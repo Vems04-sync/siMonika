@@ -102,32 +102,38 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($aplikasis as $aplikasi)
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="app-icon me-3 bg-primary bg-opacity-10 p-2 rounded"> 
-                                            <i class="bi bi-app text-primary"></i> 
-                                        </div>
-                                        <span>{{ $aplikasi->nama }}</span>
-                                    </div>
-                                </td>
-                                <td>{{ $aplikasi->opd }}</td> 
-                                <td>
-                                    @if ($aplikasi->status_pemakaian == 'Aktif')
-                                        <span class="status-badge status-active">Aktif</span>
-                                    @else
-                                        <span class="status-badge status-unused">Tidak Aktif</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-primary btn-action"> 
-                                        <i class="bi bi-eye"></i> Detail 
-                                    </a>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
+                            @if(isset($aplikasis) && $aplikasis->isNotEmpty())
+                                @foreach($aplikasis as $aplikasi)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="app-icon me-3 bg-primary bg-opacity-10 p-2 rounded"> 
+                                                    <i class="bi bi-app text-primary"></i> 
+                                                </div>
+                                                <span>{{ $aplikasi->nama }}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ $aplikasi->opd }}</td>
+                                        <td>
+                                            @if ($aplikasi->status_pemakaian == 'Aktif')
+                                                <span class="status-badge status-active">Aktif</span>
+                                            @else
+                                                <span class="status-badge status-unused">Tidak Aktif</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <a href="#" class="btn btn-sm btn-primary btn-action"> 
+                                                <i class="bi bi-eye"></i> Detail 
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="4" class="text-center">Tidak ada data aplikasi tersedia.</td>
+                                </tr>
+                            @endif
+                        </tbody>                        
                     </table>
                 </div>
             </div>
