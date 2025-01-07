@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama');
             $table->string('opd');
             $table->text('uraian')->nullable();
-            $table->integer('tahun_pembuatan')->nullable();
+            $table->date('tahun_pembuatan')->nullable();
             $table->string('jenis');
             $table->string('basis_aplikasi');
             $table->string('bahasa_framework')->nullable();
