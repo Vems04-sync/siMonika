@@ -24,4 +24,3 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('aplikasi', AplikasiController::class);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
-

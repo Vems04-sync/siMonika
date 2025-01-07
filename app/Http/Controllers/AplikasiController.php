@@ -18,11 +18,18 @@ class AplikasiController extends \Illuminate\Routing\Controller
      */
     public function index()
     {
-        $aplikasis = Aplikasi::all();
-        $jumlahAplikasiAktif = Aplikasi::where('status_pemakaian', 'Aktif')->count();
-        $jumlahAplikasiTidakDigunakan = Aplikasi::where('status_pemakaian', '!=', 'Aktif')->count();
+        // Jika ini untuk dashboard
+        if (request()->route()->getName() === 'dashboard') {
+            $jumlahAplikasiAktif = Aplikasi::where('status_pemakaian', 'Aktif')->count();
+            $jumlahAplikasiTidakDigunakan = Aplikasi::where('status_pemakaian', '!=', 'Aktif')->count();
+            $aplikasis = Aplikasi::all();
+            
+            return view('index', compact('jumlahAplikasiAktif', 'jumlahAplikasiTidakDigunakan', 'aplikasis'));
+        }
 
-        return view('index', compact('aplikasis', 'jumlahAplikasiAktif', 'jumlahAplikasiTidakDigunakan'));
+        // Jika ini untuk aplikasi
+        $aplikasis = Aplikasi::all();
+        return view('aplikasi.index', compact('aplikasis'));
     }
 
     /**
