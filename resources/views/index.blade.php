@@ -1,90 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - SiMonika</title>
-    {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}"> 
 </head>
+
 <body>
-    <!-- Navbar dengan tombol logout -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">SiMonika</a>
-            <div class="d-flex">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-light">Logout</button>
-                </form>
-            </div>
-        </div>
-    </nav>
+    <!-- Sidebar -->
+    @include('templates/sidebar')
 
-    <div class="container mt-4">
-        <div class="row mb-3">
-            <div class="col">
-                <h2>Daftar Aplikasi</h2>
-            </div>
-            <div class="col text-end">
-                <a href="{{ route('aplikasi.create') }}" class="btn btn-primary">Tambah Aplikasi</a>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Dashboard Monitoring</h2>
+            <div class="d-flex align-items-center">
+                <i class="bi bi-clock me-2"></i>
+                <span>Update Terakhir: Hari ini 14:30 WIB</span>
             </div>
         </div>
 
-        @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
+        <!-- Statistik Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card stat-card h-100">
+                    <div class="card-body status-active">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2">Aplikasi Aktif</h6>
+                                <h2 class="card-title mb-0">{{ $jumlahAplikasiAktif }}</h2> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card h-100">
+                    <div class="card-body status-unused">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2">Aplikasi Tidak Digunakan</h6>
+                                <h2 class="card-title mb-0">{{ $jumlahAplikasiTidakDigunakan }}</h2> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        @endif
 
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama</th>
-                        <th>OPD</th>
-                        <th>Uraian</th>
-                        <th>Tahun Pembuatan</th>
-                        <th>Jenis</th>
-                        <th>Basis Aplikasi</th>
-                        <th>Bahasa Framework</th>
-                        <th>Database</th>
-                        <th>Pengembang</th>
-                        <th>Lokasi Server</th>
-                        <th>Status Pemakaian</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($aplikasis as $index => $aplikasi)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $aplikasi->nama }}</td>
-                        <td>{{ $aplikasi->opd }}</td>
-                        <td>{{ $aplikasi->uraian }}</td>
-                        <td>{{ $aplikasi->tahun_pembuatan }}</td>
-                        <td>{{ $aplikasi->jenis }}</td>
-                        <td>{{ $aplikasi->basis_aplikasi }}</td>
-                        <td>{{ $aplikasi->bahasa_framework }}</td>
-                        <td>{{ $aplikasi->database }}</td>
-                        <td>{{ $aplikasi->pengembang }}</td>
-                        <td>{{ $aplikasi->lokasi_server }}</td>
-                        <td>{{ $aplikasi->status_pemakaian }}</td>
-                        <td>
-                            <a href="{{ route('aplikasi.edit', $aplikasi->id_aplikasi) }}" class="btn btn-sm btn-warning">Edit</a>
-                            <form action="{{ route('aplikasi.destroy', $aplikasi->id_aplikasi) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus aplikasi ini?')">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <!-- Charts Row - Gunakan library Chart.js atau yang serupa -->
+        <div class="row g-2 mb-2">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header border-0 bg-white">
+                        <h5 class="card-title">Status Aplikasi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="statusPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card h-100">
+                    <div class="card-header border-0 bg-white">
+                        <h5 class="card-title">Pengguna Aktif per Aplikasi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="userBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header border-0 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Detail Status Aplikasi</h5>
+                </div>
+            </div>
+            <!-- Table -->
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Nama Aplikasi</th>
+                                <th>OPD</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($aplikasis as $aplikasi)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="app-icon me-3 bg-primary bg-opacity-10 p-2 rounded"> 
+                                            <i class="bi bi-app text-primary"></i> 
+                                        </div>
+                                        <span>{{ $aplikasi->nama }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ $aplikasi->opd }}</td> 
+                                <td>
+                                    @if ($aplikasi->status_pemakaian == 'Aktif')
+                                        <span class="status-badge status-active">Aktif</span>
+                                    @else
+                                        <span class="status-badge status-unused">Tidak Aktif</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-primary btn-action"> 
+                                        <i class="bi bi-eye"></i> Detail 
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="{{ asset('js/index/chart.js') }}"></script>
+    <script src="{{ asset('js/sidebar.js') }}"></script> 
 </body>
+
 </html>
