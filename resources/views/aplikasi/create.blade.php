@@ -57,7 +57,7 @@
                         </div>
                         <div class="col-md-6">
                             <label for="bahasa_framework" class="form-label">Bahasa Pemrograman/Framework:</label>
-                            <input type="text" id="bahasa_framework" name="bahasa_framework" class="form-control" value="{{ old('bahasa_framework') }}">
+                            <input type="text" id="bahasa_framework" name="bahasa_framework" class="form-control" value="{{ old('bahasa_framework') }}"required >
                         </div>
                     </div>
                     <div class="row g-3">

@@ -23,4 +23,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [AplikasiController::class, 'index'])->name('dashboard');
     Route::resource('aplikasi', AplikasiController::class);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::put('/aplikasi/{id}', [AplikasiController::class, 'update'])->name('aplikasi.update');
 });

@@ -98,7 +98,6 @@
                                 <th>Nama Aplikasi</th>
                                 <th>OPD</th>
                                 <th>Status</th>
-                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,11 +119,6 @@
                                             @else
                                                 <span class="status-badge status-unused">Tidak Aktif</span>
                                             @endif
-                                        </td>
-                                        <td>
-                                            <a href="#" class="btn btn-sm btn-primary btn-action"> 
-                                                <i class="bi bi-eye"></i> Detail 
-                                            </a>
                                         </td>
                                     </tr>
                                 @endforeach

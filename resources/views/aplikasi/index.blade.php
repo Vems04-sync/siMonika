@@ -49,111 +49,64 @@
             </div>
         </div>
 
-        <!-- Applications Grid -->
         <div class="row g-4" id="appGrid">
-            <!-- SIKD -->
-            <div class="col-md-6 col-lg-4 app-card" data-status="active">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="app-icon me-3 bg-primary bg-opacity-10 p-2 rounded">
-                                <i class="bi bi-app text-primary"></i>
+            @foreach($aplikasis as $aplikasi)
+                <div class="col-md-6 col-lg-4 app-card" data-status="{{ $aplikasi->status_pemakaian == 'Aktif' ? 'active' : 'inactive'}}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="app-icon me-3 bg-primary bg-opacity-10 p-2 rounded">
+                                    <i class="bi bi-app text-primary"></i>
+                                </div>
+                                <h5 class="card-title mb-0">{{ $aplikasi->nama }}</h5> 
                             </div>
-                            <h5 class="card-title mb-0">SIKD</h5>
+                            <div class="mb-3">
+                                @if ($aplikasi->status_pemakaian == 'Aktif')
+                                    <span class="status-badge status-active">Aktif</span>
+                                @else
+                                    <span class="status-badge status-unused">Tidak Aktif</span>
+                                @endif
+                            </div>
+                            <div class="app-details">
+                                <p class="text-muted mb-2">
+                                    <i class="bi bi-code-slash me-2"></i>
+                                    Tahun Pembuatan: {{ $aplikasi->tahun_pembuatan }}
+                                </p>
+                                <p class="text-muted mb-2">
+                                    <i class="bi bi-calendar-event me-2"></i>
+                                    Jenis: {{ $aplikasi->jenis }}
+                                </p>
+                                <p class="text-muted mb-2">
+                                    <i class="bi bi-people me-2"></i>
+                                    Bahasa Framework: {{ $aplikasi->bahasa_framework }}
+                                </p>
+                            </div>
+                            <div class="app-notes mt-3">
+                                <small class="text-muted">
+                                    {{ $aplikasi->uraian }} 
+                                </small>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <span class="status-badge status-active">Aktif</span>
-                        </div>
-                        <div class="app-details">
-                            <p class="text-muted mb-2">
-                                <i class="bi bi-code-slash me-2"></i>
-                                Versi: 2.1.0
-                            </p>
-                            <p class="text-muted mb-2">
-                                <i class="bi bi-calendar-event me-2"></i>
-                                Instalasi: 01 Jan 2023
-                            </p>
-                            <p class="text-muted mb-2">
-                                <i class="bi bi-people me-2"></i>
-                                Pengguna Aktif: 150
-                            </p>
-                        </div>
-                        <div class="app-notes mt-3">
-                            <small class="text-muted">
-                                Sistem Informasi Keuangan Daerah untuk pengelolaan keuangan.
-                            </small>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-transparent border-top-0">
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-outline-primary btn-sm" onclick="viewAppDetails('sikd')">
-                                <i class="bi bi-eye me-1"></i>Detail
-                            </button>
-                            <div>
-                                <button class="btn btn-outline-secondary btn-sm me-2" onclick="editApp('sikd')">
-                                    <i class="bi bi-pencil me-1"></i>Edit
+                        <div class="card-footer bg-transparent border-top-0">
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-outline-primary btn-sm" onclick="viewAppDetails('{{ $aplikasi->id_aplikasi }}')"> 
+                                    <i class="bi bi-eye me-1"></i>Detail
                                 </button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="deleteApp('sikd')">
-                                    <i class="bi bi-trash me-1"></i>Hapus
-                                </button>
+                                <div>
+                                    <button class="btn btn-outline-secondary btn-sm me-2" onclick="editApp('{{ $aplikasi->id_aplikasi }}')"> 
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteApp('{{ $aplikasi->id_aplikasi }}')"> 
+                                        <i class="bi bi-trash me-1"></i>Hapus
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- E-Office -->
-            <div class="col-md-6 col-lg-4 app-card" data-status="inactive">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="app-icon me-3 bg-warning bg-opacity-10 p-2 rounded">
-                                <i class="bi bi-app text-warning"></i>
-                            </div>
-                            <h5 class="card-title mb-0">E-Office</h5>
-                        </div>
-                        <div class="mb-3">
-                            <span class="status-badge status-inactive">Jarang Digunakan</span>
-                        </div>
-                        <div class="app-details">
-                            <p class="text-muted mb-2">
-                                <i class="bi bi-code-slash me-2"></i>
-                                Versi: 1.5.2
-                            </p>
-                            <p class="text-muted mb-2">
-                                <i class="bi bi-calendar-event me-2"></i>
-                                Instalasi: 15 Mar 2023
-                            </p>
-                            <p class="text-muted mb-2">
-                                <i class="bi bi-people me-2"></i>
-                                Pengguna Aktif: 80
-                            </p>
-                        </div>
-                        <div class="app-notes mt-3">
-                            <small class="text-muted">
-                                Sistem manajemen dokumen dan surat elektronik.
-                            </small>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-transparent border-top-0">
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-outline-primary btn-sm" onclick="viewAppDetails('eoffice')">
-                                <i class="bi bi-eye me-1"></i>Detail
-                            </button>
-                            <div>
-                                <button class="btn btn-outline-secondary btn-sm me-2" onclick="editApp('eoffice')">
-                                    <i class="bi bi-pencil me-1"></i>Edit
-                                </button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="deleteApp('eoffice')">
-                                    <i class="bi bi-trash me-1"></i>Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Add more application cards here -->
-                </div>
-            </div>
+            @endforeach
+        </div>
+        
 
             @include('aplikasi/create')
         </div>
