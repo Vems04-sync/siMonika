@@ -35,7 +35,7 @@
 
         <div>
             <label for="tahun_pembuatan">Tahun Pembuatan:</label><br>
-            <input type="number" id="tahun_pembuatan" name="tahun_pembuatan" value="{{ old('tahun_pembuatan') }}">
+            <input type="date" id="tahun_pembuatan" name="tahun_pembuatan" value="{{ old('tahun_pembuatan') }}">
         </div>
 
         <div>
