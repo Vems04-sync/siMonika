@@ -7,8 +7,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pengguna;
 
-class AuthController extends Controller
+class AuthController extends \Illuminate\Routing\Controller
 {
+    public function __construct()
+    {
+        // Terapkan middleware guest untuk method tertentu
+        $this->middleware('guest')->except('logout');
+    }
+
     public function showLoginForm()
     {
         return view('auth.login');

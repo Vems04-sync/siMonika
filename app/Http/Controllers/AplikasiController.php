@@ -5,15 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Aplikasi;
 use Illuminate\Http\Request;
 
-class AplikasiController extends Controller
+class AplikasiController extends \Illuminate\Routing\Controller
 {
+    public function __construct()
+    {
+        // Terapkan middleware auth untuk semua method
+        $this->middleware('auth');
+    }
+
     /** 
      * Display a listing of the resource.
      */
     public function index()
     {
         $aplikasis = Aplikasi::all();
-        return view('index', compact('aplikasis'));
+        $jumlahAplikasiAktif = Aplikasi::where('status_pemakaian', 'Aktif')->count();
+        $jumlahAplikasiTidakDigunakan = Aplikasi::where('status_pemakaian', '!=', 'Aktif')->count();
+
+        return view('index', compact('aplikasis', 'jumlahAplikasiAktif', 'jumlahAplikasiTidakDigunakan'));
     }
 
     /**
