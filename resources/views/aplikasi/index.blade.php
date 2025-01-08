@@ -84,15 +84,28 @@
                             </div>
                             <div class="app-details">
                                 <p class="text-muted mb-2">
-                                    <i class="bi bi-code-slash me-2"></i>
+                                    <i class="bi bi-calendar"></i>
                                     Tahun Pembuatan: {{ $aplikasi->tahun_pembuatan }}
                                 </p>
                                 <p class="text-muted mb-2">
-                                    <i class="bi bi-calendar-event me-2"></i>
+                                    <i class="bi bi-back"></i>
                                     Jenis: {{ $aplikasi->jenis }}
                                 </p>
                                 <p class="text-muted mb-2">
-                                    <i class="bi bi-people me-2"></i>
+                                    @if ($aplikasi->basis_aplikasi === 'Desktop')
+                                        <i class="bi bi-laptop me-2"></i>
+                                    @elseif ($aplikasi->basis_aplikasi === 'Mobile')
+                                        <i class="bi bi-phone me-2"></i>
+                                    @elseif ($aplikasi->basis_aplikasi === 'Website')
+                                        <i class="bi bi-browser-chrome me-2"></i>
+                                    @else
+                                        <i class="bi bi-people me-2"></i> 
+                                    @endif
+                                    Basis Aplikasi: {{ $aplikasi->basis_aplikasi }}
+                                </p>
+
+                                <p class="text-muted mb-2">
+                                    <i class="bi bi-gear"></i>
                                     Bahasa Framework: {{ $aplikasi->bahasa_framework }}
                                 </p>
                             </div>
