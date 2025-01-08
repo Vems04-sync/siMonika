@@ -73,6 +73,8 @@
                                 <th>Nama Aplikasi</th>
                                 <th>OPD</th>
                                 <th>Status</th>
+                                <th>Basis Aplikasi</th>
+                                <th>Lokasi Server</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -94,6 +96,12 @@
                                             @else
                                                 <span class="status-badge status-unused">Tidak Aktif</span>
                                             @endif
+                                        </td>
+                                        <td>
+                                            <span>{{ $aplikasi->basis_aplikasi }}</span>
+                                        </td>
+                                        <td>
+                                            <span>{{ $aplikasi->lokasi_server }}</span>
                                         </td>
                                     </tr>
                                 @endforeach
