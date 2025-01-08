@@ -51,7 +51,7 @@
 
         <div class="row g-4" id="appGrid">
             @foreach($aplikasis as $aplikasi)
-                <div class="col-md-6 col-lg-4 app-card" data-status="{{ $aplikasi->status_pemakaian == 'Aktif' ? 'active' : 'inactive'}}">
+                <div class="col-md-6 col-lg-4 app-card" data-status="{{ $aplikasi->status_pemakaian == 'Aktif' ? 'active' : 'unused'}}">
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
@@ -106,7 +106,6 @@
                 </div>
             @endforeach
         </div>
-        
 
             @include('aplikasi/create')
         </div>
