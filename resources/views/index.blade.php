@@ -55,33 +55,8 @@
             </div>
         </div>
 
-        <!-- Charts Row - Gunakan library Chart.js atau yang serupa -->
-        <div class="row g-2 mb-2">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-header border-0 bg-white">
-                        <h5 class="card-title">Status Aplikasi</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="statusPieChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-8">
-                <div class="card h-100">
-                    <div class="card-header border-0 bg-white">
-                        <h5 class="card-title">Pengguna Aktif per Aplikasi</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="userBarChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Tambahkan include template charts -->
+        @include('templates.charts')
 
         <div class="card">
             <div class="card-header border-0 bg-white">

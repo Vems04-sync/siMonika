@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Aplikasi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AplikasiController extends \Illuminate\Routing\Controller
 {
@@ -91,5 +92,35 @@ class AplikasiController extends \Illuminate\Routing\Controller
     {
         $aplikasi->delete();
         return redirect()->route('aplikasi.index')->with('success', 'Aplikasi berhasil dihapus.');
+    }
+
+    public function getChartData()
+    {
+        // Data untuk status chart
+        $statusData = Aplikasi::select('status_pemakaian', DB::raw('count(*) as total'))
+            ->groupBy('status_pemakaian')
+            ->get();
+        
+        // Data untuk jenis aplikasi
+        $jenisData = Aplikasi::select('jenis', DB::raw('count(*) as total'))
+            ->groupBy('jenis')
+            ->get();
+        
+        // Data untuk basis platform
+        $basisData = Aplikasi::select('basis_aplikasi', DB::raw('count(*) as total'))
+            ->groupBy('basis_aplikasi')
+            ->get();
+        
+        // Data untuk pengembang
+        $pengembangData = Aplikasi::select('pengembang', DB::raw('count(*) as total'))
+            ->groupBy('pengembang')
+            ->get();
+
+        return response()->json([
+            'statusData' => $statusData,
+            'jenisData' => $jenisData,
+            'basisData' => $basisData,
+            'pengembangData' => $pengembangData
+        ]);
     }
 }
