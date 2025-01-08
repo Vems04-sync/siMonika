@@ -23,7 +23,7 @@ class AplikasiController extends \Illuminate\Routing\Controller
             $jumlahAplikasiAktif = Aplikasi::where('status_pemakaian', 'Aktif')->count();
             $jumlahAplikasiTidakDigunakan = Aplikasi::where('status_pemakaian', '!=', 'Aktif')->count();
             $aplikasis = Aplikasi::all();
-            
+
             return view('index', compact('jumlahAplikasiAktif', 'jumlahAplikasiTidakDigunakan', 'aplikasis'));
         }
 
@@ -67,6 +67,9 @@ class AplikasiController extends \Illuminate\Routing\Controller
      */
     public function edit(Aplikasi $aplikasi)
     {
+        if (!$aplikasi) {
+            abort(404, 'Data aplikasi tidak ditemukan.');
+        }
         return view('aplikasi.edit', compact('aplikasi'));
     }
 
@@ -80,16 +83,41 @@ class AplikasiController extends \Illuminate\Routing\Controller
             'opd' => 'required|max:100',
         ]);
 
-        $aplikasi->update($request->all());
+        // Update hanya data spesifik
+        $aplikasi->update($request->only([
+            'nama',
+            'opd',
+            'uraian',
+            'tahun_pembuatan',
+            'jenis',
+            'basis_aplikasi',
+            'bahasa_framework',
+            'database',
+            'pengembang',
+            'lokasi_server',
+            'status_pemakaian',
+        ]));
+
         return redirect()->route('aplikasi.index')->with('success', 'Aplikasi berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Aplikasi $aplikasi)
+    public function destroy($id)
     {
-        $aplikasi->delete();
-        return redirect()->route('aplikasi.index')->with('success', 'Aplikasi berhasil dihapus.');
+        try {
+            // Mencari aplikasi berdasarkan ID
+            $aplikasi = Aplikasi::findOrFail($id);
+
+            // Hapus aplikasi
+            $aplikasi->delete();
+
+            // Mengembalikan respons sukses dalam format JSON
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            // Menangani kesalahan, misalnya aplikasi tidak ditemukan
+            return response()->json(['success' => false, 'message' => 'Aplikasi tidak ditemukan.']);
+        }
     }
 }

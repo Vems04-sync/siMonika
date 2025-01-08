@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Aplikasi - siMonika</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
@@ -50,15 +51,16 @@
         </div>
 
         <div class="row g-4" id="appGrid">
-            @foreach($aplikasis as $aplikasi)
-                <div class="col-md-6 col-lg-4 app-card" data-status="{{ $aplikasi->status_pemakaian == 'Aktif' ? 'active' : 'inactive'}}">
+            @foreach ($aplikasis as $aplikasi)
+                <div class="col-md-6 col-lg-4 app-card"
+                    data-status="{{ $aplikasi->status_pemakaian == 'Aktif' ? 'active' : 'inactive' }}">
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="app-icon me-3 bg-primary bg-opacity-10 p-2 rounded">
                                     <i class="bi bi-app text-primary"></i>
                                 </div>
-                                <h5 class="card-title mb-0">{{ $aplikasi->nama }}</h5> 
+                                <h5 class="card-title mb-0">{{ $aplikasi->nama }}</h5>
                             </div>
                             <div class="mb-3">
                                 @if ($aplikasi->status_pemakaian == 'Aktif')
@@ -83,20 +85,23 @@
                             </div>
                             <div class="app-notes mt-3">
                                 <small class="text-muted">
-                                    {{ $aplikasi->uraian }} 
+                                    {{ $aplikasi->uraian }}
                                 </small>
                             </div>
                         </div>
                         <div class="card-footer bg-transparent border-top-0">
                             <div class="d-flex justify-content-between">
-                                <button class="btn btn-outline-primary btn-sm" onclick="viewAppDetails('{{ $aplikasi->id_aplikasi }}')"> 
+                                <button class="btn btn-outline-primary btn-sm"
+                                    onclick="viewAppDetails('{{ $aplikasi->id_aplikasi }}')">
                                     <i class="bi bi-eye me-1"></i>Detail
                                 </button>
                                 <div>
-                                    <button class="btn btn-outline-secondary btn-sm me-2" onclick="editApp('{{ $aplikasi->id_aplikasi }}')"> 
+                                    <button class="btn btn-outline-secondary btn-sm me-2"
+                                        onclick="editApp('{{ $aplikasi->id_aplikasi }}')">
                                         <i class="bi bi-pencil me-1"></i>Edit
                                     </button>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteApp('{{ $aplikasi->id_aplikasi }}')"> 
+                                    <button class="btn btn-outline-danger btn-sm"
+                                        onclick="deleteApp({{ $aplikasi->id_aplikasi }})">
                                         <i class="bi bi-trash me-1"></i>Hapus
                                     </button>
                                 </div>
@@ -106,10 +111,10 @@
                 </div>
             @endforeach
         </div>
-        
 
-            @include('aplikasi/create')
-        </div>
+
+        @include('aplikasi/create')
+    </div>
     </div>
 
     <!-- Scripts -->
@@ -159,11 +164,34 @@
         // Delete Application
         function deleteApp(appId) {
             if (confirm('Apakah Anda yakin ingin menghapus aplikasi ini?')) {
-                // In a real application, this would delete the app
-                alert('Aplikasi dihapus: ' + appId);
+                // Kirim permintaan DELETE menggunakan fetch
+                fetch(`/aplikasi/${appId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json()) // Mendapatkan respons dalam format JSON
+                    .then(data => {
+                        if (data.success) {
+                            // Hapus elemen aplikasi dari DOM
+                            const appElement = document.getElementById(`app-${appId}`);
+                            if (appElement) {
+                                appElement.remove();
+                            }
+                            alert('Aplikasi berhasil dihapus');
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Terjadi kesalahan saat menghapus aplikasi');
+                        }
+                    })
+                    .catch(error => {
+                        alert('Terjadi kesalahan: ' + error.message);
+                    });
+
             }
         }
-
         // Save Application
         function saveApp() {
             // In a real application, this would save the app data
