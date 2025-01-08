@@ -1,3 +1,9 @@
+<div class="sidebar-responsive">
+    <button class="btn-toggle-sidebar">
+        <i class="bi bi-list"></i>
+    </button>
+</div>
+<div class="sidebar-overlay"></div>
 <div class="sidebar">
     <div class="sidebar-header">
         <div class="app-title">

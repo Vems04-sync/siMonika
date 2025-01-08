@@ -23,9 +23,23 @@
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Daftar Aplikasi</h2>
-            <button class="btn btn-primary" onclick="addApp()">
-                <i class="bi bi-plus-lg me-2"></i>Tambah Aplikasi
-            </button>
+            <div class="button-action">
+                <!-- Button Import Excel -->
+                <button class="btn btn-outline-success">
+                    <i class="bi bi-upload"></i>
+                    <span class="me-2">Import</span>
+                </button>
+                <!-- Button Export Excel -->
+                <button class="btn btn-outline-primary">
+                    <i class="bi bi-download"></i>
+                    <span class="me-2">Export</span>
+                </button>
+                <!-- Button Tambah Aplikasi -->
+                <button class="btn btn-primary" onclick="addApp()">
+                    <i class="bi bi-plus-lg"></i>
+                    <span class="me-2">Tambah Aplikasi</span>
+                </button>
+            </div>
         </div>
 
         <!-- Filter and Search -->
@@ -50,15 +64,16 @@
         </div>
 
         <div class="row g-4" id="appGrid">
-            @foreach($aplikasis as $aplikasi)
-                <div class="col-md-6 col-lg-4 app-card" data-status="{{ $aplikasi->status_pemakaian == 'Aktif' ? 'active' : 'unused'}}">
+            @foreach ($aplikasis as $aplikasi)
+                <div class="col-md-6 col-lg-4 app-card"
+                    data-status="{{ $aplikasi->status_pemakaian == 'Aktif' ? 'active' : 'unused' }}">
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="app-icon me-3 bg-primary bg-opacity-10 p-2 rounded">
                                     <i class="bi bi-app text-primary"></i>
                                 </div>
-                                <h5 class="card-title mb-0">{{ $aplikasi->nama }}</h5> 
+                                <h5 class="card-title mb-0">{{ $aplikasi->nama }}</h5>
                             </div>
                             <div class="mb-3">
                                 @if ($aplikasi->status_pemakaian == 'Aktif')
@@ -83,20 +98,23 @@
                             </div>
                             <div class="app-notes mt-3">
                                 <small class="text-muted">
-                                    {{ $aplikasi->uraian }} 
+                                    {{ $aplikasi->uraian }}
                                 </small>
                             </div>
                         </div>
                         <div class="card-footer bg-transparent border-top-0">
                             <div class="d-flex justify-content-between">
-                                <button class="btn btn-outline-primary btn-sm" onclick="viewAppDetails('{{ $aplikasi->id_aplikasi }}')"> 
+                                <button class="btn btn-outline-primary btn-sm"
+                                    onclick="viewAppDetails('{{ $aplikasi->nama }}')">
                                     <i class="bi bi-eye me-1"></i>Detail
                                 </button>
                                 <div>
-                                    <button class="btn btn-outline-secondary btn-sm me-2" onclick="editApp('{{ $aplikasi->id_aplikasi }}')"> 
+                                    <button class="btn btn-outline-secondary btn-sm me-2"
+                                        onclick="editApp('{{ $aplikasi->nama }}')">
                                         <i class="bi bi-pencil me-1"></i>Edit
                                     </button>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteApp('{{ $aplikasi->id_aplikasi }}')"> 
+                                    <button class="btn btn-outline-danger btn-sm"
+                                        onclick="deleteApp('{{ $aplikasi->nama }}')">
                                         <i class="bi bi-trash me-1"></i>Hapus
                                     </button>
                                 </div>
@@ -107,8 +125,8 @@
             @endforeach
         </div>
 
-            @include('aplikasi/create')
-        </div>
+        @include('aplikasi/create')
+    </div>
     </div>
 
     <!-- Scripts -->

@@ -16,7 +16,7 @@ async function loadChartData() {
                     labels: statusLabels,
                     datasets: [{
                         data: statusValues,
-                        backgroundColor: ['#0d9488', '#dc2626', '#eab308'],
+                        backgroundColor: ['#28a745', '#dc2626', '#eab308'],
                         borderWidth: 0
                     }]
                 },
