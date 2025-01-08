@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav flex-grow-1">
         <ul class="nav flex-column">
             <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('dashboard') }}">
@@ -32,15 +32,16 @@
                     <span>Atribut</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="button nav-link">
-                        <i class="bi bi-box-arrow-right"></i>
-                        <span>Logout</span>
-                    </button>
-                </form>
-            </li>
         </ul>
     </nav>
-</div> 
+
+    <div class="sidebar-footer">
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="button nav-link">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Logout</span>
+            </button>
+        </form>
+    </div>
+</div>
