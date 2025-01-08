@@ -35,7 +35,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-subtitle mb-2">Aplikasi Aktif</h6>
-                                <h2 class="card-title mb-0">{{ $jumlahAplikasiAktif }}</h2> 
+                                <h2 class="card-title-info mb-0">{{ $jumlahAplikasiAktif }}</h2> 
                             </div>
                         </div>
                     </div>
@@ -47,7 +47,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-subtitle mb-2">Aplikasi Tidak Digunakan</h6>
-                                <h2 class="card-title mb-0">{{ $jumlahAplikasiTidakDigunakan }}</h2> 
+                                <h2 class="card-title-info mb-0">{{ $jumlahAplikasiTidakDigunakan }}</h2> 
                             </div>
                         </div>
                     </div>
