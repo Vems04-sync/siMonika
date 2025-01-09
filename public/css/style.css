@@ -162,6 +162,14 @@ body {
     width: 100%;
 }
 
+.chart-legend {
+    max-height: 100px; /* Sesuaikan tinggi maksimum */
+    overflow-y: auto; /* Tambahkan scrollbar */
+    padding: 5px;
+}
+
+
+
 /* Navigation Link Styles */
 .nav-link {
     color: #ecf0f1;
@@ -266,11 +274,6 @@ body {
     .sidebar.show {
         transform: translateX(0);
     }
-    
-    .chart-container {
-        height: 200px; 
-        margin-bottom: 20px; 
-    }
 
     .card {
         margin: 0 auto; 
@@ -283,5 +286,12 @@ body {
 
     .button-action span{
         display: none;
+    }
+}
+
+@media (max-width: 430px) {
+    .col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
     }
 }

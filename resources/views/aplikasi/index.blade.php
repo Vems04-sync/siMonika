@@ -99,7 +99,7 @@
                                     @elseif ($aplikasi->basis_aplikasi === 'Website')
                                         <i class="bi bi-browser-chrome me-2"></i>
                                     @else
-                                        <i class="bi bi-people me-2"></i> 
+                                        <i class="bi bi-people me-2"></i>
                                     @endif
                                     Basis Aplikasi: {{ $aplikasi->basis_aplikasi }}
                                 </p>
@@ -117,10 +117,9 @@
                         </div>
                         <div class="card-footer bg-transparent border-top-0">
                             <div class="d-flex justify-content-between">
-                                <button class="btn btn-outline-primary btn-sm"
-                                    onclick="viewAppDetails('{{ $aplikasi->nama }}')">
+                                <a href="{{ route('aplikasi.show', ['id' => $aplikasi->id_aplikasi]) }}" class="btn btn-outline-primary btn-sm">
                                     <i class="bi bi-eye me-1"></i>Detail
-                                </button>
+                                </a>                                
                                 <div>
                                     <button class="btn btn-outline-secondary btn-sm me-2"
                                         onclick="editApp('{{ $aplikasi->nama }}')">

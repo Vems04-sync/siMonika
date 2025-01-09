@@ -1,4 +1,3 @@
-// Fungsi untuk memuat data chart
 async function loadChartData() {
     try {
         const response = await fetch("/chart-data");
@@ -19,7 +18,7 @@ async function loadChartData() {
                     datasets: [
                         {
                             data: statusValues,
-                            backgroundColor: ["#28a745", "#dc2626", "#eab308"],
+                            backgroundColor: ["#28a745", "#dc2626", "#eab308"], // Existing colors
                             borderWidth: 0,
                         },
                     ],
@@ -29,8 +28,23 @@ async function loadChartData() {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: "bottom",
+                            position: "left",
+                            labels: {
+                                boxWidth: 10,
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: "circle",
+                                textAlign: "left",
+                            },
                         },
+                    },
+                    onResize: function (chart, size) {
+                        if (size.width <= 1050) {
+                            chart.options.plugins.legend.position = "top";
+                        } else {
+                            chart.options.plugins.legend.position = "left";
+                        }
+                        chart.update();
                     },
                 },
             }
@@ -61,8 +75,23 @@ async function loadChartData() {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: "bottom",
+                            position: "left",
+                            labels: {
+                                boxWidth: 10,
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: "circle",
+                                textAlign: "left",
+                            },
                         },
+                    },
+                    onResize: function (chart, size) {
+                        if (size.width <= 1050) {
+                            chart.options.plugins.legend.position = "top";
+                        } else {
+                            chart.options.plugins.legend.position = "left";
+                        }
+                        chart.update();
                     },
                 },
             }
@@ -93,8 +122,23 @@ async function loadChartData() {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: "bottom",
+                            position: "left",
+                            labels: {
+                                boxWidth: 10,
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: "circle",
+                                textAlign: "left",
+                            },
                         },
+                    },
+                    onResize: function (chart, size) {
+                        if (size.width <= 1050) {
+                            chart.options.plugins.legend.position = "top";
+                        } else {
+                            chart.options.plugins.legend.position = "left";
+                        }
+                        chart.update();
                     },
                 },
             }
@@ -110,7 +154,7 @@ async function loadChartData() {
                     datasets: [
                         {
                             data: data.pengembangData.map((item) => item.total),
-                            backgroundColor: ["#34495e", "#2ecc71"],
+                            backgroundColor: ["#34495e", "#2ecc71", "#3498db"], // Added one more color
                             borderWidth: 0,
                         },
                     ],
@@ -120,8 +164,23 @@ async function loadChartData() {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: "bottom",
+                            position: "left",
+                            labels: {
+                                boxWidth: 10,
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: "circle",
+                                textAlign: "left",
+                            },
                         },
+                    },
+                    onResize: function (chart, size) {
+                        if (size.width <= 1050) {
+                            chart.options.plugins.legend.position = "top";
+                        } else {
+                            chart.options.plugins.legend.position = "left";
+                        }
+                        chart.update();
                     },
                 },
             }
