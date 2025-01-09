@@ -7,9 +7,11 @@
     <title>Dashboard - SiMonika</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}"> 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 
 <body>
@@ -35,7 +37,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-subtitle mb-2">Aplikasi Aktif</h6>
-                                <h2 class="card-title-info mb-0">{{ $jumlahAplikasiAktif }}</h2> 
+                                <h2 class="card-title-info mb-0">{{ $jumlahAplikasiAktif }}</h2>
                             </div>
                         </div>
                     </div>
@@ -47,7 +49,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-subtitle mb-2">Aplikasi Tidak Digunakan</h6>
-                                <h2 class="card-title-info mb-0">{{ $jumlahAplikasiTidakDigunakan }}</h2> 
+                                <h2 class="card-title-info mb-0">{{ $jumlahAplikasiTidakDigunakan }}</h2>
                             </div>
                         </div>
                     </div>
@@ -63,6 +65,16 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Detail Status Aplikasi</h5>
                 </div>
+                <form method="GET" action="{{ url()->current() }}" class="d-flex align-items-center">
+                    <label for="per_page" class="me-2">Tampilkan:</label>
+                    <select name="per_page" id="per_page" class="form-select form-select-sm w-auto"
+                        onchange="this.form.submit()">
+                        <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5</option>
+                        <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                        <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                    </select>
+                </form>
             </div>
             <!-- Table -->
             <div class="card-body">
@@ -71,25 +83,24 @@
                         <thead>
                             <tr>
                                 <th>Nama Aplikasi</th>
-                                <th>OPD</th>
                                 <th>Status</th>
+                                <th>Jenis Aplikasi</th>
                                 <th>Basis Aplikasi</th>
-                                <th>Lokasi Server</th>
+                                <th>Pengembang</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @if(isset($aplikasis) && $aplikasis->isNotEmpty())
-                                @foreach($aplikasis as $aplikasi)
+                            @if (isset($aplikasis) && $aplikasis->isNotEmpty())
+                                @foreach ($aplikasis as $aplikasi)
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <div class="app-icon me-3 bg-primary bg-opacity-10 p-2 rounded"> 
-                                                    <i class="bi bi-app text-primary"></i> 
+                                                <div class="app-icon me-3 bg-primary bg-opacity-10 p-2 rounded">
+                                                    <i class="bi bi-app text-primary"></i>
                                                 </div>
                                                 <span>{{ $aplikasi->nama }}</span>
                                             </div>
                                         </td>
-                                        <td>{{ $aplikasi->opd }}</td>
                                         <td>
                                             @if ($aplikasi->status_pemakaian == 'Aktif')
                                                 <span class="status-badge status-active">Aktif</span>
@@ -97,21 +108,25 @@
                                                 <span class="status-badge status-unused">Tidak Aktif</span>
                                             @endif
                                         </td>
+                                        <td>{{ $aplikasi->basis_aplikasi }}</td>
                                         <td>
                                             <span>{{ $aplikasi->basis_aplikasi }}</span>
                                         </td>
                                         <td>
-                                            <span>{{ $aplikasi->lokasi_server }}</span>
+                                            <span>{{ $aplikasi->pengembang }}</span>
                                         </td>
                                     </tr>
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="4" class="text-center">Tidak ada data aplikasi tersedia.</td>
+                                    <td colspan="5" class="text-center">Tidak ada data aplikasi tersedia.</td>
                                 </tr>
                             @endif
-                        </tbody>                        
+                        </tbody>
                     </table>
+                    <div class="d-flex justify-content-center">
+                        {{ $aplikasis->onEachSide(1)->links('vendor.pagination.custom') }}
+                    </div>                                    
                 </div>
             </div>
         </div>
@@ -121,7 +136,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <script src="{{ asset('js/index/chart.js') }}"></script>
-    <script src="{{ asset('js/sidebar.js') }}"></script> 
+    <script src="{{ asset('js/sidebar.js') }}"></script>
 </body>
 
 </html>

@@ -19,17 +19,16 @@ class AplikasiController extends \Illuminate\Routing\Controller
      */
     public function index()
     {
-        // Jika ini untuk dashboard
+        $perPage = request()->get('per_page', 5); 
+        $aplikasis = Aplikasi::paginate($perPage);
+    
         if (request()->route()->getName() === 'dashboard') {
             $jumlahAplikasiAktif = Aplikasi::where('status_pemakaian', 'Aktif')->count();
             $jumlahAplikasiTidakDigunakan = Aplikasi::where('status_pemakaian', '!=', 'Aktif')->count();
-            $aplikasis = Aplikasi::all();
             
             return view('index', compact('jumlahAplikasiAktif', 'jumlahAplikasiTidakDigunakan', 'aplikasis'));
         }
-
-        // Jika ini untuk aplikasi
-        $aplikasis = Aplikasi::all();
+    
         return view('aplikasi.index', compact('aplikasis'));
     }
 
