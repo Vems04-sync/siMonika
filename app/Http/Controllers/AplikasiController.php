@@ -5,30 +5,34 @@ namespace App\Http\Controllers;
 use App\Models\Aplikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exports\AplikasiExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Routing\Controller;
 
-class AplikasiController extends \Illuminate\Routing\Controller
+
+
+class AplikasiController extends Controller
 {
     public function __construct()
     {
-        // Terapkan middleware auth untuk semua method
         $this->middleware('auth');
     }
 
-    /** 
+    /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $perPage = request()->get('per_page', 5); 
         $aplikasis = Aplikasi::paginate($perPage);
-    
+
         if (request()->route()->getName() === 'dashboard') {
             $jumlahAplikasiAktif = Aplikasi::where('status_pemakaian', 'Aktif')->count();
             $jumlahAplikasiTidakDigunakan = Aplikasi::where('status_pemakaian', '!=', 'Aktif')->count();
-            
+
             return view('index', compact('jumlahAplikasiAktif', 'jumlahAplikasiTidakDigunakan', 'aplikasis'));
         }
-    
+
         return view('aplikasi.index', compact('aplikasis'));
     }
 
@@ -51,6 +55,7 @@ class AplikasiController extends \Illuminate\Routing\Controller
         ]);
 
         Aplikasi::create($request->all());
+
         return redirect()->route('aplikasi.index')->with('success', 'Aplikasi berhasil ditambahkan.');
     }
 
@@ -59,7 +64,7 @@ class AplikasiController extends \Illuminate\Routing\Controller
      */
     public function show(Aplikasi $aplikasi)
     {
-        //
+        return view('aplikasi.show', compact('aplikasi'));
     }
 
     /**
@@ -81,6 +86,7 @@ class AplikasiController extends \Illuminate\Routing\Controller
         ]);
 
         $aplikasi->update($request->all());
+
         return redirect()->route('aplikasi.index')->with('success', 'Aplikasi berhasil diperbarui.');
     }
 
@@ -90,27 +96,39 @@ class AplikasiController extends \Illuminate\Routing\Controller
     public function destroy(Aplikasi $aplikasi)
     {
         $aplikasi->delete();
+
         return redirect()->route('aplikasi.index')->with('success', 'Aplikasi berhasil dihapus.');
     }
 
+    /**
+     * Export data to an Excel file.
+     */
+    public function export()
+    {
+        try {
+            return Excel::download(new AplikasiExport, 'aplikasi.xlsx');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors('Terjadi kesalahan saat melakukan ekspor: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get chart data.
+     */
     public function getChartData()
     {
-        // Data untuk status chart
         $statusData = Aplikasi::select('status_pemakaian', DB::raw('count(*) as total'))
             ->groupBy('status_pemakaian')
             ->get();
-        
-        // Data untuk jenis aplikasi
+
         $jenisData = Aplikasi::select('jenis', DB::raw('count(*) as total'))
             ->groupBy('jenis')
             ->get();
-        
-        // Data untuk basis platform
+
         $basisData = Aplikasi::select('basis_aplikasi', DB::raw('count(*) as total'))
             ->groupBy('basis_aplikasi')
             ->get();
-        
-        // Data untuk pengembang
+
         $pengembangData = Aplikasi::select('pengembang', DB::raw('count(*) as total'))
             ->groupBy('pengembang')
             ->get();
