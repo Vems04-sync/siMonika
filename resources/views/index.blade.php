@@ -22,7 +22,10 @@
     <div class="main-content">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Dashboard Monitoring</h2>
+            <div>
+                <h2 class="mb-0">Dashboard Monitoring</h2>
+                <p class="text-muted">Selamat datang, {{ $user->nama }}</p>
+            </div>
             <div class="d-flex align-items-center">
                 <i class="bi bi-clock me-2"></i>
                 <span>Update Terakhir: Hari ini 14:30 WIB</span>

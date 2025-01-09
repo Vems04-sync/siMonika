@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Hash;
 
 class Pengguna extends Authenticatable
 {
@@ -17,15 +16,22 @@ class Pengguna extends Authenticatable
         'nama',
         'email',
         'password',
+        'role'
     ];
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
 
-    // Mutator untuk password
-    public function setPasswordAttribute($value)
+    // Helper method untuk cek role
+    public function isSuperAdmin()
     {
-        $this->attributes['password'] = Hash::make($value);
+        return $this->role === 'super_admin';
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
     }
 }

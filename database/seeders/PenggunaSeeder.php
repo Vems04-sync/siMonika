@@ -15,12 +15,8 @@ class PenggunaSeeder extends Seeder
             [
                 'nama' => 'Admin',
                 'email' => 'admin@admin.com',
-                'password' => 'admin123'
-            ],
-            [
-                'nama' => 'User Test',
-                'email' => 'user@test.com',
-                'password' => 'user123'
+                'password' => Hash::make('admin123'),
+                'role' => 'admin'
             ]
         ];
 
