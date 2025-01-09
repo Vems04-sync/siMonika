@@ -21,6 +21,7 @@ Route::middleware(['guest'])->group(function () {
 // Route yang membutuhkan autentikasi
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [AplikasiController::class, 'index'])->name('dashboard');
+    Route::get('/aplikasi/export', [AplikasiController::class, 'export'])->name('aplikasi.export');
     Route::resource('aplikasi', AplikasiController::class);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::put('/aplikasi/{id}', [AplikasiController::class, 'update'])->name('aplikasi.update');

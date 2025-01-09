@@ -24,16 +24,11 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Daftar Aplikasi</h2>
             <div class="button-action">
-                <!-- Button Import Excel -->
-                <button class="btn btn-outline-success">
-                    <i class="bi bi-upload"></i>
-                    <span class="me-2">Import</span>
-                </button>
                 <!-- Button Export Excel -->
-                <button class="btn btn-outline-primary">
+                <a href="{{ route('aplikasi.export') }}" class="btn btn-outline-primary">
                     <i class="bi bi-download"></i>
                     <span class="me-2">Export</span>
-                </button>
+                </a>
                 <!-- Button Tambah Aplikasi -->
                 <button class="btn btn-primary" onclick="addApp()">
                     <i class="bi bi-plus-lg"></i>
