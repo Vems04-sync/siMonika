@@ -14,11 +14,15 @@ class Aplikasi extends Model
 
     protected $fillable = [
         'nama',
-        'status_pemakaian',
+        'opd',
+        'uraian',
         'tahun_pembuatan',
         'jenis',
         'basis_aplikasi',
         'bahasa_framework',
-        'uraian'
+        'database',
+        'pengembang',
+        'lokasi_server',
+        'status_pemakaian'
     ];
 }

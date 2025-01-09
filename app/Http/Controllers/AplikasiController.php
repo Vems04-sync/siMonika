@@ -49,14 +49,24 @@ class AplikasiController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'nama' => 'required|max:100',
-            'opd' => 'required|max:100',
+        $validatedData = $request->validate([
+            'nama' => 'required',
+            'opd' => 'required',
+            'uraian' => 'nullable',
+            'tahun_pembuatan' => 'nullable|date',
+            'jenis' => 'required',
+            'basis_aplikasi' => 'required',
+            'bahasa_framework' => 'required',
+            'database' => 'required',
+            'pengembang' => 'required',
+            'lokasi_server' => 'required',
+            'status_pemakaian' => 'required'
         ]);
 
-        Aplikasi::create($request->all());
+        Aplikasi::create($validatedData);
 
-        return redirect()->route('aplikasi.index')->with('success', 'Aplikasi berhasil ditambahkan.');
+        return redirect()->route('aplikasi.index')
+            ->with('success', 'Aplikasi berhasil ditambahkan.');
     }
 
     /**
