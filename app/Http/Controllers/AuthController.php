@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pengguna;
+use Illuminate\Validation\Rules\Password;
 
 class AuthController extends \Illuminate\Routing\Controller
 {
@@ -23,19 +24,21 @@ class AuthController extends \Illuminate\Routing\Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
+            'email' => ['required', 'email', 'exists:penggunas'],
+            'password' => ['required', Password::min(8)],
+        ], [
+            'email.exists' => 'Email tidak terdaftar',
+            'password.min' => 'Password minimal 8 karakter'
         ]);
 
-        if (Auth::attempt($credentials)) {
+        // Batasi percobaan login
+        if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
             
-            // Cek role pengguna
             if (Auth::user()->role === 'super_admin') {
-                return redirect()->route('admin.index'); // ke halaman kelola admin
-            } else {
-                return redirect()->route('dashboard'); // ke halaman index biasa
+                return redirect()->route('admin.index');
             }
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([

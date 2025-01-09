@@ -7,7 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
 
 // Route untuk guest (belum login)
-Route::middleware(['guest'])->group(function () {
+Route::middleware(['guest', 'throttle:6,1'])->group(function () {
     // Redirect root URL ke halaman login
     Route::get('/', function () {
         return redirect()->route('login');
