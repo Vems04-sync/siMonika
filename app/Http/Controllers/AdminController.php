@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewAdminCredentials;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -24,14 +27,25 @@ class AdminController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:100',
             'email' => 'required|email|unique:penggunas',
-            'password' => 'required|min:6'
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
+        // Generate random password
+        $plainPassword = Str::random(8);
+        $validated['password'] = Hash::make($plainPassword);
         $validated['role'] = 'admin';
 
-        Pengguna::create($validated);
-        return redirect()->route('admin.index')->with('success', 'Admin berhasil ditambahkan');
+        $admin = Pengguna::create($validated);
+
+        // Kirim email
+        Mail::to($validated['email'])->send(new NewAdminCredentials(
+            $validated['nama'],
+            $validated['email'],
+            $plainPassword
+        ));
+
+        return redirect()
+            ->route('admin.index')
+            ->with('success', 'Admin berhasil ditambahkan dan kredensial telah dikirim ke email.');
     }
 
     public function edit($id)

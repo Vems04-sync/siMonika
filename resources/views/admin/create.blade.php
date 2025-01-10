@@ -23,13 +23,6 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror" name="password">
-                            @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                         <a href="{{ route('admin.index') }}" class="btn btn-secondary">Kembali</a>
                     </form>
