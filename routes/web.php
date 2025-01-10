@@ -38,11 +38,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/chart-data', [AplikasiController::class, 'getChartData']);
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-    // Tambahkan route untuk detail
-    Route::get('/aplikasi/detail/{nama}', [AplikasiController::class, 'getDetail'])->name('aplikasi.getDetail');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
 });
 
 // Route untuk admin

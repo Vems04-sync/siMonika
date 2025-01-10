@@ -103,6 +103,13 @@
                                         </td>
                                         <td>{{ $aplikasi->jenis }}</td>
                                         <td>
+                                            @if ($aplikasi->basis_aplikasi === 'Desktop')
+                                                <i class="bi bi-laptop me-1"></i>
+                                            @elseif ($aplikasi->basis_aplikasi === 'Mobile')
+                                                <i class="bi bi-phone me-1"></i>
+                                            @elseif ($aplikasi->basis_aplikasi === 'Website')
+                                                <i class="bi bi-browser-chrome me-1"></i>
+                                            @endif
                                             <span>{{ $aplikasi->basis_aplikasi }}</span>
                                         </td>
                                         <td>
