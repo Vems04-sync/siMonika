@@ -18,18 +18,30 @@ class ProfileController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'password' => 'nullable|min:8|confirmed',
         ]);
 
         $user = Pengguna::find(Auth::id());
         $user->nama = $request->nama;
-        
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
-        }
-        
         $user->save();
 
         return redirect()->back()->with('success', 'Profil berhasil diperbarui');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = Pengguna::find(Auth::id());
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return redirect()->back()->with('success', 'Password berhasil diperbarui');
+    }
+
+    public function index()
+    {
+        return view('profile.index');
     }
 }

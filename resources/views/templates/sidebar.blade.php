@@ -32,12 +32,12 @@
                     <span>Atribut</span>
                 </a>
             </li>
-            {{-- <li class="{{ Request::is('profile') ? 'active' : '' }}">
-                <a href="{{ route('profile.edit') }}">
-                    <i class="bi bi-person-circle"></i>
-                    <span>Edit Profil</span>
+            <li class="nav-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('profile.index') }}">
+                    <i class="bi bi-person-vcard"></i>
+                    <span>Profile</span>
                 </a>
-            </li> --}}
+            </li>
         </ul>
     </nav>
 

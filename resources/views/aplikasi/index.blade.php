@@ -155,58 +155,78 @@
 
         <!-- Table View (hidden by default) -->
         <div class="table-responsive" id="appTable" style="display: none;">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>OPD</th>
-                        <th>Status</th>
-                        <th>Tahun Pembuatan</th>
-                        <th>Jenis</th>
-                        <th>Basis Aplikasi</th>
-                        <th>Bahasa/Framework</th>
-                        <th>Database</th>
-                        <th>Pengembang</th>
-                        <th>Lokasi Server</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($aplikasis as $aplikasi)
-                        <tr>
-                            <td>{{ $aplikasi->nama }}</td>
-                            <td>{{ $aplikasi->opd }}</td>
-                            <td>
-                                @if ($aplikasi->status_pemakaian == 'Aktif')
-                                    <span class="status-badge status-active">Aktif</span>
-                                @else
-                                    <span class="status-badge status-unused">Tidak Aktif</span>
-                                @endif
-                            </td>
-                            <td>{{ $aplikasi->tahun_pembuatan }}</td>
-                            <td>{{ $aplikasi->jenis }}</td>
-                            <td>{{ $aplikasi->basis_aplikasi }}</td>
-                            <td>{{ $aplikasi->bahasa_framework }}</td>
-                            <td>{{ $aplikasi->database }}</td>
-                            <td>{{ $aplikasi->pengembang }}</td>
-                            <td>{{ $aplikasi->lokasi_server }}</td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="viewAppDetails('{{ $aplikasi->nama }}')">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="editApp('{{ $aplikasi->nama }}')">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteApp('{{ $aplikasi->nama }}')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="shadow-sm">
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="ps-4">Nama</th>
+                                <th scope="col">OPD</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Tahun Pembuatan</th>
+                                <th scope="col">Jenis</th>
+                                <th scope="col">Basis Aplikasi</th>
+                                <th scope="col">Bahasa/Framework</th>
+                                <th scope="col">Database</th>
+                                <th scope="col">Pengembang</th>
+                                <th scope="col">Lokasi Server</th>
+                                <th scope="col" class="text-center pe-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($aplikasis as $aplikasi)
+                                <tr>
+                                    <td class="fw-medium ps-4">{{ $aplikasi->nama }}</td>
+                                    <td>{{ $aplikasi->opd }}</td>
+                                    <td>
+                                        @if ($aplikasi->status_pemakaian == 'Aktif')
+                                            <span class="status-badge status-active">Aktif</span>
+                                        @else
+                                            <span class="status-badge status-unused">Tidak Aktif</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $aplikasi->tahun_pembuatan }}</td>
+                                    <td>{{ $aplikasi->jenis }}</td>
+                                    <td>
+                                        @if ($aplikasi->basis_aplikasi === 'Desktop')
+                                            <i class="bi bi-laptop me-1"></i>
+                                        @elseif ($aplikasi->basis_aplikasi === 'Mobile')
+                                            <i class="bi bi-phone me-1"></i>
+                                        @elseif ($aplikasi->basis_aplikasi === 'Website')
+                                            <i class="bi bi-browser-chrome me-1"></i>
+                                        @endif
+                                        {{ $aplikasi->basis_aplikasi }}
+                                    </td>
+                                    <td>{{ $aplikasi->bahasa_framework }}</td>
+                                    <td>{{ $aplikasi->database }}</td>
+                                    <td>{{ $aplikasi->pengembang }}</td>
+                                    <td>{{ $aplikasi->lokasi_server }}</td>
+                                    <td class="text-center pe-4">
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="viewAppDetails('{{ $aplikasi->nama }}')"
+                                                    title="Lihat Detail">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary" 
+                                                    onclick="editApp('{{ $aplikasi->nama }}')"
+                                                    title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" 
+                                                    onclick="deleteApp('{{ $aplikasi->nama }}')"
+                                                    title="Hapus">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Pagination akan ditambahkan di sini oleh JavaScript -->
         </div>
 
         @include('aplikasi/create')

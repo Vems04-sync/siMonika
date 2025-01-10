@@ -320,26 +320,32 @@ body {
 /* Table Styles */
 .table {
     font-size: 0.875rem;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0;
+    margin-top: 5px;
 }
 
-.table th {
+.table thead {
     background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-    font-size: 0.875rem;
-    font-weight: 600;
 }
 
-.table td {
+.table thead th {
+    border-bottom: none;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 1rem;
+    font-size: 0.875rem;
+}
+
+.table tbody td {
+    padding: 1rem;
     vertical-align: middle;
     font-size: 0.875rem;
 }
 
-.btn-group .btn {
-    padding: 0.25rem 0.5rem;
-}
-
-.table .badge {
-    font-size: 0.875em;
+.table tbody tr:hover {
+    background-color: rgba(52, 152, 219, 0.05);
 }
 
 .table .btn-group .btn {
