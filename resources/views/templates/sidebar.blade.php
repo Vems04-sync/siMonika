@@ -32,6 +32,12 @@
                     <span>Atribut</span>
                 </a>
             </li>
+            <li class="{{ Request::is('profile') ? 'active' : '' }}">
+                <a href="{{ route('profile.edit') }}">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Edit Profil</span>
+                </a>
+            </li>
         </ul>
     </nav>
 
