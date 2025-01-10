@@ -16,21 +16,20 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        $user = Pengguna::find(Auth::id());
-
-        $validated = $request->validate([
-            'nama' => 'required|string|max:100',
-            'password' => 'nullable|min:8|confirmed'
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'password' => 'nullable|min:8|confirmed',
         ]);
 
-        $user->nama = $validated['nama'];
-
+        $user = Pengguna::find(Auth::id());
+        $user->nama = $request->nama;
+        
         if ($request->filled('password')) {
-            $user->password = Hash::make($validated['password']);
+            $user->password = Hash::make($request->password);
         }
-
+        
         $user->save();
 
-        return redirect()->route('profile.edit')->with('success', 'Profil berhasil diupdate');
+        return redirect()->back()->with('success', 'Profil berhasil diperbarui');
     }
 }
