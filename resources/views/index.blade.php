@@ -68,16 +68,6 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Detail Status Aplikasi</h5>
                 </div>
-                <form method="GET" action="{{ url()->current() }}" class="d-flex align-items-center">
-                    <label for="per_page" class="me-2">Tampilkan:</label>
-                    <select name="per_page" id="per_page" class="form-select form-select-sm w-auto"
-                        onchange="this.form.submit()">
-                        <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5</option>
-                        <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                        <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
-                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                    </select>
-                </form>
             </div>
             <!-- Table -->
             <div class="card-body">

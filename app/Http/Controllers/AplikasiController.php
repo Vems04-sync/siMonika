@@ -23,17 +23,16 @@ class AplikasiController extends Controller
      */
     public function index()
     {
-        $perPage = request()->get('per_page', 5);
-        $aplikasis = Aplikasi::paginate($perPage);
+        $aplikasis = Aplikasi::all();
 
         if (request()->route()->getName() === 'dashboard') {
             $jumlahAplikasiAktif = Aplikasi::where('status_pemakaian', 'Aktif')->count();
             $jumlahAplikasiTidakDigunakan = Aplikasi::where('status_pemakaian', '!=', 'Aktif')->count();
 
             return view('index', compact('jumlahAplikasiAktif', 'jumlahAplikasiTidakDigunakan', 'aplikasis'));
+        } else {
+            return view('aplikasi.index', compact('aplikasis'));
         }
-
-        return view('aplikasi.index', compact('aplikasis'));
     }
 
     /**

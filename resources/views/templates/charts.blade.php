@@ -1,6 +1,6 @@
 <div class="row g-4 mb-4">
     <!-- Status Chart -->
-    <div class="col-md-3 col-12">
+    <div class="col-md-6 col-12">
         <div class="card h-100">
             <div class="card-header border-0 bg-white">
                 <h5 class="card-title">Status Aplikasi</h5>
@@ -14,7 +14,7 @@
     </div>
 
     <!-- Jenis Chart -->
-    <div class="col-md-3 col-12">
+    <div class="col-md-6 col-12">
         <div class="card h-100">
             <div class="card-header border-0 bg-white">
                 <h5 class="card-title">Jenis Aplikasi</h5>
@@ -26,9 +26,11 @@
             </div>
         </div>
     </div>
+</div>
 
+<div class="row g-4 mb-4">
     <!-- Basis Platform Chart -->
-    <div class="col-md-3 col-12">
+    <div class="col-md-6 col-12">
         <div class="card h-100">
             <div class="card-header border-0 bg-white">
                 <h5 class="card-title">Basis Platform</h5>
@@ -42,7 +44,7 @@
     </div>
 
     <!-- Pengembang Chart -->
-    <div class="col-md-3 col-12">
+    <div class="col-md-6 col-12">
         <div class="card h-100">
             <div class="card-header border-0 bg-white">
                 <h5 class="card-title">Pengembang Aplikasi</h5>
