@@ -57,10 +57,10 @@ class AdminController extends Controller
     public function update(Request $request, $id)
     {
         $admin = Pengguna::findOrFail($id);
-        
+
         $validated = $request->validate([
             'nama' => 'required|string|max:100',
-            'email' => 'required|email|unique:penggunas,email,'.$id.',id_user',
+            'email' => 'required|email|unique:penggunas,email,' . $id . ',id_user',
             'password' => 'nullable|min:6'
         ]);
 

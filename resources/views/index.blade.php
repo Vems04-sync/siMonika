@@ -129,7 +129,7 @@
                     </table>
                     <div class="d-flex justify-content-center">
                         {{ $aplikasis->onEachSide(1)->links('vendor.pagination.custom') }}
-                    </div>                                    
+                    </div>
                 </div>
             </div>
         </div>

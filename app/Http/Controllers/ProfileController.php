@@ -24,7 +24,7 @@ class ProfileController extends Controller
         ]);
 
         $user->nama = $validated['nama'];
-        
+
         if ($request->filled('password')) {
             $user->password = Hash::make($validated['password']);
         }

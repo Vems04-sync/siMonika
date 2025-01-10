@@ -54,7 +54,6 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
         return view('super-admin.dashboard');
     })->name('super-admin.dashboard');
 });
-
 // Route untuk login
 Route::get('/login', function () {
     return view('auth.login');

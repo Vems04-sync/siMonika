@@ -113,7 +113,6 @@ class AplikasiController extends Controller
                 ->with('error', 'Gagal memperbarui aplikasi: ' . $e->getMessage());
         }
     }
-
     /**
      * Remove the specified resource from storage.
      */
