@@ -153,7 +153,38 @@ body {
     color: #fff;
 }
 
+/* Pagination Styles */
+.pagination {
+    margin-bottom: 0;
+}
 
+.pagination .page-link {
+    color: #2c3e50;
+    border-color: #dee2e6;
+    padding: 0.5rem 0.75rem;
+    margin: 0 2px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #2c3e50;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #2c3e50;
+    border-color: #2c3e50;
+    color: #ffffff;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+}
 
 /* Chart Container Styles */
 .chart-container {
@@ -284,4 +315,40 @@ body {
     .button-action span{
         display: none;
     }
+}
+
+/* Table Styles */
+.table {
+    font-size: 0.875rem;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+    font-size: 0.875rem;
+}
+
+.btn-group .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.table .badge {
+    font-size: 0.875em;
+}
+
+.table .btn-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+.table .status-badge {
+    font-size: 0.75rem;
+    min-width: 80px;
+    padding: 4px 8px;
 }

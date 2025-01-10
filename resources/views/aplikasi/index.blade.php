@@ -39,6 +39,11 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Daftar Aplikasi</h2>
             <div class="button-action">
+                <!-- Toggle View Button -->
+                <button class="btn btn-outline-secondary me-2" id="toggleView">
+                    <i class="bi bi-grid"></i>
+                    <span class="me-2">Ubah Tampilan</span>
+                </button>
                 <!-- Button Export Excel -->
                 <a href="{{ route('aplikasi.export') }}" class="btn btn-outline-primary">
                     <i class="bi bi-download"></i>
@@ -148,6 +153,62 @@
             @endforeach
         </div>
 
+        <!-- Table View (hidden by default) -->
+        <div class="table-responsive" id="appTable" style="display: none;">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>OPD</th>
+                        <th>Status</th>
+                        <th>Tahun Pembuatan</th>
+                        <th>Jenis</th>
+                        <th>Basis Aplikasi</th>
+                        <th>Bahasa/Framework</th>
+                        <th>Database</th>
+                        <th>Pengembang</th>
+                        <th>Lokasi Server</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($aplikasis as $aplikasi)
+                        <tr>
+                            <td>{{ $aplikasi->nama }}</td>
+                            <td>{{ $aplikasi->opd }}</td>
+                            <td>
+                                @if ($aplikasi->status_pemakaian == 'Aktif')
+                                    <span class="status-badge status-active">Aktif</span>
+                                @else
+                                    <span class="status-badge status-unused">Tidak Aktif</span>
+                                @endif
+                            </td>
+                            <td>{{ $aplikasi->tahun_pembuatan }}</td>
+                            <td>{{ $aplikasi->jenis }}</td>
+                            <td>{{ $aplikasi->basis_aplikasi }}</td>
+                            <td>{{ $aplikasi->bahasa_framework }}</td>
+                            <td>{{ $aplikasi->database }}</td>
+                            <td>{{ $aplikasi->pengembang }}</td>
+                            <td>{{ $aplikasi->lokasi_server }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewAppDetails('{{ $aplikasi->nama }}')">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="editApp('{{ $aplikasi->nama }}')">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteApp('{{ $aplikasi->nama }}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
         @include('aplikasi/create')
     </div>
     </div>
@@ -230,20 +291,160 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="js/sidebar.js"></script>
     <script>
-        // Search and Filter
+        // Toggle View Handler
+        let isCardView = true;
+        const toggleViewBtn = document.getElementById('toggleView');
+        const appGrid = document.getElementById('appGrid');
+        const appTable = document.getElementById('appTable');
+
+        toggleViewBtn.addEventListener('click', function() {
+            isCardView = !isCardView;
+            
+            if (isCardView) {
+                appGrid.style.display = 'flex';
+                appTable.style.display = 'none';
+                toggleViewBtn.innerHTML = '<i class="bi bi-grid"></i><span class="ms-2">Ubah Tampilan</span>';
+            } else {
+                appGrid.style.display = 'none';
+                appTable.style.display = 'block';
+                toggleViewBtn.innerHTML = '<i class="bi bi-card-list"></i><span class="ms-2">Ubah Tampilan</span>';
+                setupPagination();
+                showTablePage();
+            }
+        });
+
+        // Pagination Configuration
+        const itemsPerPage = 10;
+        let currentPage = 1;
+
+        function setupPagination() {
+            const table = document.querySelector('#appTable tbody');
+            const rows = table.querySelectorAll('tr');
+            const pageCount = Math.ceil(rows.length / itemsPerPage);
+            
+            // Create pagination container if not exists
+            let paginationContainer = document.querySelector('#tablePagination');
+            if (!paginationContainer) {
+                paginationContainer = document.createElement('div');
+                paginationContainer.id = 'tablePagination';
+                paginationContainer.className = 'd-flex justify-content-end mt-3';
+                document.querySelector('#appTable').appendChild(paginationContainer);
+            }
+            
+            // Generate pagination HTML
+            let paginationHtml = '<ul class="pagination">';
+            // Previous button
+            paginationHtml += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+                </li>
+            `;
+            
+            // Page numbers
+            for (let i = 1; i <= pageCount; i++) {
+                paginationHtml += `
+                    <li class="page-item ${currentPage === i ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `;
+            }
+            
+            // Next button
+            paginationHtml += `
+                <li class="page-item ${currentPage === pageCount ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+                </li>
+            `;
+            paginationHtml += '</ul>';
+            
+            paginationContainer.innerHTML = paginationHtml;
+            
+            // Add click events to pagination
+            const paginationLinks = paginationContainer.querySelectorAll('.page-link');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const newPage = parseInt(link.dataset.page);
+                    if (newPage >= 1 && newPage <= pageCount) {
+                        currentPage = newPage;
+                        showTablePage();
+                        setupPagination();
+                    }
+                });
+            });
+        }
+
+        function showTablePage() {
+            const table = document.querySelector('#appTable tbody');
+            const rows = table.querySelectorAll('tr');
+            
+            // Hide all rows
+            rows.forEach(row => row.style.display = 'none');
+            
+            // Calculate start and end index for current page
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            
+            // Show rows for current page
+            for (let i = start; i < end && i < rows.length; i++) {
+                rows[i].style.display = '';
+            }
+        }
+
+        // Modify existing filterApps function
         function filterApps() {
             const searchTerm = document.getElementById('searchApp').value.toLowerCase();
             const statusFilter = document.getElementById('statusFilter').value;
+            
+            // Filter cards
             const cards = document.querySelectorAll('.app-card');
-
             cards.forEach(card => {
                 const title = card.querySelector('.card-title').textContent.toLowerCase();
                 const status = card.dataset.status;
                 const matchesSearch = title.includes(searchTerm);
                 const matchesStatus = !statusFilter || status === statusFilter;
-
                 card.style.display = matchesSearch && matchesStatus ? 'block' : 'none';
             });
+            
+            // Filter table rows
+            const rows = document.querySelectorAll('#appTable tbody tr');
+            let visibleRows = [];
+            
+            rows.forEach(row => {
+                const title = row.cells[0].textContent.toLowerCase();
+                const status = row.cells[2].textContent.trim().toLowerCase() === 'aktif' ? 'active' : 'unused';
+                const matchesSearch = title.includes(searchTerm);
+                const matchesStatus = !statusFilter || status === statusFilter;
+                
+                if (matchesSearch && matchesStatus) {
+                    visibleRows.push(row);
+                }
+                row.style.display = 'none';
+            });
+
+            // Reset pagination for filtered results
+            currentPage = 1;
+            
+            // Show first page of filtered results
+            const start = 0;
+            const end = Math.min(itemsPerPage, visibleRows.length);
+            for (let i = start; i < end; i++) {
+                visibleRows[i].style.display = '';
+            }
+            
+            // Update pagination
+            if (searchTerm || statusFilter) {
+                const paginationContainer = document.querySelector('#tablePagination');
+                if (paginationContainer) {
+                    paginationContainer.style.display = 'none';
+                }
+            } else {
+                setupPagination();
+                const paginationContainer = document.querySelector('#tablePagination');
+                if (paginationContainer) {
+                    paginationContainer.style.display = '';
+                }
+            }
         }
 
         // Event Listeners
@@ -352,6 +553,14 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('appModal'));
             modal.hide();
         }
+
+        // Initialize pagination when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!isCardView) {
+                setupPagination();
+                showTablePage();
+            }
+        });
     </script>
 </body>
 
