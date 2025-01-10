@@ -101,7 +101,7 @@
                                                 <span class="status-badge status-unused">Tidak Aktif</span>
                                             @endif
                                         </td>
-                                        <td>{{ $aplikasi->basis_aplikasi }}</td>
+                                        <td>{{ $aplikasi->jenis }}</td>
                                         <td>
                                             <span>{{ $aplikasi->basis_aplikasi }}</span>
                                         </td>
