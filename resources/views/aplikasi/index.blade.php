@@ -307,6 +307,30 @@
         </div>
     </div>
 
+    <!-- Modal Detail -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailModalTitle">Detail Aplikasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <!-- Data akan diisi secara dinamis -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="js/sidebar.js"></script>
@@ -319,7 +343,7 @@
 
         toggleViewBtn.addEventListener('click', function() {
             isCardView = !isCardView;
-            
+
             if (isCardView) {
                 appGrid.style.display = 'flex';
                 appTable.style.display = 'none';
@@ -341,7 +365,7 @@
             const table = document.querySelector('#appTable tbody');
             const rows = table.querySelectorAll('tr');
             const pageCount = Math.ceil(rows.length / itemsPerPage);
-            
+
             // Create pagination container if not exists
             let paginationContainer = document.querySelector('#tablePagination');
             if (!paginationContainer) {
@@ -350,7 +374,7 @@
                 paginationContainer.className = 'd-flex justify-content-end mt-3';
                 document.querySelector('#appTable').appendChild(paginationContainer);
             }
-            
+
             // Generate pagination HTML
             let paginationHtml = '<ul class="pagination">';
             // Previous button
@@ -359,7 +383,7 @@
                     <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
                 </li>
             `;
-            
+
             // Page numbers
             for (let i = 1; i <= pageCount; i++) {
                 paginationHtml += `
@@ -368,7 +392,7 @@
                     </li>
                 `;
             }
-            
+
             // Next button
             paginationHtml += `
                 <li class="page-item ${currentPage === pageCount ? 'disabled' : ''}">
@@ -376,9 +400,9 @@
                 </li>
             `;
             paginationHtml += '</ul>';
-            
+
             paginationContainer.innerHTML = paginationHtml;
-            
+
             // Add click events to pagination
             const paginationLinks = paginationContainer.querySelectorAll('.page-link');
             paginationLinks.forEach(link => {
@@ -397,14 +421,14 @@
         function showTablePage() {
             const table = document.querySelector('#appTable tbody');
             const rows = table.querySelectorAll('tr');
-            
+
             // Hide all rows
             rows.forEach(row => row.style.display = 'none');
-            
+
             // Calculate start and end index for current page
             const start = (currentPage - 1) * itemsPerPage;
             const end = start + itemsPerPage;
-            
+
             // Show rows for current page
             for (let i = start; i < end && i < rows.length; i++) {
                 rows[i].style.display = '';
@@ -415,7 +439,7 @@
         function filterApps() {
             const searchTerm = document.getElementById('searchApp').value.toLowerCase();
             const statusFilter = document.getElementById('statusFilter').value;
-            
+
             // Filter cards
             const cards = document.querySelectorAll('.app-card');
             cards.forEach(card => {
@@ -425,17 +449,17 @@
                 const matchesStatus = !statusFilter || status === statusFilter;
                 card.style.display = matchesSearch && matchesStatus ? 'block' : 'none';
             });
-            
+
             // Filter table rows
             const rows = document.querySelectorAll('#appTable tbody tr');
             let visibleRows = [];
-            
+
             rows.forEach(row => {
                 const title = row.cells[0].textContent.toLowerCase();
                 const status = row.cells[2].textContent.trim().toLowerCase() === 'aktif' ? 'active' : 'unused';
                 const matchesSearch = title.includes(searchTerm);
                 const matchesStatus = !statusFilter || status === statusFilter;
-                
+
                 if (matchesSearch && matchesStatus) {
                     visibleRows.push(row);
                 }
@@ -444,14 +468,14 @@
 
             // Reset pagination for filtered results
             currentPage = 1;
-            
+
             // Show first page of filtered results
             const start = 0;
             const end = Math.min(itemsPerPage, visibleRows.length);
             for (let i = start; i < end; i++) {
                 visibleRows[i].style.display = '';
             }
-            
+
             // Update pagination
             if (searchTerm || statusFilter) {
                 const paginationContainer = document.querySelector('#tablePagination');
@@ -473,8 +497,64 @@
 
         // View Details
         function viewAppDetails(appId) {
-            // In a real application, this would navigate to a details page
-            alert('Melihat detail aplikasi: ' + appId);
+            fetch(`/aplikasi/detail/${appId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Aplikasi tidak ditemukan');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    // Bersihkan tbody sebelum menambahkan data baru
+                    const tbody = document.querySelector('#detailModal .table tbody');
+                    tbody.innerHTML = '';
+
+                    // Mapping nama kolom ke label yang lebih user-friendly
+                    const columnLabels = {
+                        'id': 'ID',
+                        'nama': 'Nama Aplikasi',
+                        'opd': 'OPD',
+                        'uraian': 'Uraian',
+                        'tahun_pembuatan': 'Tahun Pembuatan',
+                        'jenis': 'Jenis',
+                        'basis_aplikasi': 'Basis Aplikasi',
+                        'bahasa_framework': 'Bahasa/Framework',
+                        'database': 'Database',
+                        'pengembang': 'Pengembang',
+                        'lokasi_server': 'Lokasi Server',
+                        'status_pemakaian': 'Status Pemakaian',
+                        'created_at': 'Dibuat Pada',
+                        'updated_at': 'Diperbarui Pada'
+                    };
+
+                    // Tambahkan baris untuk setiap kolom
+                    for (const [key, value] of Object.entries(data)) {
+                        // Skip kolom yang tidak perlu ditampilkan
+                        if (['id', 'created_at', 'updated_at'].includes(key)) continue;
+
+                        const row = document.createElement('tr');
+                        const label = columnLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l
+                    .toUpperCase());
+
+                        row.innerHTML = `
+                            <th width="30%">${label}</th>
+                            <td>${value || '-'}</td>
+                        `;
+                        tbody.appendChild(row);
+                    }
+
+                    // Tampilkan modal
+                    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat mengambil detail aplikasi');
+                });
         }
 
         // Add Application
