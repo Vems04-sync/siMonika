@@ -22,8 +22,16 @@ Route::middleware(['guest'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [AplikasiController::class, 'index'])->name('dashboard');
     Route::get('/aplikasi/export', [AplikasiController::class, 'export'])->name('aplikasi.export');
-    Route::resource('aplikasi', AplikasiController::class);
+    // Route::resource('aplikasi', AplikasiController::class);  // Comment atau hapus ini untuk sementara
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::put('/aplikasi/{id}', [AplikasiController::class, 'update'])->name('aplikasi.update');
+
+    // Definisikan route secara manual
+    Route::get('/aplikasi', [AplikasiController::class, 'index'])->name('aplikasi.index');
+    Route::get('/aplikasi/create', [AplikasiController::class, 'create'])->name('aplikasi.create');
+    Route::post('/aplikasi', [AplikasiController::class, 'store'])->name('aplikasi.store');
+    Route::get('/aplikasi/edit/{nama}', [AplikasiController::class, 'editByNama'])->name('aplikasi.editByNama');
+    Route::put('/aplikasi/{nama}', [AplikasiController::class, 'updateByNama'])->name('aplikasi.updateByNama');
+    Route::delete('/aplikasi/delete/{nama}', [AplikasiController::class, 'destroyByNama'])->name('aplikasi.destroyByNama');
+
     Route::get('/chart-data', [AplikasiController::class, 'getChartData']);
 });

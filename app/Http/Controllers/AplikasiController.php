@@ -23,7 +23,7 @@ class AplikasiController extends Controller
      */
     public function index()
     {
-        $perPage = request()->get('per_page', 5); 
+        $perPage = request()->get('per_page', 5);
         $aplikasis = Aplikasi::paginate($perPage);
 
         if (request()->route()->getName() === 'dashboard') {
@@ -82,7 +82,7 @@ class AplikasiController extends Controller
      */
     public function edit(Aplikasi $aplikasi)
     {
-        return view('aplikasi.edit', compact('aplikasi'));
+        return response()->json($aplikasi);
     }
 
     /**
@@ -90,24 +90,59 @@ class AplikasiController extends Controller
      */
     public function update(Request $request, Aplikasi $aplikasi)
     {
-        $request->validate([
-            'nama' => 'required|max:100',
-            'opd' => 'required|max:100',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'nama' => 'required',
+                'opd' => 'required',
+                'uraian' => 'nullable',
+                'tahun_pembuatan' => 'nullable|date',
+                'jenis' => 'required',
+                'basis_aplikasi' => 'required',
+                'bahasa_framework' => 'required',
+                'database' => 'required',
+                'pengembang' => 'required',
+                'lokasi_server' => 'required',
+                'status_pemakaian' => 'required'
+            ]);
 
-        $aplikasi->update($request->all());
-
-        return redirect()->route('aplikasi.index')->with('success', 'Aplikasi berhasil diperbarui.');
+            $aplikasi->update($validatedData);
+            return redirect()->route('aplikasi.index')
+                ->with('success', 'Aplikasi berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return redirect()->route('aplikasi.index')
+                ->with('error', 'Gagal memperbarui aplikasi: ' . $e->getMessage());
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Aplikasi $aplikasi)
-    {
-        $aplikasi->delete();
+    // public function destroy(Aplikasi $aplikasi)
+    // {
+    //     try {
+    //         $aplikasi->delete();
+    //         return redirect()->route('aplikasi.index')
+    //             ->with('success', 'Aplikasi berhasil dihapus.');
+    //     } catch (\Exception $e) {
+    //         return redirect()->route('aplikasi.index')
+    //             ->with('error', 'Gagal menghapus aplikasi: ' . $e->getMessage());
+    //     }
+    // }
 
-        return redirect()->route('aplikasi.index')->with('success', 'Aplikasi berhasil dihapus.');
+    /**
+     * Remove the specified resource from storage by nama.
+     */
+    public function destroyByNama($nama)
+    {
+        try {
+            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+            $aplikasi->delete();
+            return redirect()->route('aplikasi.index')
+                ->with('success', 'Aplikasi berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->route('aplikasi.index')
+                ->with('error', 'Gagal menghapus aplikasi: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -149,5 +184,49 @@ class AplikasiController extends Controller
             'basisData' => $basisData,
             'pengembangData' => $pengembangData
         ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource by nama.
+     */
+    public function editByNama($nama)
+    {
+        try {
+            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+            return response()->json($aplikasi);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Aplikasi tidak ditemukan'], 404);
+        }
+    }
+
+    /**
+     * Update the specified resource in storage by nama.
+     */
+    public function updateByNama(Request $request, $nama)
+    {
+        try {
+            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+
+            $validatedData = $request->validate([
+                'nama' => 'required',
+                'opd' => 'required',
+                'uraian' => 'nullable',
+                'tahun_pembuatan' => 'nullable|date',
+                'jenis' => 'required',
+                'basis_aplikasi' => 'required',
+                'bahasa_framework' => 'required',
+                'database' => 'required',
+                'pengembang' => 'required',
+                'lokasi_server' => 'required',
+                'status_pemakaian' => 'required'
+            ]);
+
+            $aplikasi->update($validatedData);
+            return redirect()->route('aplikasi.index')
+                ->with('success', 'Aplikasi berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return redirect()->route('aplikasi.index')
+                ->with('error', 'Gagal memperbarui aplikasi: ' . $e->getMessage());
+        }
     }
 }
