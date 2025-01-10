@@ -190,8 +190,21 @@ class AplikasiController extends Controller
     public function editByNama($nama)
     {
         try {
-            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-            return response()->json($aplikasi);
+            // Dapatkan semua kolom dari tabel
+            $columns = \Schema::getColumnListing('aplikasis');
+
+            // Ambil data berdasarkan kolom yang ada
+            $aplikasi = Aplikasi::where('nama', $nama)
+                ->select($columns)
+                ->firstOrFail();
+
+            // Siapkan data untuk response
+            $detailData = [];
+            foreach ($columns as $column) {
+                $detailData[$column] = $aplikasi->$column;
+            }
+
+            return response()->json($detailData);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Aplikasi tidak ditemukan'], 404);
         }
@@ -225,6 +238,32 @@ class AplikasiController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('aplikasi.index')
                 ->with('error', 'Gagal memperbarui aplikasi: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get detail aplikasi by nama.
+     */
+    public function getDetail($nama)
+    {
+        try {
+            // Dapatkan semua kolom dari tabel
+            $columns = \Schema::getColumnListing('aplikasis');
+
+            // Ambil data berdasarkan kolom yang ada
+            $aplikasi = Aplikasi::where('nama', $nama)
+                ->select($columns)
+                ->firstOrFail();
+
+            // Siapkan data untuk response
+            $detailData = [];
+            foreach ($columns as $column) {
+                $detailData[$column] = $aplikasi->$column;
+            }
+
+            return response()->json($detailData);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Aplikasi tidak ditemukan'], 404);
         }
     }
 }
