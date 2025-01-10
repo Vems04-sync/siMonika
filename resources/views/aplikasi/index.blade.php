@@ -12,6 +12,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>
@@ -20,6 +21,20 @@
 
     <!-- Main Content -->
     <div class="main-content">
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Daftar Aplikasi</h2>
@@ -94,7 +109,7 @@
                                     @elseif ($aplikasi->basis_aplikasi === 'Website')
                                         <i class="bi bi-browser-chrome me-2"></i>
                                     @else
-                                        <i class="bi bi-people me-2"></i> 
+                                        <i class="bi bi-people me-2"></i>
                                     @endif
                                     Basis Aplikasi: {{ $aplikasi->basis_aplikasi }}
                                 </p>
@@ -137,6 +152,80 @@
     </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="appModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Tambah/Edit Aplikasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="appForm" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="nama" class="form-label">Nama Aplikasi</label>
+                            <input type="text" class="form-control" id="nama" name="nama" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="opd" class="form-label">OPD</label>
+                            <input type="text" class="form-control" id="opd" name="opd" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uraian" class="form-label">Uraian</label>
+                            <textarea class="form-control" id="uraian" name="uraian"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tahun_pembuatan" class="form-label">Tahun Pembuatan</label>
+                            <input type="date" class="form-control" id="tahun_pembuatan" name="tahun_pembuatan">
+                        </div>
+                        <div class="mb-3">
+                            <label for="jenis" class="form-label">Jenis</label>
+                            <input type="text" class="form-control" id="jenis" name="jenis" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="basis_aplikasi" class="form-label">Basis Aplikasi</label>
+                            <select class="form-select" id="basis_aplikasi" name="basis_aplikasi" required>
+                                <option value="Website">Website</option>
+                                <option value="Desktop">Desktop</option>
+                                <option value="Mobile">Mobile</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bahasa_framework" class="form-label">Bahasa/Framework</label>
+                            <input type="text" class="form-control" id="bahasa_framework" name="bahasa_framework"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="database" class="form-label">Database</label>
+                            <input type="text" class="form-control" id="database" name="database" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pengembang" class="form-label">Pengembang</label>
+                            <input type="text" class="form-control" id="pengembang" name="pengembang" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lokasi_server" class="form-label">Lokasi Server</label>
+                            <input type="text" class="form-control" id="lokasi_server" name="lokasi_server"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status_pemakaian" class="form-label">Status Pemakaian</label>
+                            <select class="form-select" id="status_pemakaian" name="status_pemakaian" required>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Tidak Aktif">Tidak Aktif</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="js/sidebar.js"></script>
@@ -176,16 +265,83 @@
 
         // Edit Application
         function editApp(appId) {
-            document.getElementById('modalTitle').textContent = 'Edit Aplikasi';
-            const modal = new bootstrap.Modal(document.getElementById('appModal'));
-            modal.show();
+            // Fetch data aplikasi berdasarkan nama
+            fetch(`/aplikasi/edit/${appId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Aplikasi tidak ditemukan');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('modalTitle').textContent = 'Edit Aplikasi';
+
+                    // Isi form dengan data yang ada
+                    document.getElementById('nama').value = data.nama;
+                    document.getElementById('opd').value = data.opd;
+                    document.getElementById('uraian').value = data.uraian;
+                    document.getElementById('tahun_pembuatan').value = data.tahun_pembuatan;
+                    document.getElementById('jenis').value = data.jenis;
+                    document.getElementById('basis_aplikasi').value = data.basis_aplikasi;
+                    document.getElementById('bahasa_framework').value = data.bahasa_framework;
+                    document.getElementById('database').value = data.database;
+                    document.getElementById('pengembang').value = data.pengembang;
+                    document.getElementById('lokasi_server').value = data.lokasi_server;
+                    document.getElementById('status_pemakaian').value = data.status_pemakaian;
+
+                    // Set form action untuk update
+                    const form = document.getElementById('appForm');
+                    form.action = `/aplikasi/${appId}`;
+                    form.method = 'POST';
+
+                    // Tambahkan method field untuk PUT request
+                    let methodField = document.getElementById('_method');
+                    if (!methodField) {
+                        methodField = document.createElement('input');
+                        methodField.type = 'hidden';
+                        methodField.name = '_method';
+                        methodField.id = '_method';
+                        form.appendChild(methodField);
+                    }
+                    methodField.value = 'PUT';
+
+                    // Tampilkan modal
+                    const modal = new bootstrap.Modal(document.getElementById('appModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat mengambil data aplikasi');
+                });
         }
 
         // Delete Application
         function deleteApp(appId) {
             if (confirm('Apakah Anda yakin ingin menghapus aplikasi ini?')) {
-                // In a real application, this would delete the app
-                alert('Aplikasi dihapus: ' + appId);
+                // Buat form untuk delete request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/aplikasi/delete/${appId}`;
+
+                // Tambahkan CSRF token
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+
+                // Tambahkan method _method untuk DELETE
+                const methodField = document.createElement('input');
+                methodField.type = 'hidden';
+                methodField.name = '_method';
+                methodField.value = 'DELETE';
+
+                // Gabungkan semua element
+                form.appendChild(csrfToken);
+                form.appendChild(methodField);
+                document.body.appendChild(form);
+
+                // Submit form
+                form.submit();
             }
         }
 
