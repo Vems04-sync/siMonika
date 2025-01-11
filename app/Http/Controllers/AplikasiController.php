@@ -251,14 +251,15 @@ class AplikasiController extends Controller
             $columns = \Schema::getColumnListing('aplikasis');
 
             // Ambil data berdasarkan kolom yang ada
-            $aplikasi = Aplikasi::where('nama', $nama)
-                ->select($columns)
-                ->firstOrFail();
+            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
 
-            // Siapkan data untuk response
+            // Siapkan data untuk response, exclude kolom yang tidak perlu ditampilkan
             $detailData = [];
             foreach ($columns as $column) {
-                $detailData[$column] = $aplikasi->$column;
+                // Skip kolom yang tidak perlu ditampilkan
+                if (!in_array($column, ['id', 'created_at', 'updated_at'])) {
+                    $detailData[$column] = $aplikasi->$column;
+                }
             }
 
             return response()->json($detailData);
