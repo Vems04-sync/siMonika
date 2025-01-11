@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AtributController;
 
 // Route untuk guest (belum login)
 Route::middleware(['guest', 'throttle:6,1'])->group(function () {
@@ -46,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
 
 // Route untuk admin
 Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/', [AdminController::class, 'index'])->name('admin.index');
     Route::get('/create', [AdminController::class, 'create'])->name('admin.create');
     Route::post('/', [AdminController::class, 'store'])->name('admin.store');
@@ -64,3 +66,5 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
+
+Route::resource('atribut', AtributController::class);

@@ -26,8 +26,8 @@
                     <span>Aplikasi</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
+            <li class="nav-item {{ request()->routeIs('atribut.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('atribut.index') }}">
                     <i class="bi bi-clipboard"></i>
                     <span>Atribut</span>
                 </a>
