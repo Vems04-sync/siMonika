@@ -203,19 +203,17 @@
                                     <td>{{ $aplikasi->lokasi_server }}</td>
                                     <td class="text-center pe-4">
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-sm btn-outline-primary" 
-                                                    onclick="viewAppDetails('{{ $aplikasi->nama }}')"
-                                                    title="Lihat Detail">
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                onclick="viewAppDetails('{{ $aplikasi->nama }}')"
+                                                title="Lihat Detail">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-secondary" 
-                                                    onclick="editApp('{{ $aplikasi->nama }}')"
-                                                    title="Edit">
+                                            <button class="btn btn-sm btn-outline-secondary"
+                                                onclick="editApp('{{ $aplikasi->nama }}')" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-danger" 
-                                                    onclick="deleteApp('{{ $aplikasi->nama }}')"
-                                                    title="Hapus">
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                onclick="deleteApp('{{ $aplikasi->nama }}')" title="Hapus">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -515,37 +513,35 @@
 
                     // Mapping nama kolom ke label yang lebih user-friendly
                     const columnLabels = {
-                        'id': 'ID',
-                        'nama': 'Nama Aplikasi',
-                        'opd': 'OPD',
-                        'uraian': 'Uraian',
-                        'tahun_pembuatan': 'Tahun Pembuatan',
-                        'jenis': 'Jenis',
-                        'basis_aplikasi': 'Basis Aplikasi',
-                        'bahasa_framework': 'Bahasa/Framework',
-                        'database': 'Database',
-                        'pengembang': 'Pengembang',
-                        'lokasi_server': 'Lokasi Server',
-                        'status_pemakaian': 'Status Pemakaian',
-                        'created_at': 'Dibuat Pada',
-                        'updated_at': 'Diperbarui Pada'
+                        nama: 'Nama Aplikasi',
+                        opd: 'OPD',
+                        uraian: 'Uraian',
+                        tahun_pembuatan: 'Tahun Pembuatan',
+                        jenis: 'Jenis',
+                        basis_aplikasi: 'Basis Aplikasi',
+                        bahasa_framework: 'Bahasa/Framework',
+                        database: 'Database',
+                        pengembang: 'Pengembang',
+                        lokasi_server: 'Lokasi Server',
+                        status_pemakaian: 'Status Pemakaian'
                     };
 
                     // Tambahkan baris untuk setiap kolom
-                    for (const [key, value] of Object.entries(data)) {
-                        // Skip kolom yang tidak perlu ditampilkan
-                        if (['id', 'created_at', 'updated_at'].includes(key)) continue;
-
+                    Object.entries(data).forEach(([key, value]) => {
                         const row = document.createElement('tr');
-                        const label = columnLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l
-                    .toUpperCase());
+
+                        // Gunakan label dari mapping jika ada, atau format nama kolom jika tidak ada
+                        const label = columnLabels[key] ||
+                            key.split('_')
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ');
 
                         row.innerHTML = `
                             <th width="30%">${label}</th>
                             <td>${value || '-'}</td>
                         `;
                         tbody.appendChild(row);
-                    }
+                    });
 
                     // Tampilkan modal
                     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
