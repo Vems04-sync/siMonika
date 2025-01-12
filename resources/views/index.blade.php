@@ -28,7 +28,7 @@
             </div>
             <div class="d-flex align-items-center">
                 <i class="bi bi-clock me-2"></i>
-                <span>Update Terakhir: Hari ini 14:30 WIB</span>
+                <span id="lastUpdate">Update Terakhir: {{ $lastUpdate->locale('id')->isoFormat('dddd, D MMMM YYYY HH:mm [WIB]') }}</span>
             </div>
         </div>
 
@@ -125,7 +125,7 @@
                         </tbody>
                     </table>
                     <div class="d-flex justify-content-center">
-                        {{ $aplikasis->onEachSide(1)->links('vendor.pagination.custom') }}
+                        <div class="pagination-container"></div>
                     </div>
                 </div>
             </div>
@@ -137,6 +137,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <script src="{{ asset('js/index/chart.js') }}"></script>
     <script src="{{ asset('js/sidebar.js') }}"></script>
+    <script src="{{ asset('js/index/pagination.js') }}"></script>
+    <script src="{{ asset('js/index/last-update.js') }}"></script>
 </body>
 
 </html>

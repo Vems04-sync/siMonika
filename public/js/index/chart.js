@@ -3,11 +3,26 @@ async function loadChartData() {
         const response = await fetch("/chart-data");
         const data = await response.json();
 
-        // Update Status Pie Chart
-        const statusLabels = data.statusData.map(
-            (item) => item.status_pemakaian
+        // Status Pie Chart
+        const statusColors = {
+            Aktif: "#28a745", 
+            "Tidak Aktif": "#dc2626", 
+        };
+
+        // Urutkan data status agar Aktif selalu di awal
+        const sortedStatusData = data.statusData.sort((a, b) => {
+            if (a.status_pemakaian === "Aktif") return -1;
+            if (b.status_pemakaian === "Aktif") return 1;
+            return 0;
+        });
+
+        const statusLabels = sortedStatusData.map(
+            (item) => `${item.status_pemakaian} (${item.total})`
         );
-        const statusValues = data.statusData.map((item) => item.total);
+        const statusValues = sortedStatusData.map((item) => item.total);
+        const statusBackgroundColors = sortedStatusData.map(
+            (item) => statusColors[item.status_pemakaian]
+        );
 
         const statusPieChart = new Chart(
             document.getElementById("statusPieChart"),
@@ -18,7 +33,7 @@ async function loadChartData() {
                     datasets: [
                         {
                             data: statusValues,
-                            backgroundColor: ["#28a745", "#dc2626", "#eab308"], // Existing colors
+                            backgroundColor: statusBackgroundColors,
                             borderWidth: 0,
                         },
                     ],
@@ -35,6 +50,50 @@ async function loadChartData() {
                                 usePointStyle: true,
                                 pointStyle: "circle",
                                 textAlign: "left",
+                                font: {
+                                    size: 12,
+                                },
+                                generateLabels: function (chart) {
+                                    const data = chart.data;
+                                    if (
+                                        data.labels.length &&
+                                        data.datasets.length
+                                    ) {
+                                        return data.labels.map((label, i) => {
+                                            const value =
+                                                data.datasets[0].data[i];
+                                            const backgroundColor =
+                                                data.datasets[0]
+                                                    .backgroundColor[i];
+                                            return {
+                                                text: `${label}`,
+                                                fillStyle: backgroundColor,
+                                                strokeStyle: backgroundColor,
+                                                lineWidth: 0,
+                                                hidden:
+                                                    isNaN(value) || value === 0,
+                                                index: i,
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                },
+                            },
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce(
+                                        (a, b) => a + b,
+                                        0
+                                    );
+                                    const percentage = (
+                                        (value / total) *
+                                        100
+                                    ).toFixed(1);
+                                    return `${value} (${percentage}%)`;
+                                },
                             },
                         },
                     },
@@ -56,15 +115,16 @@ async function loadChartData() {
             {
                 type: "doughnut",
                 data: {
-                    labels: data.jenisData.map((item) => item.jenis),
+                    labels: data.jenisData.map(
+                        (item) => `${item.jenis} (${item.total})`
+                    ),
                     datasets: [
                         {
                             data: data.jenisData.map((item) => item.total),
                             backgroundColor: [
-                                "#1abc9c",
-                                "#3498db",
-                                "#9b59b6",
-                                "#e74c3c",
+                                "#2ecc71", 
+                                "#3498db", 
+                                "#e74c3c"
                             ],
                             borderWidth: 0,
                         },
@@ -82,6 +142,25 @@ async function loadChartData() {
                                 usePointStyle: true,
                                 pointStyle: "circle",
                                 textAlign: "left",
+                                font: {
+                                    size: 12,
+                                },
+                            },
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce(
+                                        (a, b) => a + b,
+                                        0
+                                    );
+                                    const percentage = (
+                                        (value / total) *
+                                        100
+                                    ).toFixed(1);
+                                    return `${value} (${percentage}%)`;
+                                },
                             },
                         },
                     },
@@ -103,15 +182,17 @@ async function loadChartData() {
             {
                 type: "doughnut",
                 data: {
-                    labels: data.basisData.map((item) => item.basis_aplikasi),
+                    labels: data.basisData.map(
+                        (item) => `${item.basis_aplikasi} (${item.total})`
+                    ),
                     datasets: [
                         {
                             data: data.basisData.map((item) => item.total),
                             backgroundColor: [
-                                "#f39c12",
-                                "#27ae60",
-                                "#e67e22",
-                                "#95a5a6",
+                                "#3B82F6", 
+                                "#10B981", 
+                                "#F59E0B", 
+                                "#6366F1", 
                             ],
                             borderWidth: 0,
                         },
@@ -129,6 +210,25 @@ async function loadChartData() {
                                 usePointStyle: true,
                                 pointStyle: "circle",
                                 textAlign: "left",
+                                font: {
+                                    size: 12,
+                                },
+                            },
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce(
+                                        (a, b) => a + b,
+                                        0
+                                    );
+                                    const percentage = (
+                                        (value / total) *
+                                        100
+                                    ).toFixed(1);
+                                    return `${value} (${percentage}%)`;
+                                },
                             },
                         },
                     },
@@ -150,11 +250,19 @@ async function loadChartData() {
             {
                 type: "doughnut",
                 data: {
-                    labels: data.pengembangData.map((item) => item.pengembang),
+                    labels: data.pengembangData.map(
+                        (item) => `${item.pengembang} (${item.total})`
+                    ),
                     datasets: [
                         {
                             data: data.pengembangData.map((item) => item.total),
-                            backgroundColor: ["#34495e", "#2ecc71", "#3498db"], // Added one more color
+                            backgroundColor: [
+                                "#8B5CF6", 
+                                "#14B8A6", 
+                                "#F43F5E", 
+                                "#0EA5E9", 
+                                "#22C55E", 
+                            ],
                             borderWidth: 0,
                         },
                     ],
@@ -171,6 +279,25 @@ async function loadChartData() {
                                 usePointStyle: true,
                                 pointStyle: "circle",
                                 textAlign: "left",
+                                font: {
+                                    size: 12,
+                                },
+                            },
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce(
+                                        (a, b) => a + b,
+                                        0
+                                    );
+                                    const percentage = (
+                                        (value / total) *
+                                        100
+                                    ).toFixed(1);
+                                    return `${value} (${percentage}%)`;
+                                },
                             },
                         },
                     },

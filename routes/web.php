@@ -46,6 +46,8 @@ Route::middleware(['auth'])->group(function () {
 
     // route untuk detail aplikasi
     Route::get('/aplikasi/detail/{nama}', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
+
+    Route::get('/last-update', [DashboardController::class, 'getLastUpdate'])->name('last.update');
 });
 
 // Route untuk admin
