@@ -27,7 +27,10 @@
 
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Profile</h2>
+            <div>
+                <h2 class="mb-0">Profile</h2>
+                <p class="text-muted">Pengaturan informasi akun pengguna</p>
+            </div>
         </div>
 
         <!-- Profile Content -->
@@ -53,10 +56,13 @@
                     </div>
                     <div class="list-group list-group-flush">
                         <a href="{{ route('dashboard') }}" class="list-group-item list-group-item-action">
-                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                            <i class="bi bi-house-door me-2"></i>Dashboard
                         </a>
                         <a href="{{ route('aplikasi.index') }}" class="list-group-item list-group-item-action">
                             <i class="bi bi-grid me-2"></i>Aplikasi
+                        </a>
+                        <a href="{{ route('atribut.index') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-clipboard me-2"></i>Atribut
                         </a>
                     </div>
                 </div>

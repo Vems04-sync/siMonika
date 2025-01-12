@@ -26,15 +26,7 @@ class AplikasiController extends Controller
     public function index()
     {
         $aplikasis = Aplikasi::all();
-
-        if (request()->route()->getName() === 'dashboard') {
-            $jumlahAplikasiAktif = Aplikasi::where('status_pemakaian', 'Aktif')->count();
-            $jumlahAplikasiTidakDigunakan = Aplikasi::where('status_pemakaian', '!=', 'Aktif')->count();
-
-            return view('index', compact('jumlahAplikasiAktif', 'jumlahAplikasiTidakDigunakan', 'aplikasis'));
-        } else {
-            return view('aplikasi.index', compact('aplikasis'));
-        }
+        return view('aplikasi.index', compact('aplikasis'));
     }
 
     /**

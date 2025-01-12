@@ -1,5 +1,5 @@
 <div class="sidebar-responsive">
-    <button class="btn-toggle-sidebar">
+    <button class="btn-toggle-sidebar" type="button">
         <i class="bi bi-list"></i>
     </button>
 </div>
