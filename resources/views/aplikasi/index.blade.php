@@ -317,7 +317,21 @@
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <tbody>
-                                <!-- Data akan diisi secara dinamis -->
+                                <!-- Data aplikasi akan diisi secara dinamis -->
+                            </tbody>
+                        </table>
+
+                        <!-- Tambahkan section untuk atribut -->
+                        <h6 class="mt-4 mb-3">Atribut Tambahan</h6>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nama Atribut</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody id="atributTable">
+                                <!-- Atribut akan diisi secara dinamis -->
                             </tbody>
                         </table>
                     </div>
@@ -496,16 +510,9 @@
         // View Details
         function viewAppDetails(appId) {
             fetch(`/aplikasi/detail/${appId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Aplikasi tidak ditemukan');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    if (data.error) {
-                        throw new Error(data.error);
-                    }
+                    console.log('Data yang diterima:', data); // Debug
 
                     // Bersihkan tbody sebelum menambahkan data baru
                     const tbody = document.querySelector('#detailModal .table tbody');
@@ -528,20 +535,41 @@
 
                     // Tambahkan baris untuk setiap kolom
                     Object.entries(data).forEach(([key, value]) => {
-                        const row = document.createElement('tr');
+                        if (key !== 'atribut') { // Skip atribut karena akan ditampilkan terpisah
+                            const row = document.createElement('tr');
+                            const label = columnLabels[key] ||
+                                key.split('_')
+                                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                .join(' ');
 
-                        // Gunakan label dari mapping jika ada, atau format nama kolom jika tidak ada
-                        const label = columnLabels[key] ||
-                            key.split('_')
-                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                            .join(' ');
-
-                        row.innerHTML = `
-                            <th width="30%">${label}</th>
-                            <td>${value || '-'}</td>
-                        `;
-                        tbody.appendChild(row);
+                            row.innerHTML = `
+                                <th width="30%">${label}</th>
+                                <td>${value || '-'}</td>
+                            `;
+                            tbody.appendChild(row);
+                        }
                     });
+
+                    // Tampilkan atribut tambahan
+                    const atributTbody = document.getElementById('atributTable');
+                    atributTbody.innerHTML = '';
+
+                    if (data.atribut && data.atribut.length > 0) {
+                        data.atribut.forEach(atribut => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${atribut.nama_atribut}</td>
+                                <td>${atribut.nilai_atribut || '-'}</td>
+                            `;
+                            atributTbody.appendChild(row);
+                        });
+                    } else {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td colspan="2" class="text-center">Tidak ada atribut tambahan</td>
+                        `;
+                        atributTbody.appendChild(row);
+                    }
 
                     // Tampilkan modal
                     const modal = new bootstrap.Modal(document.getElementById('detailModal'));

@@ -25,4 +25,9 @@ class Aplikasi extends Model
         'lokasi_server',
         'status_pemakaian'
     ];
+
+    public function atributTambahans()
+    {
+        return $this->hasMany(AtributTambahan::class, 'id_aplikasi', 'id_aplikasi');
+    }
 }
