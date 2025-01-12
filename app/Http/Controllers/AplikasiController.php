@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use App\Exports\AplikasiExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -191,7 +193,7 @@ class AplikasiController extends Controller
     {
         try {
             // Dapatkan semua kolom dari tabel
-            $columns = \Schema::getColumnListing('aplikasis');
+            $columns = Schema::getColumnListing('aplikasis');
 
             // Ambil data berdasarkan kolom yang ada
             $aplikasi = Aplikasi::where('nama', $nama)
@@ -248,7 +250,7 @@ class AplikasiController extends Controller
     {
         try {
             // Dapatkan semua kolom dari tabel
-            $columns = \Schema::getColumnListing('aplikasis');
+            $columns = Schema::getColumnListing('aplikasis');
 
             // Ambil data berdasarkan kolom yang ada
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
@@ -265,6 +267,48 @@ class AplikasiController extends Controller
             return response()->json($detailData);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Aplikasi tidak ditemukan'], 404);
+        }
+    }
+
+    /**
+     * Get detail aplikasi by nama.
+     */
+    public function detail($nama)
+    {
+        try {
+            // Ambil data aplikasi beserta atribut tambahannya
+            $aplikasi = Aplikasi::where('nama', $nama)
+                ->with('atributTambahans')  // Pastikan ini ada
+                ->firstOrFail();
+
+            // Siapkan response dengan format yang sesuai
+            $response = [
+                'id_aplikasi' => $aplikasi->id_aplikasi,
+                'nama' => $aplikasi->nama,
+                'opd' => $aplikasi->opd,
+                'uraian' => $aplikasi->uraian,
+                'tahun_pembuatan' => $aplikasi->tahun_pembuatan,
+                'jenis' => $aplikasi->jenis,
+                'basis_aplikasi' => $aplikasi->basis_aplikasi,
+                'bahasa_framework' => $aplikasi->bahasa_framework,
+                'database' => $aplikasi->database,
+                'pengembang' => $aplikasi->pengembang,
+                'lokasi_server' => $aplikasi->lokasi_server,
+                'status_pemakaian' => $aplikasi->status_pemakaian,
+                'atribut' => $aplikasi->atributTambahans->map(function($atribut) {
+                    return [
+                        'nama_atribut' => $atribut->nama_atribut,
+                        'nilai_atribut' => $atribut->nilai_atribut
+                    ];
+                })
+            ];
+
+            Log::info('Data yang dikirim:', $response);
+            
+            return response()->json($response);
+        } catch (\Exception $e) {
+            Log::error('Error saat mengambil detail:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Terjadi kesalahan saat mengambil data'], 500);
         }
     }
 }

@@ -45,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
 
     // route untuk detail aplikasi
-    Route::get('/aplikasi/detail/{nama}', [AplikasiController::class, 'getDetail'])->name('aplikasi.getDetail');
+    Route::get('/aplikasi/detail/{nama}', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
 });
 
 // Route untuk admin
