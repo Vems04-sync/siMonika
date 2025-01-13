@@ -143,9 +143,20 @@ class AplikasiController extends Controller
     public function export()
     {
         try {
-            return Excel::download(new AplikasiExport, 'aplikasi.xlsx');
+            Log::info('Starting export process');
+            
+            // Cek apakah ada data
+            $count = Aplikasi::count();
+            Log::info("Found {$count} records to export");
+            
+            $export = new AplikasiExport();
+            Log::info('AplikasiExport instance created');
+            
+            return Excel::download($export, 'aplikasi.xlsx');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors('Terjadi kesalahan saat melakukan ekspor: ' . $e->getMessage());
+            Log::error('Export error details: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return back()->with('error', 'Terjadi kesalahan saat mengexport data: ' . $e->getMessage());
         }
     }
 
