@@ -373,37 +373,22 @@
     <!-- Script aplikasi -->
     <script src="{{ asset('js/aplikasi/index.js') }}"></script>
 
-    <!-- Inisialisasi toastr untuk flash messages -->
+    <!-- Tambahkan ini untuk flash message dari session -->
+    @if(session('success'))
     <script>
-        // Konfigurasi toastr
-        toastr.options = {
-            "closeButton": true,
-            "newestOnTop": true,
-            "progressBar": true,
-            "positionClass": "toast-top-right",
-            "preventDuplicates": true,
-            "timeOut": "3000"
-        };
-
-        // Tampilkan flash message dari localStorage atau session
         document.addEventListener('DOMContentLoaded', function() {
-            const flashMessage = localStorage.getItem('flash_message');
-            if (flashMessage) {
-                toastr.success(flashMessage, "Berhasil");
-                localStorage.removeItem('flash_message');
-            } 
-            // Jika tidak ada flash message dari localStorage, cek session
-            else {
-                @if(session('success'))
-                    toastr.success("{{ session('success') }}", "Berhasil");
-                @endif
-
-                @if(session('error'))
-                    toastr.error("{{ session('error') }}", "Error");
-                @endif
-            }
+            toastr.success("{{ session('success') }}", "Berhasil");
         });
     </script>
+    @endif
+
+    @if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            toastr.error("{{ session('error') }}", "Error");
+        });
+    </script>
+    @endif
 </body>
 
 </html>
