@@ -11,11 +11,12 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
 use App\Models\AtributTambahan;
-
-
+use App\Traits\CatatAktivitas;
 
 class AplikasiController extends Controller
 {
+    use CatatAktivitas;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -59,6 +60,13 @@ class AplikasiController extends Controller
 
         Aplikasi::create($validatedData);
 
+        $this->catatAktivitas(
+            'Menambahkan aplikasi baru',
+            'create',
+            'aplikasi',
+            'Menambahkan aplikasi: ' . $request->nama
+        );
+
         return redirect()->route('aplikasi.index')
             ->with('success', 'Aplikasi berhasil ditambahkan.');
     }
@@ -100,6 +108,14 @@ class AplikasiController extends Controller
             ]);
 
             $aplikasi->update($validatedData);
+
+            $this->catatAktivitas(
+                'Mengupdate aplikasi',
+                'update',
+                'aplikasi',
+                'Mengupdate aplikasi: ' . $request->nama
+            );
+
             return redirect()->route('aplikasi.index')
                 ->with('success', 'Aplikasi berhasil diperbarui.');
         } catch (\Exception $e) {
@@ -130,6 +146,14 @@ class AplikasiController extends Controller
         try {
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
             $aplikasi->delete();
+
+            $this->catatAktivitas(
+                'Menghapus aplikasi',
+                'delete',
+                'aplikasi',
+                'Menghapus aplikasi: ' . $nama
+            );
+
             return redirect()->route('aplikasi.index')
                 ->with('success', 'Aplikasi berhasil dihapus.');
         } catch (\Exception $e) {
