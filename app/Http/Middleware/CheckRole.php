@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class CheckRole
 {
@@ -25,5 +26,16 @@ class CheckRole
         }
 
         return $next($request);
+    }
+
+    public function boot()
+    {
+        Gate::define('super_admin', function ($user) {
+            return $user->role === 'super_admin';
+        });
+
+        Gate::define('admin', function ($user) {
+            return $user->role === 'admin';
+        });
     }
 }
