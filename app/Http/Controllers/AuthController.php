@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pengguna;
 use Illuminate\Validation\Rules\Password;
+use App\Models\LogAktivitas;
 
 class AuthController extends \Illuminate\Routing\Controller
 {
@@ -35,6 +36,15 @@ class AuthController extends \Illuminate\Routing\Controller
         if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
             
+            // Catat aktivitas login
+            LogAktivitas::create([
+                'user_id' => Auth::user()->id_user,
+                'aktivitas' => 'Login',
+                'tipe_aktivitas' => 'login',
+                'modul' => 'auth',
+                'detail' => 'User melakukan login ke sistem'
+            ]);
+
             if (Auth::user()->role === 'super_admin') {
                 return redirect()->route('admin.index');
             }
@@ -48,6 +58,15 @@ class AuthController extends \Illuminate\Routing\Controller
 
     public function logout(Request $request)
     {
+        // Catat aktivitas logout
+        LogAktivitas::create([
+            'user_id' => Auth::user()->id_user,
+            'aktivitas' => 'Logout',
+            'tipe_aktivitas' => 'logout',
+            'modul' => 'auth',
+            'detail' => 'User melakukan logout dari sistem'
+        ]);
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
