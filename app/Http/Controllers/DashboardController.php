@@ -35,10 +35,10 @@ class DashboardController extends Controller
             ->first();
 
         if ($lastUpdate) {
-            return Carbon::parse($lastUpdate->updated_at);
+            return Carbon::parse($lastUpdate->updated_at)->timezone('Asia/Jakarta');
         }
 
-        return Carbon::now();
+        return Carbon::now()->timezone('Asia/Jakarta');
     }
 
     public function getLastUpdate()
