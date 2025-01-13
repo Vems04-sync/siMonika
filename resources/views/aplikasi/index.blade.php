@@ -317,26 +317,46 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <tbody>
-                                <!-- Data aplikasi akan diisi secara dinamis -->
-                            </tbody>
-                        </table>
+                    <!-- Add loading state -->
+                    <div id="loadingState" class="text-center d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
 
-                        <!-- Tambahkan section untuk atribut -->
-                        <h6 class="mt-4 mb-3">Atribut Tambahan</h6>
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Nama Atribut</th>
-                                    <th>Nilai</th>
-                                </tr>
-                            </thead>
-                            <tbody id="atributTable">
-                                <!-- Atribut akan diisi secara dinamis -->
-                            </tbody>
-                        </table>
+                    <!-- Add error state -->
+                    <div id="errorState" class="alert alert-danger d-none">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <span id="errorMessage">Terjadi kesalahan saat mengambil data</span>
+                    </div>
+
+                    <!-- Content state -->
+                    <div id="contentState">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <tbody id="detailTable">
+                                    <!-- Data aplikasi akan diisi secara dinamis -->
+                                </tbody>
+                            </table>
+
+                            <h6 class="mt-4 mb-3">Atribut Tambahan</h6>
+                            <div id="atributContent">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Atribut</th>
+                                            <th>Nilai</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="atributTable">
+                                        <!-- Atribut akan diisi secara dinamis -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="noAtributMessage" class="text-muted text-center p-3 d-none">
+                                <i class="bi bi-info-circle me-2"></i>Tidak ada atribut tambahan
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
