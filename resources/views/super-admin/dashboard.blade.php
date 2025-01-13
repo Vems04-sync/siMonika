@@ -94,5 +94,39 @@
             {{ $log_aktivitas->links() }}
         </div>
     </div>
+
+    <!-- Admin Aktif -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Admin Aktif</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @forelse($admin_aktif as $admin)
+                <div class="col-md-3 mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="position-relative me-3">
+                            <div class="avatar-circle bg-primary">
+                                <span class="text-white">{{ substr($admin->nama, 0, 1) }}</span>
+                                <div class="status-indicator"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ $admin->nama }}</h6>
+                            <small class="text-muted">
+                                <i class="bi bi-clock-fill me-1"></i>
+                                Aktif
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="col-12">
+                    <p class="text-center mb-0">Tidak ada admin yang aktif saat ini</p>
+                </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
