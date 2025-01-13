@@ -23,6 +23,7 @@ class DashboardController extends Controller
             'total_admin' => Pengguna::where('role', 'admin')->count(),
             'total_aplikasi' => Aplikasi::count(),
             'aplikasi_aktif' => Aplikasi::where('status_pemakaian', 'Aktif')->count(),
+            'aplikasi_tidak_aktif' => Aplikasi::where('status_pemakaian', '!=', 'Aktif')->count(),
             'log_aktivitas' => LogAktivitas::with('user')
                                          ->orderBy('created_at', 'desc')
                                          ->paginate(10)

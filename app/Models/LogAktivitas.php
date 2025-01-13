@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class LogAktivitas extends Model
 {
+    protected $table = 'log_aktivitas';
+    
     protected $fillable = [
         'user_id',
         'aktivitas',
@@ -16,6 +18,6 @@ class LogAktivitas extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Pengguna::class, 'user_id', 'id_user');
     }
 }

@@ -12,7 +12,7 @@
 
     <!-- Statistik Cards -->
     <div class="row mb-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
                     <h5 class="card-title">Total Admin</h5>
@@ -20,7 +20,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
                     <h5 class="card-title">Total Aplikasi</h5>
@@ -28,11 +28,19 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <h5 class="card-title">Aplikasi Aktif</h5>
                     <h2 class="mb-0">{{ $aplikasi_aktif }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Aplikasi Tidak Aktif</h5>
+                    <h2 class="mb-0">{{ $aplikasi_tidak_aktif }}</h2>
                 </div>
             </div>
         </div>
