@@ -50,7 +50,7 @@ class AplikasiExport implements FromCollection, WithHeadings
         try {
             Log::info('Fetching data for export');
             
-            $aplikasis = Aplikasi::with('atributs')->get();
+            $aplikasis = Aplikasi::with('atributTambahan')->get();
             
             return $aplikasis->map(function ($aplikasi) {
                 // Data dasar
@@ -70,9 +70,9 @@ class AplikasiExport implements FromCollection, WithHeadings
 
                 // Tambahkan nilai atribut dinamis
                 foreach ($this->uniqueAtributs as $atributName) {
-                    $atribut = $aplikasi->atributs
-                        ->where('nama_atribut', $atributName)
-                        ->first();
+                    $atribut = $aplikasi->atributTambahan
+                        ? $aplikasi->atributTambahan->where('nama_atribut', $atributName)->first()
+                        : null;
                     
                     $row[] = $atribut ? $atribut->nilai_atribut : '-';
                 }
