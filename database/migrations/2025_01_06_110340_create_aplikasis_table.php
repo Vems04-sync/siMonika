@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('aplikasis', function (Blueprint $table) {
             $table->id('id_aplikasi');
-            $table->string('nama');
+            $table->string('nama')->unique();
             $table->string('opd');
             $table->text('uraian')->nullable();
             $table->date('tahun_pembuatan')->nullable();

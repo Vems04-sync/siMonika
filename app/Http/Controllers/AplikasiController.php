@@ -47,7 +47,7 @@ class AplikasiController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'nama' => 'required',
+            'nama' => 'required|unique:aplikasis,nama',
             'opd' => 'required',
             'uraian' => 'nullable',
             'tahun_pembuatan' => 'nullable|date',
@@ -96,7 +96,7 @@ class AplikasiController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'nama' => 'required',
+                'nama' => 'required|unique:aplikasis,nama,' . $aplikasi->nama . ',nama',
                 'opd' => 'required',
                 'uraian' => 'nullable',
                 'tahun_pembuatan' => 'nullable|date',
