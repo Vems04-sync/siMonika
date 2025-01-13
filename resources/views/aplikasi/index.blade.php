@@ -15,19 +15,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Toastr CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
-    
-    <style>
-        /* Custom style untuk toastr */
-        .toast-success {
-            background-color: #51A351;
-        }
-        .toast-error {
-            background-color: #BD362F;
-        }
-        .toast {
-            opacity: 1 !important;
-        }
-    </style>
 </head>
 
 <body>
@@ -36,20 +23,6 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-0">
             <div>
@@ -393,8 +366,44 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/sidebar.js') }}"></script>
-    <script src="{{ asset('js/aplikasi/index.js') }}"></script>
+    
+    <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
+    <!-- Script aplikasi -->
+    <script src="{{ asset('js/aplikasi/index.js') }}"></script>
+
+    <!-- Inisialisasi toastr untuk flash messages -->
+    <script>
+        // Konfigurasi toastr
+        toastr.options = {
+            "closeButton": true,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": true,
+            "timeOut": "3000"
+        };
+
+        // Tampilkan flash message dari localStorage atau session
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessage = localStorage.getItem('flash_message');
+            if (flashMessage) {
+                toastr.success(flashMessage, "Berhasil");
+                localStorage.removeItem('flash_message');
+            } 
+            // Jika tidak ada flash message dari localStorage, cek session
+            else {
+                @if(session('success'))
+                    toastr.success("{{ session('success') }}", "Berhasil");
+                @endif
+
+                @if(session('error'))
+                    toastr.error("{{ session('error') }}", "Error");
+                @endif
+            }
+        });
+    </script>
 </body>
 
 </html>
