@@ -137,71 +137,60 @@ function filterApps() {
 }
 
 // CRUD Operations
-function viewAppDetails(appId) {
-    fetch(`/aplikasi/detail/${appId}`)
+function viewAppDetails(nama) {
+    document.getElementById('loadingState').classList.remove('d-none');
+    document.getElementById('errorState').classList.add('d-none');
+    document.getElementById('contentState').classList.add('d-none');
+
+    fetch(`/aplikasi/detail/${nama}`)
         .then(response => response.json())
         .then(data => {
-            console.log('Data yang diterima:', data);
+            console.log('Data dari server:', data);
+            document.getElementById('loadingState').classList.add('d-none');
+            document.getElementById('contentState').classList.remove('d-none');
 
-            const tbody = document.querySelector('#detailModal .table tbody');
-            tbody.innerHTML = '';
+            // Perbaikan cara menampilkan data aplikasi
+            const detailTable = document.getElementById('detailTable');
+            const aplikasi = data.aplikasi;
+            detailTable.innerHTML = `
+                <tr><th>NAMA</th><td>${aplikasi.nama}</td></tr>
+                <tr><th>OPD</th><td>${aplikasi.opd}</td></tr>
+                <tr><th>URAIAN</th><td>${aplikasi.uraian || '-'}</td></tr>
+                <tr><th>TAHUN PEMBUATAN</th><td>${aplikasi.tahun_pembuatan || '-'}</td></tr>
+                <tr><th>JENIS</th><td>${aplikasi.jenis}</td></tr>
+                <tr><th>BASIS APLIKASI</th><td>${aplikasi.basis_aplikasi}</td></tr>
+                <tr><th>BAHASA/FRAMEWORK</th><td>${aplikasi.bahasa_framework || '-'}</td></tr>
+                <tr><th>DATABASE</th><td>${aplikasi.database || '-'}</td></tr>
+                <tr><th>PENGEMBANG</th><td>${aplikasi.pengembang}</td></tr>
+                <tr><th>LOKASI SERVER</th><td>${aplikasi.lokasi_server}</td></tr>
+                <tr><th>STATUS PEMAKAIAN</th><td>${aplikasi.status_pemakaian}</td></tr>
+            `;
 
-            const columnLabels = {
-                nama: 'Nama Aplikasi',
-                opd: 'OPD',
-                uraian: 'Uraian',
-                tahun_pembuatan: 'Tahun Pembuatan',
-                jenis: 'Jenis',
-                basis_aplikasi: 'Basis Aplikasi',
-                bahasa_framework: 'Bahasa/Framework',
-                database: 'Database',
-                pengembang: 'Pengembang',
-                lokasi_server: 'Lokasi Server',
-                status_pemakaian: 'Status Pemakaian'
-            };
-
-            Object.entries(data).forEach(([key, value]) => {
-                if (key !== 'atribut') {
-                    const row = document.createElement('tr');
-                    const label = columnLabels[key] ||
-                        key.split('_')
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(' ');
-
-                    row.innerHTML = `
-                        <th width="30%">${label}</th>
-                        <td>${value || '-'}</td>
-                    `;
-                    tbody.appendChild(row);
-                }
-            });
-
-            const atributTbody = document.getElementById('atributTable');
-            atributTbody.innerHTML = '';
-
+            // Perbaikan cara menampilkan atribut
+            const atributTable = document.getElementById('atributTable');
+            const noAtributMessage = document.getElementById('noAtributMessage');
+            
             if (data.atribut && data.atribut.length > 0) {
-                data.atribut.forEach(atribut => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${atribut.nama_atribut}</td>
-                        <td>${atribut.nilai_atribut || '-'}</td>
-                    `;
-                    atributTbody.appendChild(row);
-                });
+                atributTable.innerHTML = data.atribut.map(item => `
+                    <tr>
+                        <td>${item.nama_atribut}</td>
+                        <td>${item.nilai_atribut || '-'}</td>
+                    </tr>
+                `).join('');
+                atributTable.parentElement.classList.remove('d-none');
+                noAtributMessage.classList.add('d-none');
             } else {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td colspan="2" class="text-center">Tidak ada atribut tambahan</td>
-                `;
-                atributTbody.appendChild(row);
+                atributTable.parentElement.classList.add('d-none');
+                noAtributMessage.classList.remove('d-none');
             }
 
             const modal = new bootstrap.Modal(document.getElementById('detailModal'));
             modal.show();
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat mengambil detail aplikasi');
+            document.getElementById('loadingState').classList.add('d-none');
+            document.getElementById('errorState').classList.remove('d-none');
+            document.getElementById('errorMessage').textContent = 'Terjadi kesalahan saat mengambil data';
         });
 }
 

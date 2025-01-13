@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
+use App\Models\AtributTambahan;
 
 
 
@@ -269,7 +270,8 @@ class AplikasiController extends Controller
 
             return response()->json($detailData);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Aplikasi tidak ditemukan'], 404);
+            info('Error di detail: ' . $e->getMessage());
+            return response()->json(['error' => 'Data tidak ditemukan'], 404);
         }
     }
 
@@ -279,39 +281,21 @@ class AplikasiController extends Controller
     public function detail($nama)
     {
         try {
-            // Ambil data aplikasi beserta atribut tambahannya
-            $aplikasi = Aplikasi::where('nama', $nama)
-                ->with('atributTambahans')  // Pastikan ini ada
-                ->firstOrFail();
-
-            // Siapkan response dengan format yang sesuai
-            $response = [
-                'id_aplikasi' => $aplikasi->id_aplikasi,
-                'nama' => $aplikasi->nama,
-                'opd' => $aplikasi->opd,
-                'uraian' => $aplikasi->uraian,
-                'tahun_pembuatan' => $aplikasi->tahun_pembuatan,
-                'jenis' => $aplikasi->jenis,
-                'basis_aplikasi' => $aplikasi->basis_aplikasi,
-                'bahasa_framework' => $aplikasi->bahasa_framework,
-                'database' => $aplikasi->database,
-                'pengembang' => $aplikasi->pengembang,
-                'lokasi_server' => $aplikasi->lokasi_server,
-                'status_pemakaian' => $aplikasi->status_pemakaian,
-                'atribut' => $aplikasi->atributTambahans->map(function($atribut) {
-                    return [
-                        'nama_atribut' => $atribut->nama_atribut,
-                        'nilai_atribut' => $atribut->nilai_atribut
-                    ];
-                })
-            ];
-
-            Log::info('Data yang dikirim:', $response);
+            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+            // Debug
+            info('ID Aplikasi: ' . $aplikasi->id_aplikasi);
             
-            return response()->json($response);
+            $atribut = AtributTambahan::where('id_aplikasi', $aplikasi->id_aplikasi)->get();
+            // Debug
+            info('Atribut: ' . $atribut);
+
+            return response()->json([
+                'aplikasi' => $aplikasi,
+                'atribut' => $atribut
+            ]);
         } catch (\Exception $e) {
-            Log::error('Error saat mengambil detail:', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Terjadi kesalahan saat mengambil data'], 500);
+            info('Error di detail: ' . $e->getMessage());
+            return response()->json(['error' => 'Data tidak ditemukan'], 404);
         }
     }
 }

@@ -26,7 +26,7 @@ class Aplikasi extends Model
         'status_pemakaian'
     ];
 
-    public function atributs()
+    public function atributTambahan()
     {
         return $this->hasMany(AtributTambahan::class, 'id_aplikasi', 'id_aplikasi');
     }
