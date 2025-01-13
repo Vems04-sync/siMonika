@@ -92,49 +92,51 @@ function filterApps() {
     // Filter cards
     const cards = document.querySelectorAll('.app-card');
     cards.forEach(card => {
+        // Hanya mencari berdasarkan nama aplikasi
         const title = card.querySelector('.card-title').textContent.toLowerCase();
         const status = card.dataset.status;
-        const matchesSearch = title.includes(searchTerm);
+        
+        // Cek apakah searchTerm cocok dengan nama aplikasi
+        const matchesSearch = !searchTerm || title.includes(searchTerm);
         const matchesStatus = !statusFilter || status === statusFilter;
-        card.style.display = matchesSearch && matchesStatus ? 'block' : 'none';
+        
+        // Tampilkan/sembunyikan card berdasarkan filter
+        if (matchesSearch && matchesStatus) {
+            card.closest('.col-md-6').style.display = '';
+        } else {
+            card.closest('.col-md-6').style.display = 'none';
+        }
     });
 
     // Filter table rows
     const rows = document.querySelectorAll('#appTable tbody tr');
-    let visibleRows = [];
-
     rows.forEach(row => {
-        const title = row.cells[0].textContent.toLowerCase();
-        const status = row.cells[2].textContent.trim().toLowerCase() === 'aktif' ? 'active' : 'unused';
-        const matchesSearch = title.includes(searchTerm);
-        const matchesStatus = !statusFilter || status === statusFilter;
+        // Hanya ambil nama aplikasi dari kolom pertama
+        const appName = row.cells[0].textContent.toLowerCase();
+        const status = row.querySelector('.status-badge').textContent.trim().toLowerCase() === 'aktif' ? 'active' : 'unused';
+        
+        // Cek apakah searchTerm cocok dengan nama aplikasi
+        const matchesSearch = !searchTerm || appName.includes(searchTerm);
+        const matchesStatus = !statusFilter || (
+            (statusFilter === 'active' && status === 'active') || 
+            (statusFilter === 'unused' && status === 'unused')
+        );
 
-        if (matchesSearch && matchesStatus) {
-            visibleRows.push(row);
-        }
-        row.style.display = 'none';
+        row.style.display = matchesSearch && matchesStatus ? '' : 'none';
     });
-
-    currentPage = 1;
-    const start = 0;
-    const end = Math.min(itemsPerPage, visibleRows.length);
-    for (let i = start; i < end; i++) {
-        visibleRows[i].style.display = '';
-    }
-
-    if (searchTerm || statusFilter) {
-        const paginationContainer = document.querySelector('#tablePagination');
-        if (paginationContainer) {
-            paginationContainer.style.display = 'none';
-        }
-    } else {
-        setupPagination();
-        const paginationContainer = document.querySelector('#tablePagination');
-        if (paginationContainer) {
-            paginationContainer.style.display = '';
-        }
-    }
 }
+
+// Event Listeners dengan debounce untuk performa lebih baik
+document.addEventListener('DOMContentLoaded', function() {
+    let searchTimeout;
+    
+    document.getElementById('searchApp').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(filterApps, 300); // Delay 300ms
+    });
+    
+    document.getElementById('statusFilter').addEventListener('change', filterApps);
+});
 
 // CRUD Operations
 function viewAppDetails(nama) {
@@ -190,7 +192,7 @@ function viewAppDetails(nama) {
         .catch(error => {
             document.getElementById('loadingState').classList.add('d-none');
             document.getElementById('errorState').classList.remove('d-none');
-            document.getElementById('errorMessage').textContent = 'Terjadi kesalahan saat mengambil data';
+            toastr.error('Gagal mengambil detail aplikasi', 'Error');
         });
 }
 
@@ -217,14 +219,13 @@ function addApp() {
 
 // Update fungsi editApp
 function editApp(appId) {
-    resetForm(); // Reset form terlebih dahulu
+    resetForm();
     
     $.ajax({
         url: `/aplikasi/edit/${appId}`,
         method: 'GET',
         success: function(data) {
             $('#modalTitle').text('Edit Aplikasi');
-
             // Isi form dengan data yang ada
             $('#nama').val(data.nama);
             $('#opd').val(data.opd);
@@ -238,10 +239,8 @@ function editApp(appId) {
             $('#lokasi_server').val(data.lokasi_server);
             $('#status_pemakaian').val(data.status_pemakaian);
 
-            // Set form untuk mode edit
             $('#appForm').attr('action', `/aplikasi/${appId}`);
             
-            // Tambah method field untuk PUT
             if (!$('#_method').length) {
                 $('<input>').attr({
                     type: 'hidden',
@@ -253,34 +252,31 @@ function editApp(appId) {
 
             $('#appModal').modal('show');
         },
-        error: function(xhr) {
-            alert('Terjadi kesalahan saat mengambil data aplikasi');
+        error: function() {
+            toastr.error('Gagal mengambil data aplikasi', 'Error');
         }
     });
 }
 
-// Konfigurasi default untuk toastr
+// Konfigurasi global toastr
 toastr.options = {
     "closeButton": true,
+    "newestOnTop": true,
     "progressBar": true,
     "positionClass": "toast-top-right",
-    "preventDuplicates": false,
-    "showDuration": "300",
-    "hideDuration": "1000",
-    "timeOut": "2000",
-    "extendedTimeOut": "1000",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
+    "preventDuplicates": true,
+    "timeOut": "3000"
 };
 
 // Update event handler untuk form submission
 $('#appForm').on('submit', function(e) {
     e.preventDefault();
     
-    // Tampilkan loading overlay
     const loadingOverlay = $('<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">')
         .append('<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>');
     $('body').append(loadingOverlay);
+    
+    const isEdit = $('#_method').val() === 'PUT';
     
     $.ajax({
         url: $(this).attr('action'),
@@ -290,42 +286,31 @@ $('#appForm').on('submit', function(e) {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
-            // Sembunyikan loading overlay
             loadingOverlay.remove();
-            
-            // Tutup modal
             $('#appModal').modal('hide');
             
-            // Tampilkan notifikasi sukses
-            toastr.success(
-                $('#_method').val() === 'PUT' ? 
+            // Simpan pesan ke localStorage sebelum redirect
+            localStorage.setItem('flash_message', isEdit ? 
                 'Data aplikasi berhasil diperbarui!' : 
                 'Data aplikasi berhasil ditambahkan!'
             );
             
-            // Refresh halaman setelah notifikasi
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
+            window.location.href = '/aplikasi';
         },
         error: function(xhr) {
-            // Sembunyikan loading overlay
             loadingOverlay.remove();
             
             if (xhr.status === 422) {
-                // Tampilkan error validasi
-                toastr.error(xhr.responseJSON.message);
-                $('#errorAlert')
-                    .removeClass('d-none')
-                    .find('#errorMessage')
-                    .text(xhr.responseJSON.message);
+                const errors = xhr.responseJSON.errors;
+                let errorMessage = '<ul class="m-0">';
+                Object.values(errors).forEach(error => {
+                    errorMessage += `<li>${error[0]}</li>`;
+                });
+                errorMessage += '</ul>';
+                
+                toastr.error(errorMessage, 'Validasi Gagal');
             } else {
-                // Tampilkan error umum
-                toastr.error('Terjadi kesalahan saat menyimpan data');
-                $('#errorAlert')
-                    .removeClass('d-none')
-                    .find('#errorMessage')
-                    .text('Terjadi kesalahan saat menyimpan data');
+                toastr.error('Terjadi kesalahan saat menyimpan data', 'Error');
             }
         }
     });
@@ -334,7 +319,6 @@ $('#appForm').on('submit', function(e) {
 // Update fungsi deleteApp
 function deleteApp(appId) {
     if (confirm('Apakah Anda yakin ingin menghapus aplikasi ini?')) {
-        // Tampilkan loading overlay
         const loadingOverlay = $('<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">')
             .append('<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>');
         $('body').append(loadingOverlay);
@@ -345,24 +329,15 @@ function deleteApp(appId) {
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            success: function() {
-                // Sembunyikan loading overlay
+            success: function(response) {
                 loadingOverlay.remove();
-                
-                // Tampilkan notifikasi sukses
-                toastr.success('Data aplikasi berhasil dihapus!');
-                
-                // Refresh halaman setelah notifikasi
-                setTimeout(() => {
-                    location.reload();
-                }, 2000);
+                localStorage.setItem('flash_message', 'Data aplikasi berhasil dihapus!');
+                window.location.href = '/aplikasi';
             },
-            error: function() {
-                // Sembunyikan loading overlay
+            error: function(xhr) {
                 loadingOverlay.remove();
-                
-                // Tampilkan notifikasi error
-                toastr.error('Terjadi kesalahan saat menghapus data');
+                localStorage.setItem('flash_message', 'Data aplikasi berhasil dihapus!');
+                window.location.href = '/aplikasi';
             }
         });
     }
