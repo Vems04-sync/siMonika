@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AtributController;
+use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboard;
 
 // Route untuk guest (belum login)
 Route::middleware(['guest', 'throttle:6,1'])->group(function () {
@@ -48,6 +49,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/aplikasi/detail/{nama}', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
 
     Route::get('/last-update', [DashboardController::class, 'getLastUpdate'])->name('last.update');
+
+    // Route untuk Super Admin (tanpa middleware di route)
+    Route::get('/super-admin/dashboard', [SuperAdminDashboard::class, 'index'])
+         ->name('super-admin.dashboard');
 });
 
 // Route untuk admin
@@ -61,12 +66,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::delete('/{admin}', [AdminController::class, 'destroy'])->name('admin.destroy');
 });
 
-// Route khusus super admin
-Route::middleware(['auth', 'super_admin'])->group(function () {
-    Route::get('/super-admin/dashboard', function () {
-        return view('super-admin.dashboard');
-    })->name('super-admin.dashboard');
-});
 // Route untuk login
 Route::get('/login', function () {
     return view('auth.login');
