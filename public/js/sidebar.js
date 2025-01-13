@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function toggleSidebar() {
         sidebar.classList.toggle("show");
         overlay.classList.toggle("active");
-        
+
         // Hapus pengaturan margin untuk main content
         // agar konten tidak bergeser saat sidebar muncul
         mainContent.style.marginLeft = "0";
