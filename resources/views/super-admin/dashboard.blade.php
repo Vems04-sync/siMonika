@@ -52,9 +52,12 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Log Aktivitas Admin</h5>
                 <div>
-                    <button class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-download"></i> Export Log
-                    </button>
+                    <form action="{{ route('super-admin.log.export') }}" method="GET" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-download"></i> Export Log
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -73,7 +76,7 @@
                     <tbody>
                         @forelse($log_aktivitas as $log)
                         <tr>
-                            <td>{{ $log->created_at->format('d/m/Y H:i') }}</td>
+                            <td>{{ $log->created_at->setTimezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB</td>
                             <td>{{ $log->user->nama }}</td>
                             <td>
                                 <span class="badge bg-{{ $log->tipe_aktivitas === 'create' ? 'success' : ($log->tipe_aktivitas === 'update' ? 'warning' : 'danger') }}">

@@ -72,3 +72,8 @@ Route::get('/login', function () {
 })->name('login');
 
 Route::resource('atribut', AtributController::class);
+
+Route::get('/super-admin/log/export', [App\Http\Controllers\SuperAdmin\LogAktivitasController::class, 'export'])
+    ->name('super-admin.log.export')
+    ->middleware('auth')
+    ->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin');
