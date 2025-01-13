@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
 use App\Models\AtributTambahan;
 use App\Traits\CatatAktivitas;
+use App\Models\LogAktivitas;
+use Illuminate\Support\Facades\Auth;
 
 class AplikasiController extends Controller
 {
@@ -247,26 +249,22 @@ class AplikasiController extends Controller
     {
         try {
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+            $oldStatus = $aplikasi->status_pemakaian;
+            
+            $aplikasi->update($request->all());
 
-            $validatedData = $request->validate([
-                'nama' => 'required',
-                'opd' => 'required',
-                'uraian' => 'nullable',
-                'tahun_pembuatan' => 'nullable|date',
-                'jenis' => 'required',
-                'basis_aplikasi' => 'required',
-                'bahasa_framework' => 'required',
-                'database' => 'required',
-                'pengembang' => 'required',
-                'lokasi_server' => 'required',
-                'status_pemakaian' => 'required'
+            LogAktivitas::create([
+                'user_id' => Auth::user()->id_user,
+                'aktivitas' => 'Update Aplikasi',
+                'tipe_aktivitas' => 'update',
+                'modul' => 'aplikasi',
+                'detail' => "Mengubah status aplikasi {$nama} dari {$oldStatus} menjadi {$request->status_pemakaian}"
             ]);
 
-            $aplikasi->update($validatedData);
             return redirect()->route('aplikasi.index')
-                ->with('success', 'Aplikasi berhasil diperbarui.');
+                ->with('success', 'Aplikasi berhasil diperbarui');
         } catch (\Exception $e) {
-            return redirect()->route('aplikasi.index')
+            return redirect()->back()
                 ->with('error', 'Gagal memperbarui aplikasi: ' . $e->getMessage());
         }
     }
