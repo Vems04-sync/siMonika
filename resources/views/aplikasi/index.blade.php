@@ -13,6 +13,21 @@
         rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    
+    <style>
+        /* Custom style untuk toastr */
+        .toast-success {
+            background-color: #51A351;
+        }
+        .toast-error {
+            background-color: #BD362F;
+        }
+        .toast {
+            opacity: 1 !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -45,7 +60,7 @@
                 <!-- Toggle View Button -->
                 <button class="btn btn-outline-secondary me-2" id="toggleView">
                     <i class="bi bi-grid"></i>
-                    <span class="me-2">Ubah Tampilan</span>
+                    <span>Ubah Tampilan</span>
                 </button>
                 <!-- Button Export Excel -->
                 <a href="{{ route('aplikasi.export') }}" class="btn btn-outline-primary">
@@ -310,13 +325,13 @@
 
     <!-- Modal Detail -->
     <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalTitle" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="detailModalTitle">Detail Aplikasi</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body py-4">
                     <!-- Add loading state -->
                     <div id="loadingState" class="text-center d-none">
                         <div class="spinner-border text-primary" role="status">
@@ -332,44 +347,54 @@
 
                     <!-- Content state -->
                     <div id="contentState">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <tbody id="detailTable">
-                                    <!-- Data aplikasi akan diisi secara dinamis -->
-                                </tbody>
-                            </table>
-
-                            <h6 class="mt-4 mb-3">Atribut Tambahan</h6>
-                            <div id="atributContent">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama Atribut</th>
-                                            <th>Nilai</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="atributTable">
-                                        <!-- Atribut akan diisi secara dinamis -->
-                                    </tbody>
-                                </table>
+                        <div class="row">
+                            <!-- Detail Aplikasi - Sisi Kiri -->
+                            <div class="col-md-7">
+                                <h6 class="mb-3 small fw-bold">Informasi Aplikasi</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm small align-middle">
+                                        <tbody id="detailTable" class="small">
+                                            <!-- Data aplikasi akan diisi secara dinamis -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            <div id="noAtributMessage" class="text-muted text-center p-3 d-none">
-                                <i class="bi bi-info-circle me-2"></i>Tidak ada atribut tambahan
+
+                            <!-- Atribut Tambahan - Sisi Kanan -->
+                            <div class="col-md-5">
+                                <h6 class="mb-3 small fw-bold">Atribut Tambahan</h6>
+                                <div id="atributContent">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-sm small align-middle">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">Nama Atribut</th>
+                                                    <th class="text-center">Nilai</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="atributTable" class="small">
+                                                <!-- Atribut akan diisi secara dinamis -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div id="noAtributMessage" class="text-muted text-center p-2 small">
+                                    <i class="bi bi-info-circle me-2"></i>Tidak ada atribut tambahan
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/sidebar.js') }}"></script>
     <script src="{{ asset('js/aplikasi/index.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </body>
 
 </html>

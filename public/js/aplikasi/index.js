@@ -194,78 +194,177 @@ function viewAppDetails(nama) {
         });
 }
 
+// Fungsi untuk reset form
+function resetForm() {
+    const form = $('#appForm');
+    form[0].reset();
+    form.attr('action', '/aplikasi');
+    
+    // Hapus input method jika ada
+    $('#_method').remove();
+    
+    // Reset error alert jika ada
+    $('#errorAlert').addClass('d-none');
+}
+
+// Update fungsi addApp
 function addApp() {
-    document.getElementById('modalTitle').textContent = 'Tambah Aplikasi';
-    const modal = new bootstrap.Modal(document.getElementById('appModal'));
-    modal.show();
+    resetForm(); // Reset form terlebih dahulu
+    $('#modalTitle').text('Tambah Aplikasi');
+    $('#appForm').attr('action', '/aplikasi');
+    $('#appModal').modal('show');
 }
 
+// Update fungsi editApp
 function editApp(appId) {
-    fetch(`/aplikasi/edit/${appId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Aplikasi tidak ditemukan');
+    resetForm(); // Reset form terlebih dahulu
+    
+    $.ajax({
+        url: `/aplikasi/edit/${appId}`,
+        method: 'GET',
+        success: function(data) {
+            $('#modalTitle').text('Edit Aplikasi');
+
+            // Isi form dengan data yang ada
+            $('#nama').val(data.nama);
+            $('#opd').val(data.opd);
+            $('#uraian').val(data.uraian || '');
+            $('#tahun_pembuatan').val(data.tahun_pembuatan || '');
+            $('#jenis').val(data.jenis);
+            $('#basis_aplikasi').val(data.basis_aplikasi);
+            $('#bahasa_framework').val(data.bahasa_framework);
+            $('#database').val(data.database);
+            $('#pengembang').val(data.pengembang);
+            $('#lokasi_server').val(data.lokasi_server);
+            $('#status_pemakaian').val(data.status_pemakaian);
+
+            // Set form untuk mode edit
+            $('#appForm').attr('action', `/aplikasi/${appId}`);
+            
+            // Tambah method field untuk PUT
+            if (!$('#_method').length) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: '_method',
+                    id: '_method',
+                    value: 'PUT'
+                }).appendTo('#appForm');
             }
-            return response.json();
-        })
-        .then(data => {
-            document.getElementById('modalTitle').textContent = 'Edit Aplikasi';
 
-            document.getElementById('nama').value = data.nama;
-            document.getElementById('opd').value = data.opd;
-            document.getElementById('uraian').value = data.uraian;
-            document.getElementById('tahun_pembuatan').value = data.tahun_pembuatan;
-            document.getElementById('jenis').value = data.jenis;
-            document.getElementById('basis_aplikasi').value = data.basis_aplikasi;
-            document.getElementById('bahasa_framework').value = data.bahasa_framework;
-            document.getElementById('database').value = data.database;
-            document.getElementById('pengembang').value = data.pengembang;
-            document.getElementById('lokasi_server').value = data.lokasi_server;
-            document.getElementById('status_pemakaian').value = data.status_pemakaian;
-
-            const form = document.getElementById('appForm');
-            form.action = `/aplikasi/${appId}`;
-            form.method = 'POST';
-
-            let methodField = document.getElementById('_method');
-            if (!methodField) {
-                methodField = document.createElement('input');
-                methodField.type = 'hidden';
-                methodField.name = '_method';
-                methodField.id = '_method';
-                form.appendChild(methodField);
-            }
-            methodField.value = 'PUT';
-
-            const modal = new bootstrap.Modal(document.getElementById('appModal'));
-            modal.show();
-        })
-        .catch(error => {
-            console.error('Error:', error);
+            $('#appModal').modal('show');
+        },
+        error: function(xhr) {
             alert('Terjadi kesalahan saat mengambil data aplikasi');
-        });
+        }
+    });
 }
 
+// Konfigurasi default untuk toastr
+toastr.options = {
+    "closeButton": true,
+    "progressBar": true,
+    "positionClass": "toast-top-right",
+    "preventDuplicates": false,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "2000",
+    "extendedTimeOut": "1000",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+};
+
+// Update event handler untuk form submission
+$('#appForm').on('submit', function(e) {
+    e.preventDefault();
+    
+    // Tampilkan loading overlay
+    const loadingOverlay = $('<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">')
+        .append('<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>');
+    $('body').append(loadingOverlay);
+    
+    $.ajax({
+        url: $(this).attr('action'),
+        method: 'POST',
+        data: $(this).serialize(),
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            // Sembunyikan loading overlay
+            loadingOverlay.remove();
+            
+            // Tutup modal
+            $('#appModal').modal('hide');
+            
+            // Tampilkan notifikasi sukses
+            toastr.success(
+                $('#_method').val() === 'PUT' ? 
+                'Data aplikasi berhasil diperbarui!' : 
+                'Data aplikasi berhasil ditambahkan!'
+            );
+            
+            // Refresh halaman setelah notifikasi
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        },
+        error: function(xhr) {
+            // Sembunyikan loading overlay
+            loadingOverlay.remove();
+            
+            if (xhr.status === 422) {
+                // Tampilkan error validasi
+                toastr.error(xhr.responseJSON.message);
+                $('#errorAlert')
+                    .removeClass('d-none')
+                    .find('#errorMessage')
+                    .text(xhr.responseJSON.message);
+            } else {
+                // Tampilkan error umum
+                toastr.error('Terjadi kesalahan saat menyimpan data');
+                $('#errorAlert')
+                    .removeClass('d-none')
+                    .find('#errorMessage')
+                    .text('Terjadi kesalahan saat menyimpan data');
+            }
+        }
+    });
+});
+
+// Update fungsi deleteApp
 function deleteApp(appId) {
     if (confirm('Apakah Anda yakin ingin menghapus aplikasi ini?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/aplikasi/delete/${appId}`;
+        // Tampilkan loading overlay
+        const loadingOverlay = $('<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">')
+            .append('<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>');
+        $('body').append(loadingOverlay);
 
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = document.querySelector('meta[name="csrf-token"]').content;
-
-        const methodField = document.createElement('input');
-        methodField.type = 'hidden';
-        methodField.name = '_method';
-        methodField.value = 'DELETE';
-
-        form.appendChild(csrfToken);
-        form.appendChild(methodField);
-        document.body.appendChild(form);
-        form.submit();
+        $.ajax({
+            url: `/aplikasi/delete/${appId}`,
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function() {
+                // Sembunyikan loading overlay
+                loadingOverlay.remove();
+                
+                // Tampilkan notifikasi sukses
+                toastr.success('Data aplikasi berhasil dihapus!');
+                
+                // Refresh halaman setelah notifikasi
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            },
+            error: function() {
+                // Sembunyikan loading overlay
+                loadingOverlay.remove();
+                
+                // Tampilkan notifikasi error
+                toastr.error('Terjadi kesalahan saat menghapus data');
+            }
+        });
     }
 }
 
@@ -278,4 +377,9 @@ document.addEventListener('DOMContentLoaded', function() {
         setupPagination();
         showTablePage();
     }
+});
+
+// Reset form saat modal ditutup
+$('#appModal').on('hidden.bs.modal', function () {
+    resetForm();
 }); 

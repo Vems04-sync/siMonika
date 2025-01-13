@@ -10,6 +10,17 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <!-- Tambahkan CSS Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <style>
+        .select2-container--bootstrap-5 .select2-selection {
+            min-height: 38px;
+        }
+        .select2-container--bootstrap-5 .select2-selection--single {
+            padding: 0.375rem 0.75rem;
+        }
+    </style>
 </head>
 
 <body>
@@ -135,7 +146,7 @@
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label">Aplikasi</label>
-                                <select name="id_aplikasi" class="form-select" required>
+                                <select name="id_aplikasi" class="form-select select2" required>
                                     <option value="">Pilih Aplikasi</option>
                                     @foreach($aplikasis as $aplikasi)
                                     <option value="{{ $aplikasi->id_aplikasi }}">{{ $aplikasi->nama }}</option>
@@ -182,7 +193,8 @@
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label">Aplikasi</label>
-                                <select name="id_aplikasi" class="form-select" required>
+                                <select name="id_aplikasi" class="form-select select2" required>
+                                    <option value="">Pilih Aplikasi</option>
                                     @foreach($aplikasis as $aplikasi)
                                     <option value="{{ $aplikasi->id_aplikasi }}">{{ $aplikasi->nama }}</option>
                                     @endforeach
@@ -214,6 +226,8 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('js/sidebar.js') }}"></script>
     <script src="{{ asset('js/atribut/index.js') }}"></script>
 </body>
