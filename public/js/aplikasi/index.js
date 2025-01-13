@@ -268,6 +268,20 @@ toastr.options = {
     "timeOut": "3000"
 };
 
+// Fungsi untuk menampilkan flash message
+function showFlashMessages() {
+    const flashMessage = localStorage.getItem('flash_message');
+    if (flashMessage) {
+        toastr.success(flashMessage, "Berhasil");
+        localStorage.removeItem('flash_message');
+    }
+}
+
+// Panggil fungsi saat dokumen siap
+document.addEventListener('DOMContentLoaded', function() {
+    showFlashMessages();
+});
+
 // Update event handler untuk form submission
 $('#appForm').on('submit', function(e) {
     e.preventDefault();
@@ -331,12 +345,12 @@ function deleteApp(appId) {
             },
             success: function(response) {
                 loadingOverlay.remove();
-                localStorage.setItem('flash_message', 'Data aplikasi berhasil dihapus!');
+                // Langsung redirect tanpa menyimpan ke localStorage
                 window.location.href = '/aplikasi';
             },
             error: function(xhr) {
                 loadingOverlay.remove();
-                localStorage.setItem('flash_message', 'Data aplikasi berhasil dihapus!');
+                // Langsung redirect tanpa menyimpan ke localStorage
                 window.location.href = '/aplikasi';
             }
         });

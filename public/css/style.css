@@ -377,3 +377,15 @@ body {
     border: 2px solid #fff;
     border-radius: 50%;
 }
+
+/* Toastr Custom Styles */
+#toast-container > div {
+    opacity: 1 !important;
+}
+
+.toast-success,
+.toast-error,
+.toast-warning,
+.toast-info {
+    opacity: 1 !important;
+}
