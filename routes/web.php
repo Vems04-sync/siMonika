@@ -36,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/aplikasi', [AplikasiController::class, 'store'])->name('aplikasi.store');
     Route::get('/aplikasi/edit/{nama}', [AplikasiController::class, 'editByNama'])->name('aplikasi.editByNama');
     Route::put('/aplikasi/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
+    Route::put('/aplikasi/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
     Route::delete('/aplikasi/delete/{nama}', [AplikasiController::class, 'destroyByNama'])->name('aplikasi.destroyByNama');
 
     Route::get('/chart-data', [AplikasiController::class, 'getChartData']);
