@@ -52,7 +52,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Route untuk Super Admin (tanpa middleware di route)
     Route::get('/super-admin/dashboard', [SuperAdminDashboard::class, 'index'])
-         ->name('super-admin.dashboard');
+        ->name('super-admin.dashboard');
 });
 
 // Route untuk admin
@@ -77,5 +77,3 @@ Route::get('/super-admin/log/export', [App\Http\Controllers\SuperAdmin\LogAktivi
     ->name('super-admin.log.export')
     ->middleware('auth')
     ->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin');
-
-    
