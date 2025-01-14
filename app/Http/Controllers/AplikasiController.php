@@ -97,37 +97,55 @@ class AplikasiController extends Controller
     {
         try {
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-            
-            // Validasi
-            $request->validate([
-                'nama' => [
-                    'required',
-                    Rule::unique('aplikasis', 'nama')->ignore($aplikasi->id_aplikasi, 'id_aplikasi')
-                ],
-                'opd' => 'required',
-                'jenis' => 'required',
-                'basis_aplikasi' => 'required',
-                'bahasa_framework' => 'required',
-                'database' => 'required',
-                'pengembang' => 'required',
-                'lokasi_server' => 'required',
-                'status_pemakaian' => 'required'
+            $oldData = $aplikasi->toArray();
+
+            $validated = $request->validate([
+                'nama' => 'required|string|max:255|unique:aplikasis,nama,' . $aplikasi->id_aplikasi . ',id_aplikasi',
+                'opd' => 'required|string|max:255',
+                'uraian' => 'nullable|string',
+                'tahun_pembuatan' => 'required|date',
+                'jenis' => 'required|string|max:255',
+                'basis_aplikasi' => 'required|string|max:255',
+                'bahasa_framework' => 'required|string|max:255',
+                'database' => 'required|string|max:255',
+                'pengembang' => 'required|string|max:255',
+                'lokasi_server' => 'required|string|max:255',
+                'status_pemakaian' => 'required|string|max:255'
             ]);
 
-            $aplikasi->update($request->all());
+            $aplikasi->update($validated);
 
-            $this->catatAktivitas(
-                'Mengupdate aplikasi',
-                'update',
-                'aplikasi',
-                'Mengupdate aplikasi: ' . $nama . ' menjadi ' . $request->nama
-            );
+            // Catat perubahan untuk setiap kolom
+            $changes = [];
+            foreach ($validated as $field => $newValue) {
+                if ($oldData[$field] != $newValue) {
+                    $fieldName = $this->getFieldLabel($field);
+                    $changes[] = "{$fieldName} dari '{$oldData[$field]}' menjadi '{$newValue}'";
+                }
+            }
 
-            return response()->json(['success' => true]);
+            if (!empty($changes)) {
+                LogAktivitas::create([
+                    'user_id' => Auth::id(),
+                    'aktivitas' => 'Update Aplikasi',
+                    'tipe_aktivitas' => 'update',
+                    'modul' => 'Aplikasi',
+                    'detail' => "Mengubah data aplikasi {$oldData['nama']}: " . implode(', ', $changes)
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Aplikasi berhasil diupdate'
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Gagal mengupdate aplikasi: ' . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupdate aplikasi: ' . $e->getMessage()
+            ], 500);
         }
     }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -150,20 +168,28 @@ class AplikasiController extends Controller
     {
         try {
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+            $namaAplikasi = $aplikasi->nama;
+
             $aplikasi->delete();
 
-            $this->catatAktivitas(
-                'Menghapus aplikasi',
-                'delete',
-                'aplikasi',
-                'Menghapus aplikasi: ' . $nama
-            );
+            // Catat aktivitas penghapusan
+            LogAktivitas::create([
+                'user_id' => Auth::id(),
+                'aktivitas' => 'Hapus Aplikasi',
+                'tipe_aktivitas' => 'delete',
+                'modul' => 'Aplikasi',
+                'detail' => "Menghapus aplikasi '{$namaAplikasi}'"
+            ]);
 
-            return redirect()->route('aplikasi.index')
-                ->with('success', 'Aplikasi berhasil dihapus.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Aplikasi berhasil dihapus'
+            ]);
         } catch (\Exception $e) {
-            return redirect()->route('aplikasi.index')
-                ->with('error', 'Gagal menghapus aplikasi: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus aplikasi: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -174,14 +200,14 @@ class AplikasiController extends Controller
     {
         try {
             Log::info('Starting export process');
-            
+
             // Cek apakah ada data
             $count = Aplikasi::count();
             Log::info("Found {$count} records to export");
-            
+
             $export = new AplikasiExport();
             Log::info('AplikasiExport instance created');
-            
+
             return Excel::download($export, 'aplikasi.xlsx');
         } catch (\Exception $e) {
             Log::error('Export error details: ' . $e->getMessage());
@@ -253,7 +279,7 @@ class AplikasiController extends Controller
         try {
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
             $oldStatus = $aplikasi->status_pemakaian;
-            
+
             $aplikasi->update($request->all());
 
             LogAktivitas::create([
@@ -309,7 +335,7 @@ class AplikasiController extends Controller
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
             // Debug
             info('ID Aplikasi: ' . $aplikasi->id_aplikasi);
-            
+
             $atribut = AtributTambahan::where('id_aplikasi', $aplikasi->id_aplikasi)->get();
             // Debug
             info('Atribut: ' . $atribut);
@@ -322,5 +348,25 @@ class AplikasiController extends Controller
             info('Error di detail: ' . $e->getMessage());
             return response()->json(['error' => 'Data tidak ditemukan'], 404);
         }
+    }
+
+    // Fungsi helper untuk label field yang lebih mudah dibaca
+    private function getFieldLabel($field)
+    {
+        $labels = [
+            'nama' => 'Nama',
+            'opd' => 'OPD',
+            'uraian' => 'Uraian',
+            'tahun_pembuatan' => 'Tahun Pembuatan',
+            'jenis' => 'Jenis',
+            'basis_aplikasi' => 'Basis Aplikasi',
+            'bahasa_framework' => 'Bahasa/Framework',
+            'database' => 'Database',
+            'pengembang' => 'Pengembang',
+            'lokasi_server' => 'Lokasi Server',
+            'status_pemakaian' => 'Status Pemakaian'
+        ];
+
+        return $labels[$field] ?? $field;
     }
 }
