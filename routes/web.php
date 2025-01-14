@@ -36,7 +36,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/aplikasi', [AplikasiController::class, 'store'])->name('aplikasi.store');
     Route::get('/aplikasi/edit/{nama}', [AplikasiController::class, 'editByNama'])->name('aplikasi.editByNama');
     Route::put('/aplikasi/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
-    Route::put('/aplikasi/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
     Route::delete('/aplikasi/delete/{nama}', [AplikasiController::class, 'destroyByNama'])->name('aplikasi.destroyByNama');
 
     Route::get('/chart-data', [AplikasiController::class, 'getChartData']);
@@ -79,7 +78,7 @@ Route::get('/super-admin/log/export', [App\Http\Controllers\SuperAdmin\LogAktivi
     ->middleware('auth')
     ->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin');
 
-// Add these routes with your other auth routes
+// Tambahkan route forgot password dari branch baru
 Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])
     ->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
