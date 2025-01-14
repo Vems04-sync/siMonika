@@ -19,30 +19,36 @@ class AtributController extends Controller
     public function store(Request $request)
     {
         try {
+            // Cek duplikasi secara manual
+            $exists = AtributTambahan::where('id_aplikasi', $request->id_aplikasi)
+                ->where('nama_atribut', $request->nama_atribut)
+                ->exists();
+            
+            if ($exists) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Atribut ini sudah ada untuk aplikasi yang dipilih'
+                ], 422);
+            }
+
             $request->validate([
                 'id_aplikasi' => 'required|exists:aplikasis,id_aplikasi',
-                'nama_atribut' => [
-                    'required',
-                    'string',
-                    'max:100',
-                    Rule::unique('atribut_tambahans')
-                        ->where(function ($query) use ($request) {
-                            return $query->where('id_aplikasi', $request->id_aplikasi)
-                                        ->where('nama_atribut', $request->nama_atribut);
-                        })
-                ],
+                'nama_atribut' => 'required|string|max:100',
                 'nilai_atribut' => 'nullable|string'
-            ], [
-                'nama_atribut.unique' => 'Atribut ini sudah ada untuk aplikasi yang dipilih'
             ]);
 
             AtributTambahan::create($request->all());
 
-            return redirect()->route('atribut.index')
-                ->with('success', 'Atribut berhasil ditambahkan');
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Atribut berhasil ditambahkan'
+            ]);
+
         } catch (\Exception $e) {
-            return redirect()->route('atribut.index')
-                ->with('error', 'Gagal menambahkan atribut: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menambahkan atribut: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -54,25 +60,57 @@ class AtributController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'id_aplikasi' => 'required|exists:aplikasis,id_aplikasi',
-            'nama_atribut' => 'required|string|max:100',
-            'nilai_atribut' => 'nullable|string'
-        ]);
+        try {
+            // Cek duplikasi secara manual, kecuali untuk record yang sedang diedit
+            $exists = AtributTambahan::where('id_aplikasi', $request->id_aplikasi)
+                ->where('nama_atribut', $request->nama_atribut)
+                ->where('id_atribut', '!=', $id)
+                ->exists();
+            
+            if ($exists) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Atribut ini sudah ada untuk aplikasi yang dipilih'
+                ], 422);
+            }
 
-        $atribut = AtributTambahan::findOrFail($id);
-        $atribut->update($request->all());
+            $request->validate([
+                'id_aplikasi' => 'required|exists:aplikasis,id_aplikasi',
+                'nama_atribut' => 'required|string|max:100',
+                'nilai_atribut' => 'nullable|string'
+            ]);
 
-        return redirect()->route('atribut.index')
-            ->with('success', 'Atribut berhasil diupdate');
+            $atribut = AtributTambahan::findOrFail($id);
+            $atribut->update($request->all());
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Atribut berhasil diperbarui'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal memperbarui atribut: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroy($id)
     {
-        $atribut = AtributTambahan::findOrFail($id);
-        $atribut->delete();
+        try {
+            $atribut = AtributTambahan::findOrFail($id);
+            $atribut->delete();
 
-        return redirect()->route('atribut.index')
-            ->with('success', 'Atribut berhasil dihapus');
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Atribut berhasil dihapus'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menghapus atribut: ' . $e->getMessage()
+            ], 500);
+        }
     }
 } 

@@ -96,8 +96,22 @@ class AplikasiController extends Controller
     public function update(Request $request, $nama)
     {
         try {
-            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+            // Decode URL encoded nama if needed
+            $decodedNama = urldecode($nama);
             
+            // Debug untuk melihat nama yang dicari
+            \Log::info('Mencoba mengupdate aplikasi: ' . $decodedNama);
+            
+            $aplikasi = Aplikasi::where('nama', $decodedNama)->first();
+            
+            if (!$aplikasi) {
+                \Log::error('Aplikasi tidak ditemukan: ' . $decodedNama);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Aplikasi tidak ditemukan'
+                ], 404);
+            }
+
             // Validasi
             $request->validate([
                 'nama' => [
@@ -120,28 +134,41 @@ class AplikasiController extends Controller
                 'Mengupdate aplikasi',
                 'update',
                 'aplikasi',
-                'Mengupdate aplikasi: ' . $nama . ' menjadi ' . $request->nama
+                'Mengupdate aplikasi: ' . $decodedNama . ' menjadi ' . $request->nama
             );
 
-            return response()->json(['success' => true]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Aplikasi berhasil diperbarui'
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Gagal mengupdate aplikasi: ' . $e->getMessage()], 500);
+            \Log::error('Error saat mengupdate aplikasi: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupdate aplikasi: ' . $e->getMessage()
+            ], 500);
         }
     }
     /**
      * Remove the specified resource from storage.
      */
-    // public function destroy(Aplikasi $aplikasi)
-    // {
-    //     try {
-    //         $aplikasi->delete();
-    //         return redirect()->route('aplikasi.index')
-    //             ->with('success', 'Aplikasi berhasil dihapus.');
-    //     } catch (\Exception $e) {
-    //         return redirect()->route('aplikasi.index')
-    //             ->with('error', 'Gagal menghapus aplikasi: ' . $e->getMessage());
-    //     }
-    // }
+    public function destroy($nama)
+    {
+        try {
+            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+            $aplikasi->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Aplikasi berhasil dihapus'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus aplikasi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
     /**
      * Remove the specified resource from storage by nama.
@@ -149,21 +176,44 @@ class AplikasiController extends Controller
     public function destroyByNama($nama)
     {
         try {
-            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-            $aplikasi->delete();
+            // Decode URL encoded nama if needed
+            $decodedNama = urldecode($nama);
+            
+            // Debug untuk melihat nama yang dicari
+            \Log::info('Mencoba menghapus aplikasi: ' . $decodedNama);
+            
+            $aplikasi = Aplikasi::where('nama', $decodedNama)->first();
+            
+            if (!$aplikasi) {
+                \Log::error('Aplikasi tidak ditemukan: ' . $decodedNama);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Aplikasi tidak ditemukan'
+                ], 404);
+            }
 
+            // Catat aktivitas sebelum menghapus
             $this->catatAktivitas(
                 'Menghapus aplikasi',
                 'delete',
                 'aplikasi',
-                'Menghapus aplikasi: ' . $nama
+                'Menghapus aplikasi: ' . $decodedNama
             );
 
-            return redirect()->route('aplikasi.index')
-                ->with('success', 'Aplikasi berhasil dihapus.');
+            // Hapus aplikasi
+            $aplikasi->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Aplikasi berhasil dihapus'
+            ]);
+
         } catch (\Exception $e) {
-            return redirect()->route('aplikasi.index')
-                ->with('error', 'Gagal menghapus aplikasi: ' . $e->getMessage());
+            \Log::error('Error saat menghapus aplikasi: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus aplikasi: ' . $e->getMessage()
+            ], 500);
         }
     }
 

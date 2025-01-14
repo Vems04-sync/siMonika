@@ -20,9 +20,20 @@
         .select2-container--bootstrap-5 .select2-selection--single {
             padding: 0.375rem 0.75rem;
         }
+        .is-invalid + .select2-container--bootstrap-5 .select2-selection,
+        .is-invalid.select2-selection {
+            border-color: #dc3545;
+        }
+        .is-invalid + .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+        .is-invalid + .select2-container--bootstrap-5.select2-container--open .select2-selection {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+        }
     </style>
     <!-- Tambahkan Toastr CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    <!-- Di bagian head, tambahkan CSS SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -78,12 +89,11 @@
                                         </button>
                                         <form action="{{ route('atribut.destroy', $atribut->id_atribut) }}" 
                                               method="POST" 
-                                              class="d-inline">
+                                              class="d-inline delete-form">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" 
-                                                    class="btn btn-danger btn-sm ms-1" 
-                                                    onclick="return confirm('Yakin ingin menghapus atribut ini?')">
+                                            <button type="button" 
+                                                    class="btn btn-danger btn-sm ms-1 delete-btn">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
@@ -115,21 +125,27 @@
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <form action="{{ route('atribut.store') }}" method="POST">
+                    <form action="{{ route('atribut.store') }}" method="POST" id="tambahAtributForm" novalidate>
                         @csrf
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label class="form-label">Aplikasi</label>
+                                <label class="form-label">Aplikasi <span class="text-danger">*</span></label>
                                 <select name="id_aplikasi" class="form-select select2" required>
                                     <option value="">Pilih Aplikasi</option>
                                     @foreach($aplikasis as $aplikasi)
                                     <option value="{{ $aplikasi->id_aplikasi }}">{{ $aplikasi->nama }}</option>
                                     @endforeach
                                 </select>
+                                <div class="invalid-feedback">
+                                    Silakan pilih aplikasi
+                                </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Nama Atribut</label>
+                                <label class="form-label">Nama Atribut <span class="text-danger">*</span></label>
                                 <input type="text" name="nama_atribut" class="form-control" required>
+                                <div class="invalid-feedback">
+                                    Nama atribut tidak boleh kosong
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Nilai Atribut</label>
@@ -161,22 +177,28 @@
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <form id="editAtributForm" method="POST">
+                    <form id="editAtributForm" method="POST" novalidate>
                         @csrf
                         @method('PUT')
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label class="form-label">Aplikasi</label>
+                                <label class="form-label">Aplikasi <span class="text-danger">*</span></label>
                                 <select name="id_aplikasi" class="form-select select2" required>
                                     <option value="">Pilih Aplikasi</option>
                                     @foreach($aplikasis as $aplikasi)
                                     <option value="{{ $aplikasi->id_aplikasi }}">{{ $aplikasi->nama }}</option>
                                     @endforeach
                                 </select>
+                                <div class="invalid-feedback">
+                                    Silakan pilih aplikasi
+                                </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Nama Atribut</label>
+                                <label class="form-label">Nama Atribut <span class="text-danger">*</span></label>
                                 <input type="text" name="nama_atribut" class="form-control" required>
+                                <div class="invalid-feedback">
+                                    Nama atribut tidak boleh kosong
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Nilai Atribut</label>
@@ -235,5 +257,27 @@
         });
     </script>
     @endif
+
+    <script>
+        // Konfigurasi default untuk toastr
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
+        };
+
+        // Cek dan tampilkan flash message dari localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessage = localStorage.getItem('flash_message');
+            if (flashMessage) {
+                toastr.success(flashMessage);
+                localStorage.removeItem('flash_message');
+            }
+        });
+    </script>
+
+    <!-- Di bagian bawah sebelum </body>, tambahkan JS SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html> 

@@ -15,6 +15,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Toastr CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -389,6 +390,19 @@
         });
     </script>
     @endif
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Cek dan tampilkan flash message dari localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessage = localStorage.getItem('flash_message');
+            if (flashMessage) {
+                toastr.success(flashMessage);
+                localStorage.removeItem('flash_message');
+            }
+        });
+    </script>
 </body>
 
 </html>

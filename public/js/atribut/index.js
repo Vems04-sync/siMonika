@@ -61,75 +61,184 @@ $(document).ready(function() {
     });
 
     // Handle form submit untuk delete
-    $('form[method="POST"]').on('submit', function(e) {
-        if ($(this).find('input[name="_method"]').val() === 'DELETE') {
-            e.preventDefault();
-            if (confirm('Yakin ingin menghapus atribut ini?')) {
-                const form = $(this);
+    $('.delete-btn').on('click', function(e) {
+        e.preventDefault();
+        const form = $(this).closest('form');
+        
+        Swal.fire({
+            title: 'Konfirmasi',
+            text: 'Yakin ingin menghapus atribut ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
                 $.ajax({
                     url: form.attr('action'),
                     method: 'POST',
                     data: form.serialize(),
                     success: function(response) {
-                        // Langsung redirect tanpa menyimpan ke localStorage
-                        window.location.href = '/atribut';
+                        if (response.status === 'success') {
+                            localStorage.setItem('flash_message', response.message);
+                            window.location.reload();
+                        }
                     },
                     error: function(xhr) {
-                        toastr.error('Terjadi kesalahan saat menghapus data', 'Error');
+                        if (xhr.status === 422) {
+                            toastr.error(xhr.responseJSON.message);
+                        } else {
+                            toastr.error('Terjadi kesalahan saat menghapus data');
+                        }
                     }
                 });
             }
-        }
+        });
     });
 
-    // Handle form submit untuk tambah dan edit
-    $('#tambahAtributModal form, #editAtributModal form').on('submit', function(e) {
+    // Handle form submit untuk tambah atribut
+    $('#tambahAtributModal form').on('submit', function(e) {
         e.preventDefault();
-        const form = $(this);
-        const isEdit = form.find('input[name="_method"]').val() === 'PUT';
-
+        
+        // Ambil nilai input
+        const aplikasi = $('select[name="id_aplikasi"]').val();
+        const namaAtribut = $('input[name="nama_atribut"]').val().trim();
+        
+        // Validasi input
+        if (!aplikasi) {
+            toastr.error('Silakan pilih aplikasi terlebih dahulu');
+            return false;
+        }
+        
+        if (!namaAtribut) {
+            toastr.error('Nama atribut tidak boleh kosong');
+            return false;
+        }
+        
+        // Lanjutkan dengan AJAX request jika validasi berhasil
         $.ajax({
-            url: form.attr('action'),
+            url: $(this).attr('action'),
             method: 'POST',
-            data: form.serialize(),
+            data: $(this).serialize(),
             success: function(response) {
-                localStorage.setItem('flash_message', 
-                    isEdit ? 'Data atribut berhasil diperbarui!' : 'Data atribut berhasil ditambahkan!'
-                );
-                window.location.reload();
+                if (response.status === 'success') {
+                    localStorage.setItem('flash_message', response.message);
+                    window.location.reload();
+                }
             },
             error: function(xhr) {
                 if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-                    let errorMessage = '<ul class="m-0">';
-                    Object.values(errors).forEach(error => {
-                        errorMessage += `<li>${error[0]}</li>`;
-                    });
-                    errorMessage += '</ul>';
-                    toastr.error(errorMessage, 'Validasi Gagal');
+                    toastr.error(xhr.responseJSON.message);
                 } else {
-                    toastr.error('Terjadi kesalahan saat menyimpan data', 'Error');
+                    toastr.error('Terjadi kesalahan saat memproses permintaan');
                 }
             }
         });
     });
 
-    // Handle tombol edit
+    // Reset form dan pesan error saat modal ditutup
+    $('#tambahAtributModal').on('hidden.bs.modal', function () {
+        $('#tambahAtributForm')[0].reset();
+        $('.select2').val('').trigger('change');
+    });
+
+    // Validasi input saat mengetik
+    $('input[name="nama_atribut"]').on('input', function() {
+        const value = $(this).val().trim();
+        if (value === '') {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+
+    // Validasi select2 saat berubah
+    $('select[name="id_aplikasi"]').on('change', function() {
+        const value = $(this).val();
+        if (!value) {
+            $(this).next('.select2-container').find('.select2-selection').addClass('is-invalid');
+        } else {
+            $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid');
+        }
+    });
+
+    // Kode untuk edit atribut
     $('.edit-btn').on('click', function() {
-        const id = $(this).data('id');
+        var id = $(this).data('id');
+        $.get('/atribut/' + id + '/edit', function(data) {
+            $('#editAtributModal select[name="id_aplikasi"]').val(data.id_aplikasi).trigger('change');
+            $('#editAtributModal input[name="nama_atribut"]').val(data.nama_atribut);
+            $('#editAtributModal input[name="nilai_atribut"]').val(data.nilai_atribut);
+            $('#editAtributForm').attr('action', '/atribut/' + id);
+        });
+    });
+
+    // Update handler untuk form edit
+    $('#editAtributModal form').on('submit', function(e) {
+        e.preventDefault();
         
+        // Ambil nilai input
+        const aplikasi = $('#editAtributModal select[name="id_aplikasi"]').val();
+        const namaAtribut = $('#editAtributModal input[name="nama_atribut"]').val().trim();
+        
+        // Validasi input
+        if (!aplikasi) {
+            toastr.error('Silakan pilih aplikasi terlebih dahulu');
+            return false;
+        }
+        
+        if (!namaAtribut) {
+            toastr.error('Nama atribut tidak boleh kosong');
+            return false;
+        }
+        
+        // Lanjutkan dengan AJAX request jika validasi berhasil
         $.ajax({
-            url: `/atribut/${id}/edit`,
-            method: 'GET',
+            url: $(this).attr('action'),
+            method: 'POST',
+            data: $(this).serialize(),
             success: function(response) {
-                $('#editAtributForm').attr('action', `/atribut/${id}`);
-                $('#editAtributModal select[name="id_aplikasi"]').val(response.id_aplikasi).trigger('change');
-                $('#editAtributModal input[name="nama_atribut"]').val(response.nama_atribut);
-                $('#editAtributModal input[name="nilai_atribut"]').val(response.nilai_atribut);
+                if (response.status === 'success') {
+                    localStorage.setItem('flash_message', response.message);
+                    window.location.reload();
+                }
             },
             error: function(xhr) {
-                toastr.error('Gagal mengambil data atribut', 'Error');
+                if (xhr.status === 422) {
+                    toastr.error(xhr.responseJSON.message);
+                } else {
+                    toastr.error('Terjadi kesalahan saat memproses permintaan');
+                }
             }
         });
+    });
+
+    // Reset form edit dan pesan error saat modal ditutup
+    $('#editAtributModal').on('hidden.bs.modal', function () {
+        $('#editAtributForm')[0].reset();
+        $('#editAtributModal .select2').val('').trigger('change');
+        $('#editAtributModal .is-invalid').removeClass('is-invalid');
+    });
+
+    // Validasi input untuk form edit
+    $('#editAtributModal input[name="nama_atribut"]').on('input', function() {
+        const value = $(this).val().trim();
+        if (value === '') {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+
+    // Validasi select2 untuk form edit
+    $('#editAtributModal select[name="id_aplikasi"]').on('change', function() {
+        const value = $(this).val();
+        if (!value) {
+            $(this).next('.select2-container').find('.select2-selection').addClass('is-invalid');
+        } else {
+            $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid');
+        }
     });
 }); 
