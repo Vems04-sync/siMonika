@@ -35,7 +35,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/aplikasi/create', [AplikasiController::class, 'create'])->name('aplikasi.create');
     Route::post('/aplikasi', [AplikasiController::class, 'store'])->name('aplikasi.store');
     Route::get('/aplikasi/edit/{nama}', [AplikasiController::class, 'editByNama'])->name('aplikasi.editByNama');
-    Route::put('/aplikasi/{nama}', [AplikasiController::class, 'updateByNama'])->name('aplikasi.updateByNama');
+    Route::put('/aplikasi/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
     Route::delete('/aplikasi/delete/{nama}', [AplikasiController::class, 'destroyByNama'])->name('aplikasi.destroyByNama');
 
     Route::get('/chart-data', [AplikasiController::class, 'getChartData']);
@@ -77,3 +77,15 @@ Route::get('/super-admin/log/export', [App\Http\Controllers\SuperAdmin\LogAktivi
     ->name('super-admin.log.export')
     ->middleware('auth')
     ->middleware(\App\Http\Middleware\CheckRole::class . ':super_admin');
+
+// Add these routes with your other auth routes
+Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])
+    ->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
+    ->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])
+    ->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+    ->name('password.update');
+
+    
