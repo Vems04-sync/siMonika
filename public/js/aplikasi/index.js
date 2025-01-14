@@ -1,4 +1,6 @@
-// Toggle View Handler
+// Toggle View Handlerf
+
+
 let isCardView = true;
 const toggleViewBtn = document.getElementById('toggleView');
 const appGrid = document.getElementById('appGrid');
@@ -218,16 +220,28 @@ function addApp() {
 }
 
 // Update fungsi editApp
-function editApp(appId) {
+function editApp(nama) {
     resetForm();
     
     $.ajax({
-        url: `/aplikasi/edit/${appId}`,
+        url: `/aplikasi/edit/${nama}`,
         method: 'GET',
         success: function(data) {
             $('#modalTitle').text('Edit Aplikasi');
-            // Isi form dengan data yang ada
             $('#nama').val(data.nama);
+            
+            // Tambahkan hidden input untuk menyimpan nama original
+            if (!$('#original_nama').length) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'original_nama',
+                    id: 'original_nama',
+                    value: data.nama
+                }).appendTo('#appForm');
+            } else {
+                $('#original_nama').val(data.nama);
+            }
+            
             $('#opd').val(data.opd);
             $('#uraian').val(data.uraian || '');
             $('#tahun_pembuatan').val(data.tahun_pembuatan || '');
@@ -239,7 +253,7 @@ function editApp(appId) {
             $('#lokasi_server').val(data.lokasi_server);
             $('#status_pemakaian').val(data.status_pemakaian);
 
-            $('#appForm').attr('action', `/aplikasi/${appId}`);
+            $('#appForm').attr('action', `/aplikasi/${nama}`);
             
             if (!$('#_method').length) {
                 $('<input>').attr({
