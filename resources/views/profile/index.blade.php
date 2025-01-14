@@ -48,24 +48,6 @@
                         </a>
                     </div>
                 </div>
-
-                <!-- Quick Links -->
-                <div class="card">
-                    <div class="card-header bg-transparent">
-                        <h6 class="mb-0">Quick Links</h6>
-                    </div>
-                    <div class="list-group list-group-flush">
-                        <a href="{{ route('dashboard') }}" class="list-group-item list-group-item-action">
-                            <i class="bi bi-house-door me-2"></i>Dashboard
-                        </a>
-                        <a href="{{ route('aplikasi.index') }}" class="list-group-item list-group-item-action">
-                            <i class="bi bi-grid me-2"></i>Aplikasi
-                        </a>
-                        <a href="{{ route('atribut.index') }}" class="list-group-item list-group-item-action">
-                            <i class="bi bi-clipboard me-2"></i>Atribut
-                        </a>
-                    </div>
-                </div>
             </div>
 
             <div class="col-md-8">
