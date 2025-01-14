@@ -37,21 +37,24 @@
         <nav class="sidebar-nav flex-grow-1">
             <ul class="nav flex-column">
                 @if (auth()->user()->role === 'super_admin')
-                    <li class="nav-item {{ request()->routeIs('super-admin.dashboard') ? 'active' : '' }}">
-                        <a class="nav-link active" href="{{ route('super-admin.dashboard') }}">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('super-admin/dashboard') ? 'active' : '' }}"
+                            href="{{ route('super-admin.dashboard') }}">
                             <i class="bi bi-house-door"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
-                    <li class="nav-item {{ request()->routeIs('admin.*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.index') }}">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('admin*') ? 'active' : '' }}"
+                            href="{{ route('admin.index') }}">
                             <i class="bi bi-people"></i>
                             <span>Kelola Admin</span>
                         </a>
                     </li>
                 @else
-                    <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}"
+                            href="{{ route('admin.dashboard') }}">
                             <i class="bi bi-house-door"></i>
                             <span>Dashboard</span>
                         </a>

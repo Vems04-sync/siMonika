@@ -53,7 +53,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Route untuk Super Admin (tanpa middleware di route)
     Route::get('/super-admin/dashboard', [SuperAdminDashboard::class, 'index'])
-         ->name('super-admin.dashboard');
+        ->name('super-admin.dashboard');
 });
 
 // Route untuk admin
@@ -88,5 +88,3 @@ Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword
     ->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])
     ->name('password.update');
-
-    
