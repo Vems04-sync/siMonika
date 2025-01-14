@@ -147,7 +147,7 @@
                 </button>
             </form>
             <div class="forgot-password">
-                <a href="#" onclick="forgotPassword(event)">Lupa password?</a>
+                <a href="{{ route('password.request') }}" onclick="forgotPassword(event)">Lupa password?</a>
             </div>
         </div>
     </div>
@@ -165,6 +165,11 @@
                 passwordInput.type = 'password';
                 passwordToggle.classList.replace('bi-eye', 'bi-eye-slash');
             }
+        }
+
+        function forgotPassword(event) {
+            event.preventDefault();
+            window.location.href = "{{ route('password.request') }}";
         }
     </script>
 </body>
