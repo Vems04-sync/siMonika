@@ -38,7 +38,7 @@
             <ul class="nav flex-column">
                 @if (auth()->user()->role === 'super_admin')
                     <li class="nav-item {{ request()->routeIs('super-admin.dashboard') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('super-admin.dashboard') }}">
+                        <a class="nav-link active" href="{{ route('super-admin.dashboard') }}">
                             <i class="bi bi-house-door"></i>
                             <span>Dashboard</span>
                         </a>
