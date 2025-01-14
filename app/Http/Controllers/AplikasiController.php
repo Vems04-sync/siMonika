@@ -14,6 +14,7 @@ use App\Models\AtributTambahan;
 use App\Traits\CatatAktivitas;
 use App\Models\LogAktivitas;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class AplikasiController extends Controller
 {
@@ -92,14 +93,18 @@ class AplikasiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Aplikasi $aplikasi)
+    public function update(Request $request, $nama)
     {
         try {
-            $validatedData = $request->validate([
-                'nama' => 'required|unique:aplikasis,nama,' . $aplikasi->nama . ',nama',
+            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+            
+            // Validasi
+            $request->validate([
+                'nama' => [
+                    'required',
+                    Rule::unique('aplikasis', 'nama')->ignore($aplikasi->id_aplikasi, 'id_aplikasi')
+                ],
                 'opd' => 'required',
-                'uraian' => 'nullable',
-                'tahun_pembuatan' => 'nullable|date',
                 'jenis' => 'required',
                 'basis_aplikasi' => 'required',
                 'bahasa_framework' => 'required',
@@ -109,20 +114,18 @@ class AplikasiController extends Controller
                 'status_pemakaian' => 'required'
             ]);
 
-            $aplikasi->update($validatedData);
+            $aplikasi->update($request->all());
 
             $this->catatAktivitas(
                 'Mengupdate aplikasi',
                 'update',
                 'aplikasi',
-                'Mengupdate aplikasi: ' . $request->nama
+                'Mengupdate aplikasi: ' . $nama . ' menjadi ' . $request->nama
             );
 
-            return redirect()->route('aplikasi.index')
-                ->with('success', 'Aplikasi berhasil diperbarui.');
+            return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            return redirect()->route('aplikasi.index')
-                ->with('error', 'Gagal memperbarui aplikasi: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal mengupdate aplikasi: ' . $e->getMessage()], 500);
         }
     }
     /**
