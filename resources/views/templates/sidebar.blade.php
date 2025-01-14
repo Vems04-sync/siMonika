@@ -14,26 +14,26 @@
 
     <nav class="sidebar-nav flex-grow-1">
         <ul class="nav flex-column">
-            <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('dashboard') }}">
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                     <i class="bi bi-house-door"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
-            <li class="nav-item {{ request()->routeIs('aplikasi.index') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('aplikasi.index') }}">
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('aplikasi.*') ? 'active' : '' }}" href="{{ route('aplikasi.index') }}">
                     <i class="bi bi-grid"></i>
                     <span>Aplikasi</span>
                 </a>
             </li>
-            <li class="nav-item {{ request()->routeIs('atribut.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('atribut.index') }}">
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('atribut.*') ? 'active' : '' }}" href="{{ route('atribut.index') }}">
                     <i class="bi bi-clipboard"></i>
                     <span>Atribut</span>
                 </a>
             </li>
-            <li class="nav-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('profile.index') }}">
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}" href="{{ route('profile.index') }}">
                     <i class="bi bi-person-vcard"></i>
                     <span>Profile</span>
                 </a>
