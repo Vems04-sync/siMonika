@@ -440,4 +440,45 @@ document.addEventListener('DOMContentLoaded', function() {
 // Reset form saat modal ditutup
 $('#appModal').on('hidden.bs.modal', function () {
     resetForm();
+});
+
+// Fungsi pencarian
+$('#searchApp').on('input', function() {
+    const searchTerm = $(this).val().toLowerCase();
+    
+    // Pencarian untuk tampilan grid
+    $('#appGrid .app-card').each(function() {
+        const cardText = $(this).text().toLowerCase();
+        $(this).toggle(cardText.includes(searchTerm));
+    });
+    
+    // Pencarian untuk tampilan tabel
+    $('#appTable tbody tr').each(function() {
+        const rowText = $(this).text().toLowerCase();
+        $(this).toggle(rowText.includes(searchTerm));
+    });
+});
+
+// Filter status
+$('#statusFilter').on('change', function() {
+    const status = $(this).val();
+    
+    // Filter untuk tampilan grid
+    $('#appGrid .app-card').each(function() {
+        if (!status || $(this).data('status') === status) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+    
+    // Filter untuk tampilan tabel
+    $('#appTable tbody tr').each(function() {
+        const rowStatus = $(this).find('.status-badge').hasClass('status-active') ? 'active' : 'unused';
+        if (!status || rowStatus === status) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
 }); 

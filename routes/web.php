@@ -90,3 +90,5 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])
     ->name('password.update');
 
 Route::post('/atribut/check-duplicate', [AtributController::class, 'checkDuplicate'])->name('atribut.check-duplicate');
+
+Route::get('/atribut/{id}/edit', [AtributController::class, 'edit'])->name('atribut.edit');

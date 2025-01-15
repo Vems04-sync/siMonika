@@ -93,39 +93,60 @@ class AtributController extends Controller
 
     public function edit($id)
     {
-        $atribut = AtributTambahan::findOrFail($id);
+        $atribut = AtributTambahan::with('aplikasi')->findOrFail($id);
         return response()->json($atribut);
     }
 
     public function update(Request $request, $id)
     {
+        DB::beginTransaction();
         try {
-            $request->validate([
+            // Log request data untuk debugging
+            Log::info('Request data:', $request->all());
+            
+            $atribut = AtributTambahan::findOrFail($id);
+            
+            // Validasi input
+            $validated = $request->validate([
                 'id_aplikasi' => 'required|exists:aplikasis,id_aplikasi',
-                'nama_atribut' => 'required|string|max:100',
-                'nilai_atribut' => 'nullable|string'
+                'nama_atribut' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('atribut_tambahans', 'nama_atribut')
+                        ->where('id_aplikasi', $request->id_aplikasi)
+                        ->ignore($id, 'id_atribut')
+                ],
+                'nilai_atribut' => 'nullable|string|max:255'
             ]);
 
-            $atribut = AtributTambahan::findOrFail($id);
-            $oldNama = $atribut->nama_atribut;
-            $oldAplikasi = $atribut->aplikasi->nama;
+            // Update atribut
+            $atribut->update([
+                'id_aplikasi' => $validated['id_aplikasi'],
+                'nama_atribut' => $validated['nama_atribut'],
+                'nilai_atribut' => $validated['nilai_atribut']
+            ]);
 
-            $atribut->update($request->all());
-
-            // Catat aktivitas
-            $aplikasi = Aplikasi::find($request->id_aplikasi);
+            // Catat log aktivitas
             LogAktivitas::create([
                 'user_id' => Auth::id(),
                 'aktivitas' => 'Update Atribut',
                 'tipe_aktivitas' => 'update',
                 'modul' => 'Atribut',
-                'detail' => "Mengubah atribut '{$oldNama}' pada aplikasi {$oldAplikasi}"
+                'detail' => "Mengupdate atribut '{$atribut->nama_atribut}' pada aplikasi {$atribut->aplikasi->nama}"
             ]);
 
-            return redirect()->route('atribut.index')
-                ->with('success', 'Atribut berhasil diupdate');
+            DB::commit();
+            
+            // Log data setelah update
+            Log::info('Data after update:', $atribut->fresh()->toArray());
+            
+            return redirect()->back()->with('success', 'Atribut berhasil diupdate');
         } catch (\Exception $e) {
-            return redirect()->route('atribut.index')
+            DB::rollback();
+            Log::error('Error di AtributController@update: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return redirect()->back()
                 ->with('error', 'Gagal mengupdate atribut: ' . $e->getMessage());
         }
     }
