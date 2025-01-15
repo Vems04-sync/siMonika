@@ -68,6 +68,29 @@
 
         <div class="card">
             <div class="card-body">
+                <!-- Tambahkan form pencarian dan filter di sini -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="searchInput" class="form-control" placeholder="Cari nama aplikasi...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="atributFilter" class="form-select">
+                            <option value="">Semua Atribut</option>
+                            @php
+                                $uniqueAtributs = $atributs->pluck('nama_atribut')->unique();
+                            @endphp
+                            @foreach($uniqueAtributs as $nama_atribut)
+                                <option value="{{ $nama_atribut }}">{{ $nama_atribut }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="table-responsive">
                     <table class="table table-hover align-middle table-sm">
                         <thead>
@@ -95,14 +118,14 @@
                                 <td class="small">{{ $atribut->nilai_atribut ?? '-' }}</td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <button class="btn btn-warning btn-sm edit-btn" 
+                                        <button class="btn btn-sm btn-outline-primary" 
                                                 data-id="{{ $atribut->id_atribut }}"
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#editAtributModal">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                         <button type="button" 
-                                                class="btn btn-danger btn-sm ms-1" 
+                                                class="btn btn-sm btn-outline-danger" 
                                                 onclick="deleteAtribut('{{ $atribut->id_atribut }}')">
                                             <i class="bi bi-trash"></i>
                                         </button>
