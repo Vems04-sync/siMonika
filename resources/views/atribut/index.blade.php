@@ -46,6 +46,8 @@
     </style>
     <!-- Tambahkan Toastr CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    <!-- Di bagian head, tambahkan: -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -99,17 +101,11 @@
                                                 data-bs-target="#editAtributModal">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
-                                        <form action="{{ route('atribut.destroy', $atribut->id_atribut) }}" 
-                                              method="POST" 
-                                              class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="btn btn-danger btn-sm ms-1" 
-                                                    onclick="return confirm('Yakin ingin menghapus atribut ini?')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" 
+                                                class="btn btn-danger btn-sm ms-1" 
+                                                onclick="deleteAtribut('{{ $atribut->id_atribut }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -323,6 +319,46 @@
             );
         });
     });
+    </script>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+    function deleteAtribut(id) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data atribut akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Buat form untuk delete
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `{{ url('atribut') }}/${id}`;
+                
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                
+                const method = document.createElement('input');
+                method.type = 'hidden';
+                method.name = '_method';
+                method.value = 'DELETE';
+                
+                form.appendChild(csrfToken);
+                form.appendChild(method);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
     </script>
 </body>
 </html> 
