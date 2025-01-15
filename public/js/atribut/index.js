@@ -170,8 +170,6 @@ $(document).ready(function() {
                     $.each(xhr.responseJSON.errors, function(key, value) {
                         toastr.error(value[0]);
                     });
-                } else {
-                    toastr.error('Terjadi kesalahan saat menyimpan data');
                 }
             },
             complete: function() {
