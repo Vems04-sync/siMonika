@@ -188,33 +188,22 @@
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label">Aplikasi</label>
-                                <select name="id_aplikasi" class="form-select select2" required>
-                                    <option value="">Pilih Aplikasi</option>
-                                    @foreach($aplikasis as $aplikasi)
-                                    <option value="{{ $aplikasi->id_aplikasi }}">{{ $aplikasi->nama }}</option>
-                                    @endforeach
-                                </select>
+                                <input type="text" class="form-control" value="" id="edit_aplikasi_nama" disabled>
+                                <input type="hidden" name="id_aplikasi" id="edit_id_aplikasi">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Nama Atribut</label>
-                                <input type="text" name="nama_atribut" class="form-control" required
-                                       data-validation-url="{{ route('atribut.check-duplicate') }}"
-                                       data-current-id="">
-                                <div class="invalid-feedback">Atribut ini sudah ada untuk aplikasi yang dipilih</div>
+                                <input type="text" name="nama_atribut" class="form-control" required id="edit_nama_atribut">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Nilai Atribut</label>
-                                <input type="text" name="nilai_atribut" class="form-control">
+                                <input type="text" name="nilai_atribut" class="form-control" id="edit_nilai_atribut">
                                 <div class="form-text">Opsional</div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="bi bi-x-lg me-1"></i>Batal
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-lg me-1"></i>Update
-                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Update</button>
                         </div>
                     </form>
                 </div>
@@ -359,6 +348,25 @@
             }
         });
     }
+    </script>
+
+    <script>
+    // Script untuk mengisi form edit
+    $('.edit-btn').on('click', function() {
+        const id = $(this).data('id');
+        const form = $('#editAtributForm');
+        
+        // Set action URL dengan ID yang benar
+        form.attr('action', `{{ url('atribut') }}/${id}`);
+        
+        // Ambil data dari server
+        $.get(`{{ url('atribut') }}/${id}/edit`, function(data) {
+            $('#edit_aplikasi_nama').val(data.aplikasi.nama);
+            $('#edit_id_aplikasi').val(data.id_aplikasi);
+            $('#edit_nama_atribut').val(data.nama_atribut);
+            $('#edit_nilai_atribut').val(data.nilai_atribut);
+        });
+    });
     </script>
 </body>
 </html> 
