@@ -132,4 +132,90 @@ $(document).ready(function() {
             }
         });
     });
+
+    // Inisialisasi Select2
+    $('.select2').select2({
+        theme: 'bootstrap-5'
+    });
+
+    // Handle form submission
+    $('#formTambahAtribut').on('submit', function(e) {
+        e.preventDefault();
+        
+        let form = $(this);
+        let formData = new FormData(this);
+        
+        // Disable submit button
+        form.find('button[type="submit"]').prop('disabled', true);
+        
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if(response.success) {
+                    toastr.success('Atribut berhasil ditambahkan');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    toastr.error('Gagal menambahkan atribut');
+                }
+            },
+            error: function(xhr) {
+                console.error('Error:', xhr);
+                if(xhr.responseJSON && xhr.responseJSON.errors) {
+                    $.each(xhr.responseJSON.errors, function(key, value) {
+                        toastr.error(value[0]);
+                    });
+                } else {
+                    toastr.error('Terjadi kesalahan saat menyimpan data');
+                }
+            },
+            complete: function() {
+                // Re-enable submit button
+                form.find('button[type="submit"]').prop('disabled', false);
+            }
+        });
+    });
+
+    // Konfigurasi Select2 untuk dropdown dengan pencarian
+    $('.select2-with-search').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        dropdownParent: $('#tambahAtributModal'),
+        placeholder: 'Cari dan pilih aplikasi...',
+        allowClear: true,
+        language: {
+            noResults: function() {
+                return "Aplikasi tidak ditemukan";
+            },
+            searching: function() {
+                return "Mencari...";
+            }
+        },
+        templateResult: formatAplikasi,
+        templateSelection: formatAplikasi,
+        escapeMarkup: function(markup) {
+            return markup;
+        }
+    });
+
+    // Format tampilan aplikasi di dropdown
+    function formatAplikasi(aplikasi) {
+        if (!aplikasi.id) return aplikasi.text;
+        
+        var $aplikasi = $(
+            '<span><i class="bi bi-app me-2"></i>' + aplikasi.text + '</span>'
+        );
+        
+        return $aplikasi;
+    }
+
+    // Reset Select2 saat modal ditutup
+    $('#tambahAtributModal').on('hidden.bs.modal', function() {
+        $('.select2-with-search').val('').trigger('change');
+    });
 }); 

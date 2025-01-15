@@ -20,8 +20,12 @@ class AtributController extends Controller
 
     public function store(Request $request)
     {
+        \DB::beginTransaction();
         try {
-            $request->validate([
+            // Log request data
+            \Log::info('Request data:', $request->all());
+
+            $validated = $request->validate([
                 'id_aplikasi' => 'required|exists:aplikasis,id_aplikasi',
                 'nama_atribut' => [
                     'required',
@@ -36,21 +40,50 @@ class AtributController extends Controller
                 'nilai_atribut' => 'nullable|string'
             ]);
 
-            $atribut = AtributTambahan::create($request->all());
+            // Cek aplikasi
+            $aplikasi = Aplikasi::findOrFail($validated['id_aplikasi']);
+            
+            // Buat atribut
+            $atribut = AtributTambahan::create([
+                'id_aplikasi' => $validated['id_aplikasi'],
+                'nama_atribut' => $validated['nama_atribut'],
+                'nilai_atribut' => $validated['nilai_atribut'] ?? null
+            ]);
 
-            // Catat aktivitas
-            $aplikasi = Aplikasi::find($request->id_aplikasi);
+            // Catat log aktivitas
             LogAktivitas::create([
                 'user_id' => Auth::id(),
                 'aktivitas' => 'Tambah Atribut',
                 'tipe_aktivitas' => 'create',
                 'modul' => 'Atribut',
-                'detail' => "Menambahkan atribut '{$request->nama_atribut}' pada aplikasi {$aplikasi->nama}"
+                'detail' => "Menambahkan atribut '{$atribut->nama_atribut}' pada aplikasi {$aplikasi->nama}"
             ]);
+
+            \DB::commit();
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Atribut berhasil ditambahkan',
+                    'data' => $atribut
+                ]);
+            }
 
             return redirect()->route('atribut.index')
                 ->with('success', 'Atribut berhasil ditambahkan');
+
         } catch (\Exception $e) {
+            \DB::rollback();
+            \Log::error('Error di AtributController@store: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menambahkan atribut: ' . $e->getMessage()
+                ], 422);
+            }
+
             return redirect()->route('atribut.index')
                 ->with('error', 'Gagal menambahkan atribut: ' . $e->getMessage());
         }

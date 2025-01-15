@@ -18,7 +18,13 @@ return new class extends Migration
             $table->text('nilai_atribut')->nullable();
             $table->timestamps();
     
-            $table->foreign('id_aplikasi')->references('id_aplikasi')->on('aplikasis')->onDelete('cascade');
+            $table->foreign('id_aplikasi')
+                  ->references('id_aplikasi')
+                  ->on('aplikasis')
+                  ->onDelete('cascade');
+                  
+            // Tambahkan unique constraint
+            $table->unique(['id_aplikasi', 'nama_atribut']);
         });
     }
     

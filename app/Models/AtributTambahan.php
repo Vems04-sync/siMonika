@@ -15,6 +15,8 @@ class AtributTambahan extends Model
         'nilai_atribut'
     ];
 
+    protected $guarded = ['id_atribut'];
+
     public function aplikasi()
     {
         return $this->belongsTo(Aplikasi::class, 'id_aplikasi', 'id_aplikasi');
