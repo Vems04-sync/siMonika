@@ -88,3 +88,5 @@ Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword
     ->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])
     ->name('password.update');
+
+Route::post('/atribut/check-duplicate', [AtributController::class, 'checkDuplicate'])->name('atribut.check-duplicate');
