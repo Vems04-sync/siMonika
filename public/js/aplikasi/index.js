@@ -230,7 +230,6 @@ function editApp(nama) {
             $('#modalTitle').text('Edit Aplikasi');
             $('#nama').val(data.nama);
             
-            // Tambahkan hidden input untuk menyimpan nama original
             if (!$('#original_nama').length) {
                 $('<input>').attr({
                     type: 'hidden',
@@ -267,7 +266,11 @@ function editApp(nama) {
             $('#appModal').modal('show');
         },
         error: function() {
-            toastr.error('Gagal mengambil data aplikasi', 'Error');
+            Swal.fire({
+                title: 'Error',
+                text: 'Gagal mengambil data aplikasi',
+                icon: 'error'
+            });
         }
     });
 }
@@ -296,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
     showFlashMessages();
 });
 
-// Update event handler untuk form submission
+// Event handler untuk form submission
 $('#appForm').on('submit', function(e) {
     e.preventDefault();
     
@@ -304,7 +307,7 @@ $('#appForm').on('submit', function(e) {
         .append('<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>');
     $('body').append(loadingOverlay);
     
-    const isEdit = $('#_method').val() === 'PUT';
+    const isEdit = $('#_method').length > 0;
     
     $.ajax({
         url: $(this).attr('action'),
@@ -317,17 +320,14 @@ $('#appForm').on('submit', function(e) {
             loadingOverlay.remove();
             $('#appModal').modal('hide');
             
-            // Simpan pesan ke localStorage sebelum redirect
-            localStorage.setItem('flash_message', isEdit ? 
-                'Data aplikasi berhasil diperbarui!' : 
-                'Data aplikasi berhasil ditambahkan!'
-            );
+            // Simpan pesan ke localStorage
+            localStorage.setItem('flash_message', isEdit ? 'Data aplikasi berhasil diperbarui!' : 'Data aplikasi berhasil ditambahkan!');
+            localStorage.setItem('flash_type', 'success');
             
             window.location.href = '/aplikasi';
         },
         error: function(xhr) {
             loadingOverlay.remove();
-            
             if (xhr.status === 422) {
                 const errors = xhr.responseJSON.errors;
                 let errorMessage = '<ul class="m-0">';
@@ -336,39 +336,94 @@ $('#appForm').on('submit', function(e) {
                 });
                 errorMessage += '</ul>';
                 
-                toastr.error(errorMessage, 'Validasi Gagal');
+                Swal.fire({
+                    title: 'Validasi Gagal',
+                    html: errorMessage,
+                    icon: 'error'
+                });
             } else {
-                toastr.error('Terjadi kesalahan saat menyimpan data', 'Error');
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Terjadi kesalahan saat menyimpan data',
+                    icon: 'error'
+                });
             }
         }
     });
 });
 
+// Tambahkan ini di bagian atas file atau setelah document ready
+$(document).ready(function() {
+    // Cek apakah ada flash message di localStorage
+    const flashMessage = localStorage.getItem('flash_message');
+    const flashType = localStorage.getItem('flash_type');
+    
+    if (flashMessage) {
+        // Tampilkan SweetAlert
+        Swal.fire({
+            title: flashType === 'success' ? 'Berhasil!' : 'Error!',
+            text: flashMessage,
+            icon: flashType,
+            timer: 1500,
+            showConfirmButton: false
+        });
+        
+        // Hapus flash message dari localStorage
+        localStorage.removeItem('flash_message');
+        localStorage.removeItem('flash_type');
+    }
+});
+
 // Update fungsi deleteApp
 function deleteApp(appId) {
-    if (confirm('Apakah Anda yakin ingin menghapus aplikasi ini?')) {
-        const loadingOverlay = $('<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">')
-            .append('<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>');
-        $('body').append(loadingOverlay);
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Data aplikasi akan dihapus secara permanen!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const loadingOverlay = $('<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">')
+                .append('<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>');
+            $('body').append(loadingOverlay);
 
-        $.ajax({
-            url: `/aplikasi/delete/${appId}`,
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                loadingOverlay.remove();
-                // Langsung redirect tanpa menyimpan ke localStorage
-                window.location.href = '/aplikasi';
-            },
-            error: function(xhr) {
-                loadingOverlay.remove();
-                // Langsung redirect tanpa menyimpan ke localStorage
-                window.location.href = '/aplikasi';
-            }
-        });
-    }
+            $.ajax({
+                url: `/aplikasi/delete/${appId}`,
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    loadingOverlay.remove();
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: 'Data aplikasi telah dihapus',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = '/aplikasi';
+                    });
+                },
+                error: function(xhr) {
+                    loadingOverlay.remove();
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: 'Terjadi kesalahan saat menghapus data',
+                        icon: 'error',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = '/aplikasi';
+                    });
+                }
+            });
+        }
+    });
 }
 
 // Event Listeners
