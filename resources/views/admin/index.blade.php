@@ -61,8 +61,8 @@
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <form action="{{ route('admin.destroy', $admin->id_user) }}" method="POST"
-                                                class="d-inline"
-                                                onsubmit="return confirm('Yakin ingin menghapus admin ini?');">
+                                                class="d-inline delete-form"
+                                                onsubmit="return handleDelete(event, this);">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
@@ -134,6 +134,26 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .fade-out {
+            animation: fadeOut 0.5s ease forwards;
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+        }
+    </style>
+
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         function addAdmin() {
@@ -232,5 +252,49 @@
                     alert('Terjadi kesalahan saat menyimpan data');
                 });
         });
+
+        function handleDelete(e, form) {
+            e.preventDefault();
+            
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data admin akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#0d6efd',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const row = form.closest('tr');
+                    row.classList.add('fade-out');
+                    
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            setTimeout(() => {
+                                window.location.reload(); // Refresh halaman setelah delete berhasil
+                            }, 500);
+                        } else {
+                            row.classList.remove('fade-out');
+                        }
+                    })
+                    .catch(() => {
+                        row.classList.remove('fade-out');
+                    });
+                }
+            });
+            
+            return false;
+        }
     </script>
 @endsection
