@@ -16,9 +16,32 @@
     <style>
         .select2-container--bootstrap-5 .select2-selection {
             min-height: 38px;
-        }
-        .select2-container--bootstrap-5 .select2-selection--single {
             padding: 0.375rem 0.75rem;
+        }
+        
+        .select2-container--bootstrap-5 .select2-search__field {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+        }
+        
+        .select2-container--bootstrap-5 .select2-search__field:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .select2-container--bootstrap-5 .select2-results__option--highlighted {
+            background-color: #0d6efd;
+            color: white;
+        }
+        
+        .select2-container--bootstrap-5 .select2-results__option {
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            padding: 0;
+            line-height: 1.5;
         }
     </style>
     <!-- Tambahkan Toastr CSS -->
@@ -115,15 +138,20 @@
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <form action="{{ route('atribut.store') }}" method="POST">
+                    <form action="{{ route('atribut.store') }}" method="POST" id="formTambahAtribut">
                         @csrf
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label">Aplikasi</label>
-                                <select name="id_aplikasi" class="form-select select2" required>
+                                <select name="id_aplikasi" class="form-select select2-with-search" required>
                                     <option value="">Pilih Aplikasi</option>
                                     @foreach($aplikasis as $aplikasi)
-                                    <option value="{{ $aplikasi->id_aplikasi }}">{{ $aplikasi->nama }}</option>
+                                        <option value="{{ $aplikasi->id_aplikasi }}">
+                                            {{ $aplikasi->nama }} 
+                                            @if($aplikasi->versi)
+                                                (v{{ $aplikasi->versi }})
+                                            @endif
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -134,16 +162,11 @@
                             <div class="mb-3">
                                 <label class="form-label">Nilai Atribut</label>
                                 <input type="text" name="nilai_atribut" class="form-control">
-                                <div class="form-text">Opsional</div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="bi bi-x-lg me-1"></i>Batal
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-lg me-1"></i>Simpan
-                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
                         </div>
                     </form>
                 </div>
