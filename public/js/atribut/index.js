@@ -216,4 +216,65 @@ $(document).ready(function() {
     $('#tambahAtributModal').on('hidden.bs.modal', function() {
         $('.select2-with-search').val('').trigger('change');
     });
+
+    // Fungsi untuk melakukan filter table
+    function filterTable() {
+        const searchTerm = $('#searchInput').val().toLowerCase();
+        const atributFilter = $('#atributFilter').val().toLowerCase();
+        
+        $('table tbody tr').each(function() {
+            const row = $(this);
+            const aplikasiName = row.find('td:nth-child(2)').text().toLowerCase();
+            const atributName = row.find('td:nth-child(3)').text().toLowerCase();
+            
+            const matchSearch = aplikasiName.includes(searchTerm);
+            const matchFilter = atributFilter === '' || atributName === atributFilter;
+            
+            if (matchSearch && matchFilter) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        });
+        
+        // Tampilkan pesan jika tidak ada hasil
+        const visibleRows = $('table tbody tr:visible').length;
+        if (visibleRows === 0) {
+            if ($('table tbody .no-data-row').length === 0) {
+                $('table tbody').append(`
+                    <tr class="no-data-row">
+                        <td colspan="5" class="text-center py-3">
+                            <i class="bi bi-inbox text-muted d-block mb-1" style="font-size: 1.5rem;"></i>
+                            <span class="text-muted small">Tidak ada data yang sesuai</span>
+                        </td>
+                    </tr>
+                `);
+            }
+        } else {
+            $('.no-data-row').remove();
+        }
+    }
+
+    // Event listener untuk input pencarian
+    $('#searchInput').on('input', function() {
+        filterTable();
+    });
+
+    // Event listener untuk filter atribut
+    $('#atributFilter').on('change', function() {
+        filterTable();
+    });
+
+    // Inisialisasi Select2 untuk filter atribut
+    $('#atributFilter').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Filter berdasarkan atribut',
+        allowClear: true,
+        language: {
+            noResults: function() {
+                return "Atribut tidak ditemukan";
+            }
+        }
+    });
 }); 
