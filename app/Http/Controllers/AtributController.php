@@ -8,6 +8,8 @@ use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AtributController extends Controller
 {
@@ -20,10 +22,10 @@ class AtributController extends Controller
 
     public function store(Request $request)
     {
-        \DB::beginTransaction();
+        DB::beginTransaction();
         try {
             // Log request data
-            \Log::info('Request data:', $request->all());
+            Log::info('Request data:', $request->all());
 
             $validated = $request->validate([
                 'id_aplikasi' => 'required|exists:aplikasis,id_aplikasi',
@@ -59,7 +61,7 @@ class AtributController extends Controller
                 'detail' => "Menambahkan atribut '{$atribut->nama_atribut}' pada aplikasi {$aplikasi->nama}"
             ]);
 
-            \DB::commit();
+            DB::commit();
 
             if ($request->ajax()) {
                 return response()->json([
@@ -73,9 +75,9 @@ class AtributController extends Controller
                 ->with('success', 'Atribut berhasil ditambahkan');
 
         } catch (\Exception $e) {
-            \DB::rollback();
-            \Log::error('Error di AtributController@store: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            DB::rollback();
+            Log::error('Error di AtributController@store: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
 
             if ($request->ajax()) {
                 return response()->json([
@@ -152,5 +154,17 @@ class AtributController extends Controller
             return redirect()->route('atribut.index')
                 ->with('error', 'Gagal menghapus atribut: ' . $e->getMessage());
         }
+    }
+
+    public function checkDuplicate(Request $request)
+    {
+        $exists = AtributTambahan::where('id_aplikasi', $request->id_aplikasi)
+            ->where('nama_atribut', $request->nama_atribut)
+            ->when($request->current_id, function($query) use ($request) {
+                return $query->where('id_atribut', '!=', $request->current_id);
+            })
+            ->exists();
+
+        return response()->json(['exists' => $exists]);
     }
 }

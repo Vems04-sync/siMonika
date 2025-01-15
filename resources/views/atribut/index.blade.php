@@ -157,7 +157,9 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Nama Atribut</label>
-                                <input type="text" name="nama_atribut" class="form-control" required>
+                                <input type="text" name="nama_atribut" class="form-control" required 
+                                       data-validation-url="{{ route('atribut.check-duplicate') }}">
+                                <div class="invalid-feedback">Atribut ini sudah ada untuk aplikasi yang dipilih</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Nilai Atribut</label>
@@ -199,7 +201,10 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Nama Atribut</label>
-                                <input type="text" name="nama_atribut" class="form-control" required>
+                                <input type="text" name="nama_atribut" class="form-control" required
+                                       data-validation-url="{{ route('atribut.check-duplicate') }}"
+                                       data-current-id="">
+                                <div class="invalid-feedback">Atribut ini sudah ada untuk aplikasi yang dipilih</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Nilai Atribut</label>
@@ -258,5 +263,66 @@
         });
     </script>
     @endif
+
+    <script>
+    $(document).ready(function() {
+        function validateAttribute(input, appSelect, currentId = '') {
+            const nama_atribut = input.val();
+            const id_aplikasi = appSelect.val();
+            
+            $.ajax({
+                url: input.data('validation-url'),
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    nama_atribut: nama_atribut,
+                    id_aplikasi: id_aplikasi,
+                    current_id: currentId
+                },
+                success: function(response) {
+                    if (response.exists) {
+                        input.addClass('is-invalid');
+                        input.closest('form').find('button[type="submit"]').prop('disabled', true);
+                    } else {
+                        input.removeClass('is-invalid');
+                        input.closest('form').find('button[type="submit"]').prop('disabled', false);
+                    }
+                }
+            });
+        }
+
+        // Validate on input change for create form
+        $('#tambahAtributModal input[name="nama_atribut"]').on('input', function() {
+            validateAttribute(
+                $(this),
+                $('#tambahAtributModal select[name="id_aplikasi"]')
+            );
+        });
+
+        $('#tambahAtributModal select[name="id_aplikasi"]').on('change', function() {
+            validateAttribute(
+                $('#tambahAtributModal input[name="nama_atribut"]'),
+                $(this)
+            );
+        });
+
+        // Validate on input change for edit form
+        $('#editAtributModal input[name="nama_atribut"]').on('input', function() {
+            validateAttribute(
+                $(this),
+                $('#editAtributModal select[name="id_aplikasi"]'),
+                $(this).data('current-id')
+            );
+        });
+
+        $('#editAtributModal select[name="id_aplikasi"]').on('change', function() {
+            validateAttribute(
+                $('#editAtributModal input[name="nama_atribut"]'),
+                $(this),
+                $('#editAtributModal input[name="nama_atribut"]').data('current-id')
+            );
+        });
+    });
+    </script>
 </body>
 </html> 
