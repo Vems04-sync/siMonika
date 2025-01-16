@@ -26,8 +26,24 @@ class Aplikasi extends Model
         'status_pemakaian'
     ];
 
-    public function atributTambahan()
+    public function atributTambahans()
     {
-        return $this->hasMany(AtributTambahan::class, 'id_aplikasi', 'id_aplikasi');
+        return $this->belongsToMany(AtributTambahan::class, 'aplikasi_atribut', 'id_aplikasi', 'id_atribut')
+                    ->withPivot('nilai_atribut')
+                    ->withTimestamps();
+    }
+
+    // Method untuk menambah atribut ke semua aplikasi
+    public static function addGlobalAttribute($namaAtribut)
+    {
+        $aplikasis = self::all();
+        
+        foreach ($aplikasis as $aplikasi) {
+            AtributTambahan::create([
+                'id_aplikasi' => $aplikasi->id_aplikasi,
+                'nama_atribut' => $namaAtribut,
+                'nilai_atribut' => null
+            ]);
+        }
     }
 }

@@ -13,18 +13,29 @@ return new class extends Migration
     {
         Schema::create('atribut_tambahans', function (Blueprint $table) {
             $table->id('id_atribut');
+            $table->string('nama_atribut', 100)->unique();
+            $table->string('tipe_data');
+            $table->timestamps();
+        });
+
+        // Tabel pivot untuk menyimpan nilai atribut per aplikasi
+        Schema::create('aplikasi_atribut', function (Blueprint $table) {
             $table->unsignedBigInteger('id_aplikasi');
-            $table->string('nama_atribut', 100);
+            $table->unsignedBigInteger('id_atribut');
             $table->text('nilai_atribut')->nullable();
             $table->timestamps();
-    
+
             $table->foreign('id_aplikasi')
                   ->references('id_aplikasi')
                   ->on('aplikasis')
                   ->onDelete('cascade');
-                  
-            // Tambahkan unique constraint
-            $table->unique(['id_aplikasi', 'nama_atribut']);
+
+            $table->foreign('id_atribut')
+                  ->references('id_atribut')
+                  ->on('atribut_tambahans')
+                  ->onDelete('cascade');
+
+            $table->primary(['id_aplikasi', 'id_atribut']);
         });
     }
     
@@ -34,6 +45,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('aplikasi_atribut');
         Schema::dropIfExists('atribut_tambahans');
     }
 };
