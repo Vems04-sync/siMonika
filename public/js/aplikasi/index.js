@@ -212,60 +212,88 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // CRUD Operations
 function viewAppDetails(nama) {
-    document.getElementById('loadingState').classList.remove('d-none');
-    document.getElementById('errorState').classList.add('d-none');
-    document.getElementById('contentState').classList.add('d-none');
+    console.log('Fetching details for:', nama); // Debug
 
-    fetch(`/aplikasi/detail/${nama}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log('Data dari server:', data);
-            document.getElementById('loadingState').classList.add('d-none');
-            document.getElementById('contentState').classList.remove('d-none');
+    // Show loading
+    $('#loadingState').removeClass('d-none');
+    $('#contentState').addClass('d-none');
+    $('#errorState').addClass('d-none');
 
-            // Perbaikan cara menampilkan data aplikasi
-            const detailTable = document.getElementById('detailTable');
-            const aplikasi = data.aplikasi;
-            detailTable.innerHTML = `
-                <tr><th>NAMA</th><td>${aplikasi.nama}</td></tr>
-                <tr><th>OPD</th><td>${aplikasi.opd}</td></tr>
-                <tr><th>URAIAN</th><td>${aplikasi.uraian || '-'}</td></tr>
-                <tr><th>TAHUN PEMBUATAN</th><td>${aplikasi.tahun_pembuatan || '-'}</td></tr>
-                <tr><th>JENIS</th><td>${aplikasi.jenis}</td></tr>
-                <tr><th>BASIS APLIKASI</th><td>${aplikasi.basis_aplikasi}</td></tr>
-                <tr><th>BAHASA/FRAMEWORK</th><td>${aplikasi.bahasa_framework || '-'}</td></tr>
-                <tr><th>DATABASE</th><td>${aplikasi.database || '-'}</td></tr>
-                <tr><th>PENGEMBANG</th><td>${aplikasi.pengembang}</td></tr>
-                <tr><th>LOKASI SERVER</th><td>${aplikasi.lokasi_server}</td></tr>
-                <tr><th>STATUS PEMAKAIAN</th><td>${aplikasi.status_pemakaian}</td></tr>
-            `;
+    $.ajax({
+        url: `/aplikasi/detail/${nama}`,
+        method: 'GET',
+        success: function(response) {
+            console.log('Response received:', response); // Debug
 
-            // Perbaikan cara menampilkan atribut
-            const atributTable = document.getElementById('atributTable');
-            const noAtributMessage = document.getElementById('noAtributMessage');
-            
-            if (data.atribut && data.atribut.length > 0) {
-                atributTable.innerHTML = data.atribut.map(item => `
-                    <tr>
-                        <td>${item.nama_atribut}</td>
-                        <td>${item.nilai_atribut || '-'}</td>
-                    </tr>
-                `).join('');
-                atributTable.parentElement.classList.remove('d-none');
-                noAtributMessage.classList.add('d-none');
+            // Populate aplikasi details
+            let detailHTML = '';
+            for (let key in response.aplikasi) {
+                if (key !== 'id_aplikasi' && key !== 'created_at' && key !== 'updated_at') {
+                    detailHTML += `
+                        <tr>
+                            <th>${formatLabel(key)}</th>
+                            <td>${response.aplikasi[key] || '-'}</td>
+                        </tr>
+                    `;
+                }
+            }
+            console.log('Detail HTML:', detailHTML); // Debug
+            $('#detailTable').html(detailHTML);
+
+            // Populate atribut tambahan
+            if (response.atribut_tambahan && response.atribut_tambahan.length > 0) {
+                console.log('Atribut found:', response.atribut_tambahan); // Debug
+                let atributHTML = '';
+                response.atribut_tambahan.forEach(function(atribut) {
+                    atributHTML += `
+                        <tr>
+                            <td>${atribut.nama_atribut}</td>
+                            <td>${atribut.nilai_atribut || '-'}</td>
+                        </tr>
+                    `;
+                });
+                $('#atributTable').html(atributHTML);
+                $('#atributContent').removeClass('d-none');
+                $('#noAtributMessage').addClass('d-none');
             } else {
-                atributTable.parentElement.classList.add('d-none');
-                noAtributMessage.classList.remove('d-none');
+                console.log('No atribut found'); // Debug
+                $('#atributContent').addClass('d-none');
+                $('#noAtributMessage').removeClass('d-none');
             }
 
-            const modal = new bootstrap.Modal(document.getElementById('detailModal'));
-            modal.show();
-        })
-        .catch(error => {
-            document.getElementById('loadingState').classList.add('d-none');
-            document.getElementById('errorState').classList.remove('d-none');
-            toastr.error('Gagal mengambil detail aplikasi', 'Error');
-        });
+            // Show content
+            $('#loadingState').addClass('d-none');
+            $('#contentState').removeClass('d-none');
+            
+            // Make sure modal is shown
+            $('#detailModal').modal('show');
+        },
+        error: function(xhr) {
+            console.error('Error:', xhr);
+            $('#loadingState').addClass('d-none');
+            $('#contentState').addClass('d-none');
+            $('#errorState').removeClass('d-none');
+            $('#errorMessage').text('Gagal memuat detail aplikasi');
+        }
+    });
+}
+
+// Helper function to format label
+function formatLabel(key) {
+    const labels = {
+        nama: 'Nama',
+        opd: 'OPD',
+        uraian: 'Uraian',
+        tahun_pembuatan: 'Tahun Pembuatan',
+        jenis: 'Jenis',
+        basis_aplikasi: 'Basis Aplikasi',
+        bahasa_framework: 'Bahasa/Framework',
+        database: 'Database',
+        pengembang: 'Pengembang',
+        lokasi_server: 'Lokasi Server',
+        status_pemakaian: 'Status Pemakaian'
+    };
+    return labels[key] || key;
 }
 
 // Fungsi untuk reset form
@@ -606,5 +634,25 @@ $(document).on('click', '.save-nilai', function() {
         error: function() {
             toastr.error('Gagal memperbarui nilai');
         }
+    });
+});
+
+// Tambahkan event listener untuk tombol detail
+$(document).ready(function() {
+    // Untuk tombol detail di tampilan tabel
+    $(document).on('click', '.btn-detail', function(e) {
+        e.preventDefault();
+        const nama = $(this).data('nama');
+        console.log('Detail button clicked for:', nama); // Debugging
+        viewAppDetails(nama);
+        $('#detailModal').modal('show');
+    });
+
+    // Untuk tombol detail di tampilan card (jika ada)
+    $(document).on('click', '.card-detail-btn', function(e) {
+        e.preventDefault();
+        const nama = $(this).data('nama');
+        viewAppDetails(nama);
+        $('#detailModal').modal('show');
     });
 }); 
