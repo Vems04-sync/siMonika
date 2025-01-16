@@ -184,9 +184,8 @@
                                     <i class="bi bi-eye me-1"></i>Detail
                                 </button>
                                 <div>
-                                    <button class="btn btn-outline-secondary btn-sm me-2"
-                                        onclick="editApp('{{ $aplikasi->nama }}')">
-                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    <button type="button" class="btn-edit" data-nama="{{ $aplikasi->nama }}">
+                                        <i class="bi bi-pencil"></i> Edit
                                     </button>
                                     <button class="btn btn-outline-danger btn-sm"
                                         onclick="deleteApp('{{ $aplikasi->nama }}')">
@@ -253,8 +252,7 @@
                                             <button class="btn btn-sm btn-info btn-detail" data-nama="{{ $aplikasi->nama }}">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-secondary"
-                                                onclick="editApp('{{ $aplikasi->nama }}')" title="Edit">
+                                            <button type="button" class="btn-edit" data-nama="{{ $aplikasi->nama }}">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger"

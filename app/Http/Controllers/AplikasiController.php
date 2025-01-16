@@ -106,55 +106,46 @@ class AplikasiController extends Controller
      */
     public function update(Request $request, $nama)
     {
-        try {
-            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-            $oldData = $aplikasi->toArray();
+        $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
 
-            $validated = $request->validate([
-                'nama' => 'required|string|max:255|unique:aplikasis,nama,' . $aplikasi->id_aplikasi . ',id_aplikasi',
-                'opd' => 'required|string|max:255',
-                'uraian' => 'nullable|string',
-                'tahun_pembuatan' => 'required|date',
-                'jenis' => 'required|string|max:255',
-                'basis_aplikasi' => 'required|string|max:255',
-                'bahasa_framework' => 'required|string|max:255',
-                'database' => 'required|string|max:255',
-                'pengembang' => 'required|string|max:255',
-                'lokasi_server' => 'required|string|max:255',
-                'status_pemakaian' => 'required|string|max:255'
-            ]);
+        $validatedData = $request->validate([
+            'nama' => ['required', Rule::unique('aplikasis')->ignore($aplikasi->id_aplikasi, 'id_aplikasi')],
+            'opd' => 'required',
+            'uraian' => 'nullable',
+            'tahun_pembuatan' => 'nullable|date',
+            'jenis' => 'required',
+            'basis_aplikasi' => 'required',
+            'bahasa_framework' => 'required',
+            'database' => 'required',
+            'pengembang' => 'required',
+            'lokasi_server' => 'required',
+            'status_pemakaian' => 'required'
+        ]);
 
-            $aplikasi->update($validated);
+        $aplikasi->update($request->except('atribut'));
 
-            // Catat perubahan untuk setiap kolom
-            $changes = [];
-            foreach ($validated as $field => $newValue) {
-                if ($oldData[$field] != $newValue) {
-                    $fieldName = $this->getFieldLabel($field);
-                    $changes[] = "{$fieldName} dari '{$oldData[$field]}' menjadi '{$newValue}'";
-                }
-            }
-
-            if (!empty($changes)) {
-                LogAktivitas::create([
-                    'user_id' => Auth::id(),
-                    'aktivitas' => 'Update Aplikasi',
-                    'tipe_aktivitas' => 'update',
-                    'modul' => 'Aplikasi',
-                    'detail' => "Mengubah data aplikasi {$oldData['nama']}: " . implode(', ', $changes)
+        // Update atribut tambahan
+        if ($request->has('atribut')) {
+            // Hapus atribut yang ada sebelumnya
+            $aplikasi->atributTambahans()->detach();
+            
+            // Tambahkan atribut baru
+            foreach ($request->atribut as $id_atribut => $nilai) {
+                $aplikasi->atributTambahans()->attach($id_atribut, [
+                    'nilai_atribut' => $nilai
                 ]);
             }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Aplikasi berhasil diupdate'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengupdate aplikasi: ' . $e->getMessage()
-            ], 500);
         }
+
+        $this->catatAktivitas(
+            'Mengubah aplikasi',
+            'update',
+            'aplikasi',
+            'Mengubah aplikasi: ' . $request->nama
+        );
+
+        return redirect()->route('aplikasi.index')
+            ->with('success', 'Aplikasi berhasil diperbarui.');
     }
 
     /**
@@ -262,23 +253,28 @@ class AplikasiController extends Controller
     public function editByNama($nama)
     {
         try {
-            // Dapatkan semua kolom dari tabel
-            $columns = Schema::getColumnListing('aplikasis');
+            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+            
+            // Debug untuk melihat data
+            Log::info('Aplikasi data:', ['aplikasi' => $aplikasi->toArray()]);
+            
+            $atributs = AtributTambahan::whereHas('aplikasis', function($query) use ($aplikasi) {
+                $query->where('aplikasis.id_aplikasi', $aplikasi->id_aplikasi);
+            })->get();
+            
+            $existingAtributs = $aplikasi->atributTambahans()
+                ->get()
+                ->pluck('pivot.nilai_atribut', 'id_atribut')
+                ->toArray();
+            
+            // Debug untuk melihat atribut
+            Log::info('Existing atributs:', $existingAtributs);
 
-            // Ambil data berdasarkan kolom yang ada
-            $aplikasi = Aplikasi::where('nama', $nama)
-                ->select($columns)
-                ->firstOrFail();
-
-            // Siapkan data untuk response
-            $detailData = [];
-            foreach ($columns as $column) {
-                $detailData[$column] = $aplikasi->$column;
-            }
-
-            return response()->json($detailData);
+            return view('aplikasi.edit', compact('aplikasi', 'atributs', 'existingAtributs'));
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Aplikasi tidak ditemukan'], 404);
+            Log::error('Error in editByNama: ' . $e->getMessage());
+            return redirect()->route('aplikasi.index')
+                ->with('error', 'Gagal memuat data aplikasi');
         }
     }
 
