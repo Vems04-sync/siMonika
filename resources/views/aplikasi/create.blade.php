@@ -96,6 +96,43 @@
                             </select>
                         </div>
                     </div>
+                    <div class="row g-3 mt-3">
+                        <div class="col-12">
+                            <h5>Atribut Tambahan</h5>
+                            @foreach($atributs as $atribut)
+                                <div class="mb-3">
+                                    <label for="atribut_{{ $atribut->id_atribut }}" class="form-label">
+                                        {{ $atribut->nama_atribut }}
+                                        <small class="text-muted">({{ ucfirst($atribut->tipe_data) }})</small>
+                                    </label>
+                                    @switch($atribut->tipe_data)
+                                        @case('date')
+                                            <input type="date" 
+                                                   class="form-control" 
+                                                   id="atribut_{{ $atribut->id_atribut }}"
+                                                   name="atribut[{{ $atribut->id_atribut }}]">
+                                            @break
+                                        @case('number')
+                                            <input type="number" 
+                                                   class="form-control" 
+                                                   id="atribut_{{ $atribut->id_atribut }}"
+                                                   name="atribut[{{ $atribut->id_atribut }}]">
+                                            @break
+                                        @case('text')
+                                            <textarea class="form-control" 
+                                                    id="atribut_{{ $atribut->id_atribut }}"
+                                                    name="atribut[{{ $atribut->id_atribut }}]"></textarea>
+                                            @break
+                                        @default
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   id="atribut_{{ $atribut->id_atribut }}"
+                                                   name="atribut[{{ $atribut->id_atribut }}]">
+                                    @endswitch
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                     <div class="text-end mt-4">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary">Simpan</button>

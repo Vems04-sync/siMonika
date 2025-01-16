@@ -10,15 +10,14 @@ class AtributTambahan extends Model
     protected $primaryKey = 'id_atribut';
     
     protected $fillable = [
-        'id_aplikasi',
         'nama_atribut',
-        'nilai_atribut'
+        'tipe_data'
     ];
 
-    protected $guarded = ['id_atribut'];
-
-    public function aplikasi()
+    public function aplikasis()
     {
-        return $this->belongsTo(Aplikasi::class, 'id_aplikasi', 'id_aplikasi');
+        return $this->belongsToMany(Aplikasi::class, 'aplikasi_atribut', 'id_atribut', 'id_aplikasi')
+                    ->withPivot('nilai_atribut')
+                    ->withTimestamps();
     }
 }

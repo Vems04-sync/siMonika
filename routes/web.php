@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AtributController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboard;
+use App\Http\Controllers\AtributTambahanController;
 
 // Route untuk guest (belum login)
 Route::middleware(['guest', 'throttle:6,1'])->group(function () {
@@ -92,3 +93,5 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])
 Route::post('/atribut/check-duplicate', [AtributController::class, 'checkDuplicate'])->name('atribut.check-duplicate');
 
 Route::get('/atribut/{id}/edit', [AtributController::class, 'edit'])->name('atribut.edit');
+
+Route::resource('atribut', AtributTambahanController::class);

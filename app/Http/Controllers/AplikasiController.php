@@ -31,7 +31,8 @@ class AplikasiController extends Controller
     public function index()
     {
         $aplikasis = Aplikasi::all();
-        return view('aplikasi.index', compact('aplikasis'));
+        $atributs = AtributTambahan::all();
+        return view('aplikasi.index', compact('aplikasis', 'atributs'));
     }
 
     /**
@@ -39,7 +40,8 @@ class AplikasiController extends Controller
      */
     public function create()
     {
-        return view('aplikasi.create');
+        $atributs = AtributTambahan::all();
+        return view('aplikasi.create', compact('atributs'));
     }
 
     /**
@@ -61,7 +63,16 @@ class AplikasiController extends Controller
             'status_pemakaian' => 'required'
         ]);
 
-        Aplikasi::create($validatedData);
+        $aplikasi = Aplikasi::create($request->except('atribut'));
+
+        // Simpan nilai atribut tambahan
+        if ($request->has('atribut')) {
+            foreach ($request->atribut as $id_atribut => $nilai) {
+                $aplikasi->atributTambahans()->attach($id_atribut, [
+                    'nilai_atribut' => $nilai
+                ]);
+            }
+        }
 
         $this->catatAktivitas(
             'Menambahkan aplikasi baru',

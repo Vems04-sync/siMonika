@@ -551,4 +551,60 @@ $('#statusFilter').on('change', function() {
             $(this).hide();
         }
     });
+});
+
+// Fungsi untuk memuat detail atribut
+function loadAtributDetail(atributId) {
+    $.get(`/atribut/${atributId}/detail`, function(data) {
+        let html = '';
+        data.aplikasis.forEach(aplikasi => {
+            html += `
+                <tr>
+                    <td>${aplikasi.nama}</td>
+                    <td>
+                        <form class="update-nilai-form" data-aplikasi-id="${aplikasi.id_aplikasi}" data-atribut-id="${atributId}">
+                            <input type="text" class="form-control form-control-sm" 
+                                   value="${aplikasi.pivot.nilai_atribut || ''}" 
+                                   name="nilai_atribut">
+                        </form>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary save-nilai">Simpan</button>
+                    </td>
+                </tr>
+            `;
+        });
+        $('#detailAtributContent').html(html);
+    });
+}
+
+// Event handler untuk modal
+$('#detailAtributModal').on('show.bs.modal', function (event) {
+    const button = $(event.relatedTarget);
+    const atributId = button.data('atribut-id');
+    loadAtributDetail(atributId);
+});
+
+// Event handler untuk menyimpan nilai
+$(document).on('click', '.save-nilai', function() {
+    const form = $(this).closest('tr').find('form');
+    const aplikasiId = form.data('aplikasi-id');
+    const atributId = form.data('atribut-id');
+    const nilai = form.find('input[name="nilai_atribut"]').val();
+
+    $.ajax({
+        url: `/atribut/${atributId}`,
+        method: 'PUT',
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            id_aplikasi: aplikasiId,
+            nilai_atribut: nilai
+        },
+        success: function(response) {
+            toastr.success('Nilai berhasil diperbarui');
+        },
+        error: function() {
+            toastr.error('Gagal memperbarui nilai');
+        }
+    });
 }); 

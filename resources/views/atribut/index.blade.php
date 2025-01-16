@@ -92,59 +92,44 @@
                 </div>
                 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle table-sm">
+                    <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th scope="col" class="text-center" style="width: 50px">No</th>
-                                <th scope="col" style="width: 25%">Nama Aplikasi</th>
-                                <th scope="col" style="width: 25%">Nama Atribut</th>
-                                <th scope="col">Nilai Atribut</th>
-                                <th scope="col" style="width: 180px">Aksi</th>
+                                <th>No</th>
+                                <th>Nama Atribut</th>
+                                <th>Jumlah Aplikasi</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($atributs as $index => $atribut)
                             <tr>
-                                <td class="text-center">{{ $index + 1 }}</td>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $atribut->nama_atribut }}</td>
+                                <td>{{ $atribut->aplikasis->count() }}</td>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="app-icon me-2 bg-primary bg-opacity-10 p-1 rounded">
-                                            <i class="bi bi-app text-primary"></i>
-                                        </div>
-                                        <span class="small">{{ $atribut->aplikasi->nama }}</span>
-                                    </div>
-                                </td>
-                                <td class="small">{{ $atribut->nama_atribut }}</td>
-                                <td class="small">{{ $atribut->nilai_atribut ?? '-' }}</td>
-                                <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <button class="btn btn-sm btn-outline-primary" 
-                                                data-id="{{ $atribut->id_atribut }}"
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#editAtributModal">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        <button type="button" 
-                                                class="btn btn-sm btn-outline-danger" 
-                                                onclick="deleteAtribut('{{ $atribut->id_atribut }}')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
+                                    <button class="btn btn-sm btn-info" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#detailAtributModal"
+                                            data-atribut-id="{{ $atribut->id_atribut }}">
+                                        Detail
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" 
+                                            onclick="deleteAtribut({{ $atribut->id_atribut }})">
+                                        Hapus
+                                    </button>
                                 </td>
                             </tr>
-                            @empty
+                        @empty
                             <tr>
-                                <td colspan="5" class="text-center py-3">
-                                    <i class="bi bi-inbox text-muted d-block mb-1" style="font-size: 1.5rem;"></i>
-                                    <span class="text-muted small">Belum ada data atribut</span>
-                                </td>
+                                <td colspan="4" class="text-center">Belum ada atribut</td>
                             </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
 
         <!-- Modal Tambah Atribut -->
         <div class="modal fade" id="tambahAtributModal" tabindex="-1">
@@ -153,7 +138,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title">
                             <i class="bi bi-plus-circle me-2"></i>
-                            Tambah Atribut
+                            Tambah Atribut Global
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
@@ -161,28 +146,24 @@
                         @csrf
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label class="form-label">Aplikasi</label>
-                                <select name="id_aplikasi" class="form-select select2-with-search" required>
-                                    <option value="">Pilih Aplikasi</option>
-                                    @foreach($aplikasis as $aplikasi)
-                                        <option value="{{ $aplikasi->id_aplikasi }}">
-                                            {{ $aplikasi->nama }} 
-                                            @if($aplikasi->versi)
-                                                (v{{ $aplikasi->versi }})
-                                            @endif
-                                        </option>
-                                    @endforeach
+                                <label class="form-label">Nama Atribut</label>
+                                <input type="text" name="nama_atribut" class="form-control" required>
+                                <div class="form-text">Nama atribut yang akan ditambahkan ke semua aplikasi</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tipe Data</label>
+                                <select name="tipe_data" class="form-select" required>
+                                    <option value="">Pilih Tipe Data</option>
+                                    <option value="varchar">Text (VARCHAR)</option>
+                                    <option value="number">Angka (NUMBER)</option>
+                                    <option value="date">Tanggal (DATE)</option>
+                                    <option value="text">Text Panjang (TEXT)</option>
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Nama Atribut</label>
-                                <input type="text" name="nama_atribut" class="form-control" required 
-                                       data-validation-url="{{ route('atribut.check-duplicate') }}">
-                                <div class="invalid-feedback">Atribut ini sudah ada untuk aplikasi yang dipilih</div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Nilai Atribut</label>
-                                <input type="text" name="nilai_atribut" class="form-control">
+                                <label class="form-label">Nilai Default (Opsional)</label>
+                                <input type="text" name="nilai_default" class="form-control">
+                                <div class="form-text">Nilai awal yang akan diterapkan ke semua aplikasi</div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -229,6 +210,34 @@
                             <button type="submit" class="btn btn-primary">Update</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Detail Atribut -->
+        <div class="modal fade" id="detailAtributModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Detail Atribut</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Aplikasi</th>
+                                        <th>Nilai</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detailAtributContent">
+                                    <!-- Diisi dengan JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
