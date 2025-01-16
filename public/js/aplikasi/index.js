@@ -319,59 +319,55 @@ function addApp() {
 
 // Update fungsi editApp
 function editApp(nama) {
-    resetForm();
-    
+    console.log('Edit clicked for:', nama); // Debug
+
     $.ajax({
-        url: `/aplikasi/edit/${nama}`,
+        url: `/aplikasi/detail/${nama}`,
         method: 'GET',
-        success: function(data) {
-            $('#modalTitle').text('Edit Aplikasi');
-            $('#nama').val(data.nama);
-            
-            if (!$('#original_nama').length) {
-                $('<input>').attr({
-                    type: 'hidden',
-                    name: 'original_nama',
-                    id: 'original_nama',
-                    value: data.nama
-                }).appendTo('#appForm');
-            } else {
-                $('#original_nama').val(data.nama);
-            }
-            
-            $('#opd').val(data.opd);
-            $('#uraian').val(data.uraian || '');
-            $('#tahun_pembuatan').val(data.tahun_pembuatan || '');
-            $('#jenis').val(data.jenis);
-            $('#basis_aplikasi').val(data.basis_aplikasi);
-            $('#bahasa_framework').val(data.bahasa_framework);
-            $('#database').val(data.database);
-            $('#pengembang').val(data.pengembang);
-            $('#lokasi_server').val(data.lokasi_server);
-            $('#status_pemakaian').val(data.status_pemakaian);
-
-            $('#appForm').attr('action', `/aplikasi/${nama}`);
-            
-            if (!$('#_method').length) {
-                $('<input>').attr({
-                    type: 'hidden',
-                    name: '_method',
-                    id: '_method',
-                    value: 'PUT'
-                }).appendTo('#appForm');
-            }
-
-            $('#appModal').modal('show');
+        beforeSend: function() {
+            console.log('Sending request to:', `/aplikasi/detail/${nama}`);
         },
-        error: function() {
-            Swal.fire({
-                title: 'Error',
-                text: 'Gagal mengambil data aplikasi',
-                icon: 'error'
-            });
+        success: function(response) {
+            console.log('Response received:', response); // Debug
+            const aplikasi = response.aplikasi;
+            
+            // Isi form dengan data yang ada
+            $('#editModal [name="nama"]').val(aplikasi.nama);
+            $('#editModal [name="opd"]').val(aplikasi.opd);
+            $('#editModal [name="uraian"]').val(aplikasi.uraian);
+            $('#editModal [name="tahun_pembuatan"]').val(aplikasi.tahun_pembuatan);
+            $('#editModal [name="jenis"]').val(aplikasi.jenis);
+            $('#editModal [name="basis_aplikasi"]').val(aplikasi.basis_aplikasi);
+            $('#editModal [name="bahasa_framework"]').val(aplikasi.bahasa_framework);
+            $('#editModal [name="database"]').val(aplikasi.database);
+            $('#editModal [name="pengembang"]').val(aplikasi.pengembang);
+            $('#editModal [name="lokasi_server"]').val(aplikasi.lokasi_server);
+            $('#editModal [name="status_pemakaian"]').val(aplikasi.status_pemakaian);
+
+            // Tampilkan modal sebelum mengisi atribut
+            $('#editModal').modal('show');
+
+            // Isi atribut tambahan
+            if (response.atribut_tambahan) {
+                response.atribut_tambahan.forEach(function(atribut) {
+                    $(`#editModal [name="atribut[${atribut.id_atribut}]"]`).val(atribut.nilai_atribut);
+                });
+            }
+        },
+        error: function(xhr) {
+            console.error('Error:', xhr);
         }
     });
 }
+
+// Pasang event listener
+$(document).ready(function() {
+    $(document).on('click', '.btn-edit', function() {
+        const nama = $(this).data('nama');
+        console.log('Button clicked, nama:', nama); // Debug
+        editApp(nama);
+    });
+});
 
 // Konfigurasi global toastr
 toastr.options = {
