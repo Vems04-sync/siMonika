@@ -28,8 +28,8 @@ let currentPage = 1;
 
 function setupPagination() {
     const table = document.querySelector('#appTable tbody');
-    const rows = table.querySelectorAll('tr');
-    const pageCount = Math.ceil(rows.length / itemsPerPage);
+    const visibleRows = Array.from(table.querySelectorAll('tr')).filter(row => row.style.display !== 'none');
+    const pageCount = Math.ceil(visibleRows.length / itemsPerPage);
 
     let paginationContainer = document.querySelector('#tablePagination');
     if (!paginationContainer) {
@@ -37,6 +37,11 @@ function setupPagination() {
         paginationContainer.id = 'tablePagination';
         paginationContainer.className = 'd-flex justify-content-end mt-3';
         document.querySelector('#appTable').appendChild(paginationContainer);
+    }
+
+    // Pastikan currentPage tidak melebihi pageCount
+    if (currentPage > pageCount) {
+        currentPage = pageCount || 1;
     }
 
     let paginationHtml = '<ul class="pagination">';
@@ -62,6 +67,7 @@ function setupPagination() {
 
     paginationContainer.innerHTML = paginationHtml;
 
+    // Update event listeners untuk pagination
     const paginationLinks = paginationContainer.querySelectorAll('.page-link');
     paginationLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -78,32 +84,53 @@ function setupPagination() {
 
 function showTablePage() {
     const table = document.querySelector('#appTable tbody');
-    const rows = table.querySelectorAll('tr');
-    rows.forEach(row => row.style.display = 'none');
+    const visibleRows = Array.from(table.querySelectorAll('tr')).filter(row => row.style.display !== 'none');
+    
+    // Sembunyikan semua baris terlebih dahulu
+    visibleRows.forEach(row => row.style.display = 'none');
+    
+    // Tampilkan hanya baris yang sesuai dengan halaman saat ini
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
-    for (let i = start; i < end && i < rows.length; i++) {
-        rows[i].style.display = '';
+    
+    for (let i = start; i < end && i < visibleRows.length; i++) {
+        visibleRows[i].style.display = '';
     }
 }
 
 function filterApps() {
     const searchTerm = document.getElementById('searchApp').value.toLowerCase();
     const statusFilter = document.getElementById('statusFilter').value;
+    const jenisFilter = document.getElementById('jenisFilter').value;
+    const basisFilter = document.getElementById('basisFilter').value;
+    const bahasaFilter = document.getElementById('bahasaFilter').value;
+    const databaseFilter = document.getElementById('databaseFilter').value;
+    const pengembangFilter = document.getElementById('pengembangFilter').value;
+    const lokasiFilter = document.getElementById('lokasiFilter').value;
 
     // Filter cards
     const cards = document.querySelectorAll('.app-card');
     cards.forEach(card => {
-        // Hanya mencari berdasarkan nama aplikasi
         const title = card.querySelector('.card-title').textContent.toLowerCase();
         const status = card.dataset.status;
+        const jenis = card.dataset.jenis;
+        const basis = card.dataset.basis;
+        const bahasa = card.dataset.bahasa;
+        const database = card.dataset.database;
+        const pengembang = card.dataset.pengembang;
+        const lokasi = card.dataset.lokasi;
         
-        // Cek apakah searchTerm cocok dengan nama aplikasi
         const matchesSearch = !searchTerm || title.includes(searchTerm);
         const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesJenis = !jenisFilter || jenis.toLowerCase() === jenisFilter.toLowerCase();
+        const matchesBasis = !basisFilter || basis.toLowerCase() === basisFilter.toLowerCase();
+        const matchesBahasa = !bahasaFilter || bahasa.toLowerCase() === bahasaFilter.toLowerCase();
+        const matchesDatabase = !databaseFilter || database.toLowerCase() === databaseFilter.toLowerCase();
+        const matchesPengembang = !pengembangFilter || pengembang.toLowerCase() === pengembangFilter.toLowerCase();
+        const matchesLokasi = !lokasiFilter || lokasi.toLowerCase() === lokasiFilter.toLowerCase();
         
-        // Tampilkan/sembunyikan card berdasarkan filter
-        if (matchesSearch && matchesStatus) {
+        if (matchesSearch && matchesStatus && matchesJenis && matchesBasis && 
+            matchesBahasa && matchesDatabase && matchesPengembang && matchesLokasi) {
             card.closest('.col-md-6').style.display = '';
         } else {
             card.closest('.col-md-6').style.display = 'none';
@@ -113,31 +140,74 @@ function filterApps() {
     // Filter table rows
     const rows = document.querySelectorAll('#appTable tbody tr');
     rows.forEach(row => {
-        // Hanya ambil nama aplikasi dari kolom pertama
+        // Mengambil nilai dari sel tabel dengan lebih tepat
         const appName = row.cells[0].textContent.toLowerCase();
         const status = row.querySelector('.status-badge').textContent.trim().toLowerCase() === 'aktif' ? 'active' : 'unused';
         
-        // Cek apakah searchTerm cocok dengan nama aplikasi
+        // Perbaikan cara mengambil nilai dari sel tabel
+        const jenis = row.cells[4].textContent.trim(); // Kolom Jenis
+        const basis = row.cells[5].querySelector('i')?.nextSibling?.textContent.trim() || row.cells[5].textContent.trim(); // Kolom Basis Aplikasi
+        const bahasa = row.cells[6].textContent.trim(); // Kolom Bahasa/Framework
+        const database = row.cells[7].textContent.trim(); // Kolom Database
+        const pengembang = row.cells[8].textContent.trim(); // Kolom Pengembang
+        const lokasi = row.cells[9].textContent.trim(); // Kolom Lokasi Server
+        
         const matchesSearch = !searchTerm || appName.includes(searchTerm);
         const matchesStatus = !statusFilter || (
             (statusFilter === 'active' && status === 'active') || 
             (statusFilter === 'unused' && status === 'unused')
         );
+        
+        // Perbandingan yang lebih tepat untuk setiap filter
+        const matchesJenis = !jenisFilter || jenis.toLowerCase().includes(jenisFilter.toLowerCase());
+        const matchesBasis = !basisFilter || basis.toLowerCase().includes(basisFilter.toLowerCase());
+        const matchesBahasa = !bahasaFilter || bahasa.toLowerCase().includes(bahasaFilter.toLowerCase());
+        const matchesDatabase = !databaseFilter || database.toLowerCase().includes(databaseFilter.toLowerCase());
+        const matchesPengembang = !pengembangFilter || pengembang.toLowerCase().includes(pengembangFilter.toLowerCase());
+        const matchesLokasi = !lokasiFilter || lokasi.toLowerCase().includes(lokasiFilter.toLowerCase());
 
-        row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+        const shouldShow = matchesSearch && matchesStatus && matchesJenis && 
+            matchesBasis && matchesBahasa && matchesDatabase && 
+            matchesPengembang && matchesLokasi;
+            
+        row.style.display = shouldShow ? '' : 'none';
     });
+
+    // Reset dan update pagination setelah filtering
+    if (!isCardView) {
+        currentPage = 1; // Reset ke halaman pertama
+        setupPagination();
+        showTablePage();
+    }
 }
 
-// Event Listeners dengan debounce untuk performa lebih baik
+// Event listeners untuk semua filter
 document.addEventListener('DOMContentLoaded', function() {
-    let searchTimeout;
+    const filters = [
+        'statusFilter', 'jenisFilter', 'basisFilter',
+        'bahasaFilter', 'databaseFilter', 'pengembangFilter', 'lokasiFilter'
+    ];
     
-    document.getElementById('searchApp').addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(filterApps, 300); // Delay 300ms
+    // Tambahkan event listener untuk setiap filter
+    filters.forEach(filterId => {
+        const element = document.getElementById(filterId);
+        if (element) {
+            element.addEventListener('change', filterApps);
+        }
     });
-    
-    document.getElementById('statusFilter').addEventListener('change', filterApps);
+
+    // Event listener untuk search dengan debounce
+    let searchTimeout;
+    const searchInput = document.getElementById('searchApp');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(filterApps, 300);
+        });
+    }
+
+    // Inisialisasi filter saat halaman dimuat
+    filterApps();
 });
 
 // CRUD Operations

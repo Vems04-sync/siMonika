@@ -61,6 +61,54 @@
                             <option value="unused">Tidak Aktif</option>
                         </select>
                     </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="jenisFilter">
+                            <option value="">Semua Jenis</option>
+                            @foreach($aplikasis->pluck('jenis')->unique() as $jenis)
+                                <option value="{{ $jenis }}">{{ $jenis }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="basisFilter">
+                            <option value="">Semua Basis Aplikasi</option>
+                            <option value="Website">Website</option>
+                            <option value="Desktop">Desktop</option>
+                            <option value="Mobile">Mobile</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="bahasaFilter">
+                            <option value="">Semua Bahasa/Framework</option>
+                            @foreach($aplikasis->pluck('bahasa_framework')->unique() as $bahasa)
+                                <option value="{{ $bahasa }}">{{ $bahasa }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="databaseFilter">
+                            <option value="">Semua Database</option>
+                            @foreach($aplikasis->pluck('database')->unique() as $database)
+                                <option value="{{ $database }}">{{ $database }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="pengembangFilter">
+                            <option value="">Semua Pengembang</option>
+                            @foreach($aplikasis->pluck('pengembang')->unique() as $pengembang)
+                                <option value="{{ $pengembang }}">{{ $pengembang }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="lokasiFilter">
+                            <option value="">Semua Lokasi Server</option>
+                            @foreach($aplikasis->pluck('lokasi_server')->unique() as $lokasi)
+                                <option value="{{ $lokasi }}">{{ $lokasi }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="col-md-8">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
@@ -74,7 +122,13 @@
         <div class="row g-4" id="appGrid">
             @foreach ($aplikasis as $aplikasi)
                 <div class="col-md-6 col-lg-4 app-card"
-                    data-status="{{ $aplikasi->status_pemakaian == 'Aktif' ? 'active' : 'unused' }}">
+                    data-status="{{ $aplikasi->status_pemakaian == 'Aktif' ? 'active' : 'unused' }}"
+                    data-jenis="{{ $aplikasi->jenis }}"
+                    data-basis="{{ $aplikasi->basis_aplikasi }}"
+                    data-bahasa="{{ $aplikasi->bahasa_framework }}"
+                    data-database="{{ $aplikasi->database }}"
+                    data-pengembang="{{ $aplikasi->pengembang }}"
+                    data-lokasi="{{ $aplikasi->lokasi_server }}">
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
