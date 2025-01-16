@@ -29,8 +29,7 @@ class Aplikasi extends Model
     public function atributTambahans()
     {
         return $this->belongsToMany(AtributTambahan::class, 'aplikasi_atribut', 'id_aplikasi', 'id_atribut')
-                    ->withPivot('nilai_atribut')
-                    ->withTimestamps();
+                    ->withPivot('nilai_atribut');
     }
 
     // Method untuk menambah atribut ke semua aplikasi

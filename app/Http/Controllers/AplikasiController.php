@@ -343,21 +343,37 @@ class AplikasiController extends Controller
     public function detail($nama)
     {
         try {
+            // Ambil data aplikasi
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-            // Debug
-            info('ID Aplikasi: ' . $aplikasi->id_aplikasi);
-
-            $atribut = AtributTambahan::where('id_aplikasi', $aplikasi->id_aplikasi)->get();
-            // Debug
-            info('Atribut: ' . $atribut);
+            
+            // Ambil atribut tambahan dengan nilai dari tabel pivot
+            $atributTambahan = DB::table('aplikasi_atribut')
+                ->join('atribut_tambahans', 'aplikasi_atribut.id_atribut', '=', 'atribut_tambahans.id_atribut')
+                ->where('aplikasi_atribut.id_aplikasi', $aplikasi->id_aplikasi)
+                ->select(
+                    'atribut_tambahans.nama_atribut',
+                    'atribut_tambahans.tipe_data',
+                    'aplikasi_atribut.nilai_atribut'
+                )
+                ->get();
 
             return response()->json([
+                'success' => true,
                 'aplikasi' => $aplikasi,
-                'atribut' => $atribut
+                'atribut_tambahan' => $atributTambahan,
+                'debug' => [
+                    'id_aplikasi' => $aplikasi->id_aplikasi,
+                    'count_atribut' => $atributTambahan->count()
+                ]
             ]);
+
         } catch (\Exception $e) {
-            info('Error di detail: ' . $e->getMessage());
-            return response()->json(['error' => 'Data tidak ditemukan'], 404);
+            Log::error('Error di detail: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Data tidak ditemukan',
+                'message' => $e->getMessage()
+            ], 404);
         }
     }
 

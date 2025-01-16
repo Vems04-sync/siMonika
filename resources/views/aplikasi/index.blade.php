@@ -250,9 +250,7 @@
                                     <td>{{ $aplikasi->lokasi_server }}</td>
                                     <td class="text-center pe-4">
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-sm btn-outline-primary"
-                                                onclick="viewAppDetails('{{ $aplikasi->nama }}')"
-                                                title="Lihat Detail">
+                                            <button class="btn btn-sm btn-info btn-detail" data-nama="{{ $aplikasi->nama }}">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                             <button class="btn btn-sm btn-outline-secondary"
@@ -353,62 +351,51 @@
     </div>
 
     <!-- Modal Detail -->
-    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalTitle" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="detailModalTitle">Detail Aplikasi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">Detail Aplikasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body py-4">
-                    <!-- Add loading state -->
+                <div class="modal-body">
+                    <!-- Loading state -->
                     <div id="loadingState" class="text-center d-none">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
+                        <div class="spinner-border text-primary"></div>
                     </div>
 
-                    <!-- Add error state -->
+                    <!-- Error state -->
                     <div id="errorState" class="alert alert-danger d-none">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <span id="errorMessage">Terjadi kesalahan saat mengambil data</span>
+                        <span id="errorMessage"></span>
                     </div>
 
                     <!-- Content state -->
                     <div id="contentState">
                         <div class="row">
-                            <!-- Detail Aplikasi - Sisi Kiri -->
+                            <!-- Detail Aplikasi -->
                             <div class="col-md-7">
-                                <h6 class="mb-3 small fw-bold">Informasi Aplikasi</h6>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-sm small align-middle">
-                                        <tbody id="detailTable" class="small">
-                                            <!-- Data aplikasi akan diisi secara dinamis -->
+                                <h6 class="mb-3">Informasi Aplikasi</h6>
+                                <table class="table table-bordered" id="detailTable">
+                                </table>
+                            </div>
+
+                            <!-- Atribut Tambahan -->
+                            <div class="col-md-5">
+                                <h6 class="mb-3">Atribut Tambahan</h6>
+                                <div id="atributContent">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Atribut</th>
+                                                <th>Nilai</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="atributTable">
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-
-                            <!-- Atribut Tambahan - Sisi Kanan -->
-                            <div class="col-md-5">
-                                <h6 class="mb-3 small fw-bold">Atribut Tambahan</h6>
-                                <div id="atributContent">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-sm small align-middle">
-                                            <thead>
-                                                <tr>
-                                                    <th class="text-center">Nama Atribut</th>
-                                                    <th class="text-center">Nilai</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="atributTable" class="small">
-                                                <!-- Atribut akan diisi secara dinamis -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div id="noAtributMessage" class="text-muted text-center p-2 small">
-                                    <i class="bi bi-info-circle me-2"></i>Tidak ada atribut tambahan
+                                <div id="noAtributMessage" class="text-muted text-center d-none">
+                                    Tidak ada atribut tambahan
                                 </div>
                             </div>
                         </div>
