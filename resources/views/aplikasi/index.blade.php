@@ -176,9 +176,8 @@
                         </div>
                         <div class="card-footer bg-transparent border-top-0">
                             <div class="d-flex justify-content-between">
-                                <button class="btn btn-outline-primary btn-sm"
-                                    onclick="viewAppDetails('{{ $aplikasi->nama }}')">
-                                    <i class="bi bi-eye me-1"></i>Detail
+                                <button class="btn btn-info btn-detail" data-id="{{ $aplikasi->id_aplikasi }}" data-bs-toggle="modal" data-bs-target="#detailAplikasiModal">
+                                    <i class="bi bi-eye"></i>
                                 </button>
                                 <div>
                                     <button class="btn btn-sm btn-warning btn-edit"
@@ -350,7 +349,7 @@
     </div>
 
     <!-- Modal Detail -->
-    <div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal fade" id="detailAplikasiModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -358,47 +357,66 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Loading state -->
-                    <div id="loadingState" class="text-center d-none">
-                        <div class="spinner-border text-primary"></div>
-                    </div>
-
-                    <!-- Error state -->
-                    <div id="errorState" class="alert alert-danger d-none">
-                        <span id="errorMessage"></span>
-                    </div>
-
-                    <!-- Content state -->
-                    <div id="contentState">
-                        <div class="row">
-                            <!-- Detail Aplikasi -->
-                            <div class="col-md-7">
-                                <h6 class="mb-3">Informasi Aplikasi</h6>
-                                <table class="table table-bordered" id="detailTable">
-                                </table>
-                            </div>
-
-                            <!-- Atribut Tambahan -->
-                            <div class="col-md-5">
-                                <h6 class="mb-3">Atribut Tambahan</h6>
-                                <div id="atributContent">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>Nama Atribut</th>
-                                                <th>Nilai</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="atributTable">
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div id="noAtributMessage" class="text-muted text-center d-none">
-                                    Tidak ada atribut tambahan
-                                </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Informasi Aplikasi</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td width="40%">Nama</td>
+                                    <td id="detail-nama"></td>
+                                </tr>
+                                <tr>
+                                    <td>OPD</td>
+                                    <td id="detail-opd"></td>
+                                </tr>
+                                <tr>
+                                    <td>Uraian</td>
+                                    <td id="detail-uraian"></td>
+                                </tr>
+                                <tr>
+                                    <td>Tahun Pembuatan</td>
+                                    <td id="detail-tahun"></td>
+                                </tr>
+                                <tr>
+                                    <td>Jenis</td>
+                                    <td id="detail-jenis"></td>
+                                </tr>
+                                <tr>
+                                    <td>Basis Aplikasi</td>
+                                    <td id="detail-basis"></td>
+                                </tr>
+                                <tr>
+                                    <td>Bahasa/Framework</td>
+                                    <td id="detail-bahasa"></td>
+                                </tr>
+                                <tr>
+                                    <td>Database</td>
+                                    <td id="detail-database"></td>
+                                </tr>
+                                <tr>
+                                    <td>Pengembang</td>
+                                    <td id="detail-pengembang"></td>
+                                </tr>
+                                <tr>
+                                    <td>Lokasi Server</td>
+                                    <td id="detail-server"></td>
+                                </tr>
+                                <tr>
+                                    <td>Status Pemakaian</td>
+                                    <td id="detail-status"></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Atribut Tambahan</h6>
+                            <div id="atribut-tambahan-content">
+                                <!-- Atribut tambahan akan diload di sini -->
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
@@ -434,6 +452,63 @@
 
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+    $(document).ready(function() {
+        $(document).on('click', '.btn-detail', function() {
+            const id = $(this).data('id');
+            console.log('ID yang dikirim:', id); // Debug ID
+            
+            $.get(`/aplikasi/${id}`, function(response) {
+                console.log('Response:', response); // Debug response
+                
+                if (response.success) {
+                    const app = response.aplikasi;
+                    console.log('Data aplikasi:', app); // Debug data aplikasi
+                    
+                    // Update informasi aplikasi
+                    $('#detail-nama').text(app.nama);
+                    $('#detail-opd').text(app.opd);
+                    $('#detail-uraian').text(app.uraian);
+                    $('#detail-tahun').text(app.tahun_pembuatan);
+                    $('#detail-jenis').text(app.jenis);
+                    $('#detail-basis').text(app.basis_aplikasi);
+                    $('#detail-bahasa').text(app.bahasa_framework);
+                    $('#detail-database').text(app.database);
+                    $('#detail-pengembang').text(app.pengembang);
+                    $('#detail-server').text(app.lokasi_server);
+                    $('#detail-status').text(app.status_pemakaian);
+                    
+                    console.log('Atribut tambahan:', response.atribut_tambahan); // Debug atribut
+                    
+                    // Update atribut tambahan
+                    let atributHtml = '<table class="table table-borderless">';
+                    if (response.atribut_tambahan && response.atribut_tambahan.length > 0) {
+                        response.atribut_tambahan.forEach(atribut => {
+                            atributHtml += `
+                                <tr>
+                                    <td width="40%">${atribut.nama_atribut}</td>
+                                    <td>${atribut.nilai_atribut || '-'}</td>
+                                </tr>`;
+                        });
+                    } else {
+                        atributHtml += '<tr><td colspan="2">Tidak ada atribut tambahan</td></tr>';
+                    }
+                    atributHtml += '</table>';
+                    $('#atribut-tambahan-content').html(atributHtml);
+                    
+                    $('#detailAplikasiModal').modal('show');
+                } else {
+                    console.error('Error:', response); // Debug error
+                    toastr.error('Gagal memuat detail aplikasi');
+                }
+            }).fail(function(xhr) {
+                console.error('Ajax error:', xhr); // Debug ajax error
+                toastr.error('Terjadi kesalahan saat memuat data');
+            });
+        });
+    });
+    </script>
 </body>
 
 </html>

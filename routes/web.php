@@ -31,14 +31,17 @@ Route::middleware(['auth'])->group(function () {
     // Route::resource('aplikasi', AplikasiController::class);  // Comment atau hapus ini untuk sementara
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Definisikan route secara manual
-    Route::get('/aplikasi', [AplikasiController::class, 'index'])->name('aplikasi.index');
-    Route::get('/aplikasi/create', [AplikasiController::class, 'create'])->name('aplikasi.create');
-    Route::post('/aplikasi', [AplikasiController::class, 'store'])->name('aplikasi.store');
-    Route::get('/aplikasi/edit/{nama}', [AplikasiController::class, 'editByNama'])->name('aplikasi.editByNama');
-    Route::put('/aplikasi/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
-    Route::put('/aplikasi/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
-    Route::delete('/aplikasi/delete/{nama}', [AplikasiController::class, 'destroyByNama'])->name('aplikasi.destroyByNama');
+    // Definisikan route secara manual dan terorganisir
+    Route::prefix('aplikasi')->group(function () {
+        Route::get('/', [AplikasiController::class, 'index'])->name('aplikasi.index');
+        Route::get('/create', [AplikasiController::class, 'create'])->name('aplikasi.create');
+        Route::post('/', [AplikasiController::class, 'store'])->name('aplikasi.store');
+        Route::get('/edit/{nama}', [AplikasiController::class, 'editByNama'])->name('aplikasi.editByNama');
+        Route::put('/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
+        Route::delete('/delete/{nama}', [AplikasiController::class, 'destroyByNama'])->name('aplikasi.destroyByNama');
+        Route::get('/detail/{nama}', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
+        Route::get('/export', [AplikasiController::class, 'export'])->name('aplikasi.export');
+    });
 
     Route::get('/chart-data', [AplikasiController::class, 'getChartData']);
 
@@ -46,9 +49,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
-
-    // route untuk detail aplikasi
-    Route::get('/aplikasi/detail/{nama}', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
 
     Route::get('/last-update', [DashboardController::class, 'getLastUpdate'])->name('last.update');
 
@@ -99,3 +99,12 @@ Route::resource('atribut', AtributTambahanController::class);
 // Route untuk aplikasi
 Route::get('/aplikasi/{nama}/edit', [AplikasiController::class, 'edit'])->name('aplikasi.edit');
 Route::put('/aplikasi/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
+
+Route::get('/atribut/{id}/detail', [AtributController::class, 'detail'])->name('atribut.detail');
+Route::put('/atribut/{id_aplikasi}/nilai', [AtributController::class, 'updateNilai'])
+    ->name('atribut.updateNilai')
+    ->middleware('auth');
+Route::delete('/atribut/{id_aplikasi}/{id_atribut}', [AtributController::class, 'removeFromApp'])->name('atribut.removeFromApp');
+
+// Tambahkan route untuk detail aplikasi
+Route::get('/aplikasi/{id}', [AplikasiController::class, 'show'])->name('aplikasi.show');
