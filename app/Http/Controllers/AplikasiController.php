@@ -15,6 +15,7 @@ use App\Traits\CatatAktivitas;
 use App\Models\LogAktivitas;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class AplikasiController extends Controller
 {
@@ -49,40 +50,48 @@ class AplikasiController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nama' => 'required|unique:aplikasis,nama',
-            'opd' => 'required',
-            'uraian' => 'nullable',
-            'tahun_pembuatan' => 'nullable|date',
-            'jenis' => 'required',
-            'basis_aplikasi' => 'required',
-            'bahasa_framework' => 'required',
-            'database' => 'required',
-            'pengembang' => 'required',
-            'lokasi_server' => 'required',
-            'status_pemakaian' => 'required'
-        ]);
+        try {
+            $validated = $request->validate([
+                'nama' => 'required|unique:aplikasis,nama',
+                'opd' => 'required',
+                'uraian' => 'nullable',
+                'tahun_pembuatan' => 'required|date',
+                'jenis' => 'required',
+                'basis_aplikasi' => 'required|in:Website,Desktop,Mobile',
+                'bahasa_framework' => 'required',
+                'database' => 'required',
+                'pengembang' => 'required',
+                'lokasi_server' => 'required',
+                'status_pemakaian' => 'required|in:Aktif,Tidak Aktif'
+            ]);
 
-        $aplikasi = Aplikasi::create($request->except('atribut'));
+            $aplikasi = Aplikasi::create($validated);
 
-        // Simpan nilai atribut tambahan
-        if ($request->has('atribut')) {
-            foreach ($request->atribut as $id_atribut => $nilai) {
-                $aplikasi->atributTambahans()->attach($id_atribut, [
-                    'nilai_atribut' => $nilai
-                ]);
-            }
+            // Catat log aktivitas
+            LogAktivitas::create([
+                'user_id' => Auth::id(),
+                'aktivitas' => 'Tambah Aplikasi',
+                'tipe_aktivitas' => 'create',
+                'modul' => 'Aplikasi',
+                'detail' => "Menambahkan aplikasi '{$aplikasi->nama}'"
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Aplikasi berhasil ditambahkan'
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menambahkan aplikasi: ' . $e->getMessage()
+            ], 500);
         }
-
-        $this->catatAktivitas(
-            'Menambahkan aplikasi baru',
-            'create',
-            'aplikasi',
-            'Menambahkan aplikasi: ' . $request->nama
-        );
-
-        return redirect()->route('aplikasi.index')
-            ->with('success', 'Aplikasi berhasil ditambahkan.');
     }
 
     /**
@@ -96,9 +105,17 @@ class AplikasiController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Aplikasi $aplikasi)
+    public function edit($nama)
     {
-        return response()->json($aplikasi);
+        try {
+            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+            return response()->json($aplikasi);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat data aplikasi'
+            ], 404);
+        }
     }
 
     /**
@@ -106,46 +123,62 @@ class AplikasiController extends Controller
      */
     public function update(Request $request, $nama)
     {
-        $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
+        DB::beginTransaction();
+        try {
+            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
 
-        $validatedData = $request->validate([
-            'nama' => ['required', Rule::unique('aplikasis')->ignore($aplikasi->id_aplikasi, 'id_aplikasi')],
-            'opd' => 'required',
-            'uraian' => 'nullable',
-            'tahun_pembuatan' => 'nullable|date',
-            'jenis' => 'required',
-            'basis_aplikasi' => 'required',
-            'bahasa_framework' => 'required',
-            'database' => 'required',
-            'pengembang' => 'required',
-            'lokasi_server' => 'required',
-            'status_pemakaian' => 'required'
-        ]);
+            // Validasi
+            $validated = $request->validate([
+                'nama' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('aplikasis')->ignore($aplikasi->id_aplikasi, 'id_aplikasi')
+                ],
+                'opd' => 'required|string|max:255',
+                'uraian' => 'nullable|string',
+                'tahun_pembuatan' => 'required|date',
+                'jenis' => 'required|string|max:255',
+                'basis_aplikasi' => 'required|in:Website,Desktop,Mobile',
+                'bahasa_framework' => 'required|string|max:255',
+                'database' => 'required|string|max:255',
+                'pengembang' => 'required|string|max:255',
+                'lokasi_server' => 'required|string|max:255',
+                'status_pemakaian' => 'required|in:Aktif,Tidak Aktif'
+            ]);
 
-        $aplikasi->update($request->except('atribut'));
+            // Update aplikasi
+            $aplikasi->update($validated);
 
-        // Update atribut tambahan
-        if ($request->has('atribut')) {
-            // Hapus atribut yang ada sebelumnya
-            $aplikasi->atributTambahans()->detach();
-            
-            // Tambahkan atribut baru
-            foreach ($request->atribut as $id_atribut => $nilai) {
-                $aplikasi->atributTambahans()->attach($id_atribut, [
-                    'nilai_atribut' => $nilai
-                ]);
-            }
+            // Catat log aktivitas
+            LogAktivitas::create([
+                'user_id' => Auth::id(),
+                'aktivitas' => 'Update Aplikasi',
+                'tipe_aktivitas' => 'update',
+                'modul' => 'Aplikasi',
+                'detail' => "Mengupdate aplikasi '{$aplikasi->nama}'"
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Aplikasi berhasil diperbarui'
+            ]);
+        } catch (ValidationException $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui aplikasi: ' . $e->getMessage()
+            ], 500);
         }
-
-        $this->catatAktivitas(
-            'Mengubah aplikasi',
-            'update',
-            'aplikasi',
-            'Mengubah aplikasi: ' . $request->nama
-        );
-
-        return redirect()->route('aplikasi.index')
-            ->with('success', 'Aplikasi berhasil diperbarui.');
     }
 
     /**
@@ -254,19 +287,19 @@ class AplikasiController extends Controller
     {
         try {
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-            
+
             // Debug untuk melihat data
             Log::info('Aplikasi data:', ['aplikasi' => $aplikasi->toArray()]);
-            
-            $atributs = AtributTambahan::whereHas('aplikasis', function($query) use ($aplikasi) {
+
+            $atributs = AtributTambahan::whereHas('aplikasis', function ($query) use ($aplikasi) {
                 $query->where('aplikasis.id_aplikasi', $aplikasi->id_aplikasi);
             })->get();
-            
+
             $existingAtributs = $aplikasi->atributTambahans()
                 ->get()
                 ->pluck('pivot.nilai_atribut', 'id_atribut')
                 ->toArray();
-            
+
             // Debug untuk melihat atribut
             Log::info('Existing atributs:', $existingAtributs);
 
@@ -341,7 +374,7 @@ class AplikasiController extends Controller
         try {
             // Ambil data aplikasi
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-            
+
             // Ambil atribut tambahan dengan nilai dari tabel pivot
             $atributTambahan = DB::table('aplikasi_atribut')
                 ->join('atribut_tambahans', 'aplikasi_atribut.id_atribut', '=', 'atribut_tambahans.id_atribut')
@@ -362,7 +395,6 @@ class AplikasiController extends Controller
                     'count_atribut' => $atributTambahan->count()
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error di detail: ' . $e->getMessage());
             return response()->json([

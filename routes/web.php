@@ -95,3 +95,7 @@ Route::post('/atribut/check-duplicate', [AtributController::class, 'checkDuplica
 Route::get('/atribut/{id}/edit', [AtributController::class, 'edit'])->name('atribut.edit');
 
 Route::resource('atribut', AtributTambahanController::class);
+
+// Route untuk aplikasi
+Route::get('/aplikasi/{nama}/edit', [AplikasiController::class, 'edit'])->name('aplikasi.edit');
+Route::put('/aplikasi/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');

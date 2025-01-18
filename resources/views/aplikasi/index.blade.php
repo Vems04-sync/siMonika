@@ -64,7 +64,7 @@
                     <div class="col-md-4">
                         <select class="form-select" id="jenisFilter">
                             <option value="">Semua Jenis</option>
-                            @foreach($aplikasis->pluck('jenis')->unique() as $jenis)
+                            @foreach ($aplikasis->pluck('jenis')->unique() as $jenis)
                                 <option value="{{ $jenis }}">{{ $jenis }}</option>
                             @endforeach
                         </select>
@@ -80,7 +80,7 @@
                     <div class="col-md-4">
                         <select class="form-select" id="bahasaFilter">
                             <option value="">Semua Bahasa/Framework</option>
-                            @foreach($aplikasis->pluck('bahasa_framework')->unique() as $bahasa)
+                            @foreach ($aplikasis->pluck('bahasa_framework')->unique() as $bahasa)
                                 <option value="{{ $bahasa }}">{{ $bahasa }}</option>
                             @endforeach
                         </select>
@@ -88,7 +88,7 @@
                     <div class="col-md-4">
                         <select class="form-select" id="databaseFilter">
                             <option value="">Semua Database</option>
-                            @foreach($aplikasis->pluck('database')->unique() as $database)
+                            @foreach ($aplikasis->pluck('database')->unique() as $database)
                                 <option value="{{ $database }}">{{ $database }}</option>
                             @endforeach
                         </select>
@@ -96,7 +96,7 @@
                     <div class="col-md-4">
                         <select class="form-select" id="pengembangFilter">
                             <option value="">Semua Pengembang</option>
-                            @foreach($aplikasis->pluck('pengembang')->unique() as $pengembang)
+                            @foreach ($aplikasis->pluck('pengembang')->unique() as $pengembang)
                                 <option value="{{ $pengembang }}">{{ $pengembang }}</option>
                             @endforeach
                         </select>
@@ -104,7 +104,7 @@
                     <div class="col-md-4">
                         <select class="form-select" id="lokasiFilter">
                             <option value="">Semua Lokasi Server</option>
-                            @foreach($aplikasis->pluck('lokasi_server')->unique() as $lokasi)
+                            @foreach ($aplikasis->pluck('lokasi_server')->unique() as $lokasi)
                                 <option value="{{ $lokasi }}">{{ $lokasi }}</option>
                             @endforeach
                         </select>
@@ -123,12 +123,9 @@
             @foreach ($aplikasis as $aplikasi)
                 <div class="col-md-6 col-lg-4 app-card"
                     data-status="{{ $aplikasi->status_pemakaian == 'Aktif' ? 'active' : 'unused' }}"
-                    data-jenis="{{ $aplikasi->jenis }}"
-                    data-basis="{{ $aplikasi->basis_aplikasi }}"
-                    data-bahasa="{{ $aplikasi->bahasa_framework }}"
-                    data-database="{{ $aplikasi->database }}"
-                    data-pengembang="{{ $aplikasi->pengembang }}"
-                    data-lokasi="{{ $aplikasi->lokasi_server }}">
+                    data-jenis="{{ $aplikasi->jenis }}" data-basis="{{ $aplikasi->basis_aplikasi }}"
+                    data-bahasa="{{ $aplikasi->bahasa_framework }}" data-database="{{ $aplikasi->database }}"
+                    data-pengembang="{{ $aplikasi->pengembang }}" data-lokasi="{{ $aplikasi->lokasi_server }}">
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
@@ -184,8 +181,9 @@
                                     <i class="bi bi-eye me-1"></i>Detail
                                 </button>
                                 <div>
-                                    <button type="button" class="btn-edit" data-nama="{{ $aplikasi->nama }}">
-                                        <i class="bi bi-pencil"></i> Edit
+                                    <button class="btn btn-sm btn-warning btn-edit"
+                                        data-nama="{{ $aplikasi->nama }}">
+                                        <i class="bi bi-pencil"></i>
                                     </button>
                                     <button class="btn btn-outline-danger btn-sm"
                                         onclick="deleteApp('{{ $aplikasi->nama }}')">
@@ -249,10 +247,12 @@
                                     <td>{{ $aplikasi->lokasi_server }}</td>
                                     <td class="text-center pe-4">
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-sm btn-info btn-detail" data-nama="{{ $aplikasi->nama }}">
+                                            <button class="btn btn-sm btn-info btn-detail"
+                                                data-nama="{{ $aplikasi->nama }}">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button type="button" class="btn-edit" data-nama="{{ $aplikasi->nama }}">
+                                            <button class="btn btn-sm btn-warning btn-edit"
+                                                data-nama="{{ $aplikasi->nama }}">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger"
@@ -274,6 +274,7 @@
     </div>
     </div>
 
+    <!-- Modal Edit/Tambah Aplikasi -->
     <!-- Modal -->
     <div class="modal fade" id="appModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
         <div class="modal-dialog">
@@ -407,28 +408,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/sidebar.js') }}"></script>
-    
+
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    
+
     <!-- Script aplikasi -->
     <script src="{{ asset('js/aplikasi/index.js') }}"></script>
 
     <!-- Tambahkan ini untuk flash message dari session -->
-    @if(session('success'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            toastr.success("{{ session('success') }}", "Berhasil");
-        });
-    </script>
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                toastr.success("{{ session('success') }}", "Berhasil");
+            });
+        </script>
     @endif
 
-    @if(session('error'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            toastr.error("{{ session('error') }}", "Error");
-        });
-    </script>
+    @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                toastr.error("{{ session('error') }}", "Error");
+            });
+        </script>
     @endif
 
     <!-- SweetAlert2 JS -->
