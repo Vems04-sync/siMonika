@@ -21,6 +21,7 @@ class DashboardController extends Controller
 
     public function index()
     {
+        // Data untuk statistik
         $data = [
             'total_admin' => Pengguna::where('role', 'admin')->count(),
             'total_aplikasi' => Aplikasi::count(),
@@ -32,34 +33,43 @@ class DashboardController extends Controller
         ];
 
         // Dapatkan admin yang aktif
-        $activeAdminIds = DB::table('log_aktivitas as login')
-            ->select('login.user_id')
-            ->where('login.aktivitas', 'Login')
-            ->where('login.created_at', '>=', Carbon::now()->subMinutes(30))
-            ->whereNotExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('log_aktivitas as logout')
-                    ->whereColumn('logout.user_id', 'login.user_id')
-                    ->where('logout.aktivitas', 'Logout')
-                    ->whereRaw('logout.created_at > login.created_at');
-            })
-            ->groupBy('login.user_id')
-            ->pluck('user_id');
-
-        // Ambil data lengkap admin yang aktif
-        $data['admin_aktif'] = Pengguna::whereIn('id_user', $activeAdminIds)
-            ->where('role', 'admin')
+        $activeAdmins = Pengguna::where('role', 'admin')
             ->get()
             ->map(function ($admin) {
-                // Ambil waktu login terakhir
+                // Cek login/logout terakhir
                 $lastLogin = LogAktivitas::where('user_id', $admin->id_user)
                     ->where('aktivitas', 'Login')
                     ->latest()
                     ->first();
 
-                $admin->last_login = $lastLogin ? $lastLogin->created_at : null;
-                return $admin;
+                $lastLogout = LogAktivitas::where('user_id', $admin->id_user)
+                    ->where('aktivitas', 'Logout')
+                    ->latest()
+                    ->first();
+
+                // Ambil aktivitas terakhir untuk ditampilkan
+                $lastActivity = LogAktivitas::where('user_id', $admin->id_user)
+                    ->latest()
+                    ->first();
+
+                // Tentukan status
+                $isOnline = false;
+                if ($lastLogin) {
+                    if (!$lastLogout || $lastLogin->created_at > $lastLogout->created_at) {
+                        $isOnline = true;
+                    }
+                }
+
+                return [
+                    'nama' => $admin->nama,
+                    'email' => $admin->email,
+                    'last_activity' => $lastActivity ? $lastActivity->created_at : null,
+                    'last_action' => $lastActivity ? $lastActivity->aktivitas : 'Tidak ada aktivitas',
+                    'status' => $isOnline ? 'Online' : 'Offline'
+                ];
             });
+
+        $data['admin_aktif'] = $activeAdmins;
 
         return view('super-admin.dashboard', $data);
     }
