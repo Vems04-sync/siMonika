@@ -65,7 +65,21 @@ class AplikasiController extends Controller
                 'status_pemakaian' => 'required|in:Aktif,Tidak Aktif'
             ]);
 
+            DB::beginTransaction();
+            
+            // Buat aplikasi baru
             $aplikasi = Aplikasi::create($validated);
+
+            // Simpan atribut tambahan jika ada
+            if ($request->has('atribut')) {
+                foreach ($request->atribut as $id_atribut => $nilai) {
+                    if (!empty($nilai)) {
+                        $aplikasi->atributTambahans()->attach($id_atribut, ['nilai_atribut' => $nilai]);
+                    }
+                }
+            }
+
+            DB::commit();
 
             // Catat log aktivitas
             LogAktivitas::create([
@@ -87,6 +101,7 @@ class AplikasiController extends Controller
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
+            DB::rollback();
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menambahkan aplikasi: ' . $e->getMessage()
@@ -97,9 +112,38 @@ class AplikasiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Aplikasi $aplikasi)
+    public function show($id)
     {
-        return view('aplikasi.show', compact('aplikasi'));
+        try {
+            $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
+            
+            // Ambil semua atribut yang tersedia
+            $allAtributs = AtributTambahan::all();
+            
+            // Siapkan data atribut dengan nilai
+            $atributValues = [];
+            foreach ($allAtributs as $atribut) {
+                $nilai = $aplikasi->atributTambahans
+                    ->where('id_atribut', $atribut->id_atribut)
+                    ->first();
+                    
+                $atributValues[] = [
+                    'nama_atribut' => $atribut->nama_atribut,
+                    'nilai_atribut' => $nilai ? $nilai->pivot->nilai_atribut : null
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'aplikasi' => $aplikasi,
+                'atribut_tambahan' => $atributValues
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -152,6 +196,19 @@ class AplikasiController extends Controller
 
             // Update aplikasi
             $aplikasi->update($validated);
+
+            // Update atribut tambahan
+            if ($request->has('atribut')) {
+                // Hapus atribut yang ada terlebih dahulu
+                $aplikasi->atributTambahans()->detach();
+                
+                // Tambahkan atribut baru
+                foreach ($request->atribut as $id_atribut => $nilai) {
+                    if (!empty($nilai)) {
+                        $aplikasi->atributTambahans()->attach($id_atribut, ['nilai_atribut' => $nilai]);
+                    }
+                }
+            }
 
             // Siapkan detail perubahan
             $changes = [];

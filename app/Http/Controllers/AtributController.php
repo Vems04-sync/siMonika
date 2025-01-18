@@ -188,4 +188,81 @@ class AtributController extends Controller
 
         return response()->json(['exists' => $exists]);
     }
+
+    public function detail($id)
+    {
+        try {
+            $atribut = AtributTambahan::with(['aplikasis' => function($query) {
+                $query->select('aplikasis.id_aplikasi', 'aplikasis.nama');
+            }])->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'atribut' => $atribut,
+                'aplikasis' => $atribut->aplikasis
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat detail atribut'
+            ], 500);
+        }
+    }
+
+    public function updateNilai(Request $request, $id_aplikasi)
+    {
+        try {
+            // Validasi input
+            $request->validate([
+                'id_atribut' => 'required',
+                'nilai' => 'nullable'
+            ]);
+
+            $aplikasi = Aplikasi::findOrFail($id_aplikasi);
+            
+            // Dapatkan nilai atribut yang ada
+            $existingValue = DB::table('aplikasi_atribut')
+                ->where('id_aplikasi', $id_aplikasi)
+                ->where('id_atribut', $request->id_atribut)
+                ->value('nilai_atribut');
+
+            // Gunakan nilai baru jika ada, jika tidak gunakan nilai yang sudah ada
+            $newValue = $request->nilai ?: $existingValue;
+            
+            // Update nilai di tabel pivot
+            DB::table('aplikasi_atribut')
+                ->where('id_aplikasi', $id_aplikasi)
+                ->where('id_atribut', $request->id_atribut)
+                ->update(['nilai_atribut' => $newValue]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nilai atribut berhasil diupdate'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating atribut nilai: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupdate nilai atribut: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function removeFromApp($id_aplikasi, $id_atribut)
+    {
+        try {
+            $aplikasi = Aplikasi::findOrFail($id_aplikasi);
+            $aplikasi->atributTambahans()->detach($id_atribut);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Atribut berhasil dihapus dari aplikasi'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus atribut dari aplikasi'
+            ], 500);
+        }
+    }
 }
