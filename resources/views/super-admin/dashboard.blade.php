@@ -105,30 +105,45 @@
                 <h5 class="mb-0">Admin Aktif</h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    @forelse($admin_aktif as $admin)
-                        <div class="col-md-3 mb-3">
-                            <div class="d-flex align-items-center">
-                                <div class="position-relative me-3">
-                                    <div class="avatar-circle bg-primary">
-                                        <span class="text-white">{{ substr($admin->nama, 0, 1) }}</span>
-                                        <div class="status-indicator"></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">{{ $admin->nama }}</h6>
-                                    <small class="text-muted">
-                                        <i class="bi bi-clock-fill me-1"></i>
-                                        Aktif
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-12">
-                            <p class="text-center mb-0">Tidak ada admin yang aktif saat ini</p>
-                        </div>
-                    @endforelse
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nama Admin</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Aktivitas Terakhir</th>
+                                <th>Aksi Terakhir</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($admin_aktif as $admin)
+                                <tr>
+                                    <td>{{ $admin['nama'] }}</td>
+                                    <td>{{ $admin['email'] }}</td>
+                                    <td>
+                                        @if ($admin['status'] === 'Online')
+                                            <span class="badge bg-success">Online</span>
+                                        @else
+                                            <span class="badge bg-secondary">Offline</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($admin['last_activity'])
+                                            {{ \Carbon\Carbon::parse($admin['last_activity'])->diffForHumans() }}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>{{ $admin['last_action'] }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center">Tidak ada admin yang aktif</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

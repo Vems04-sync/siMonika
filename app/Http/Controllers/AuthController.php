@@ -31,25 +31,26 @@ class AuthController extends \Illuminate\Routing\Controller
         $credentials = $request->validate([
             'email' => ['required', 'email', 'exists:penggunas'],
             'password' => ['required', Password::min(8)],
-        ], [
-            'email.exists' => 'Email tidak terdaftar',
-            'password.min' => 'Password minimal 8 karakter'
         ]);
 
-        // Batasi percobaan login
         if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
-            
+
             // Catat aktivitas login
             LogAktivitas::create([
-                'user_id' => Auth::user()->id_user,
+                'user_id' => Auth::id(),
                 'aktivitas' => 'Login',
                 'tipe_aktivitas' => 'login',
-                'modul' => 'auth',
-                'detail' => 'User melakukan login ke sistem'
+                'modul' => 'Auth',
+                'detail' => 'User login ke sistem'
             ]);
 
-            if (Auth::user()->role === 'super_admin') {
+            // Update last_activity
+            Auth::user()->update([
+                'last_activity' => now()
+            ]);
+
+            if (Auth::user()->isSuperAdmin()) {
                 return redirect()->route('admin.index');
             }
             return redirect()->route('dashboard');
@@ -64,17 +65,24 @@ class AuthController extends \Illuminate\Routing\Controller
     {
         // Catat aktivitas logout
         LogAktivitas::create([
-            'user_id' => Auth::user()->id_user,
+            'user_id' => Auth::id(),
             'aktivitas' => 'Logout',
             'tipe_aktivitas' => 'logout',
-            'modul' => 'auth',
-            'detail' => 'User melakukan logout dari sistem'
+            'modul' => 'Auth',
+            'detail' => 'User logout dari sistem'
+        ]);
+
+        // Set last_activity ke null saat logout
+        Auth::user()->update([
+            'last_activity' => null
         ]);
 
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
+
+        return redirect()->route('login')
+            ->with('success', 'Berhasil logout dari sistem');
     }
 
     public function showRegistrationForm()
@@ -117,7 +125,7 @@ class AuthController extends \Illuminate\Routing\Controller
         ]);
 
         $token = Str::random(64);
-        
+
         // Simpan token ke database
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $request->email],
@@ -129,7 +137,7 @@ class AuthController extends \Illuminate\Routing\Controller
         );
 
         // Kirim email
-        Mail::send('emails.reset-password', ['token' => $token], function($message) use($request) {
+        Mail::send('emails.reset-password', ['token' => $token], function ($message) use ($request) {
             $message->to($request->email);
             $message->subject('Reset Password - SiMonika');
         });
@@ -194,4 +202,4 @@ class AuthController extends \Illuminate\Routing\Controller
         return redirect()->route('login')
             ->with('success', 'Password berhasil direset. Silakan login dengan password baru Anda.');
     }
-} 
+}

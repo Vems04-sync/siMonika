@@ -127,6 +127,9 @@ class AplikasiController extends Controller
         try {
             $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
 
+            // Simpan data lama sebelum diupdate
+            $oldData = $aplikasi->toArray();
+
             // Validasi
             $validated = $request->validate([
                 'nama' => [
@@ -150,14 +153,33 @@ class AplikasiController extends Controller
             // Update aplikasi
             $aplikasi->update($validated);
 
-            // Catat log aktivitas
-            LogAktivitas::create([
-                'user_id' => Auth::id(),
-                'aktivitas' => 'Update Aplikasi',
-                'tipe_aktivitas' => 'update',
-                'modul' => 'Aplikasi',
-                'detail' => "Mengupdate aplikasi '{$aplikasi->nama}'"
-            ]);
+            // Siapkan detail perubahan
+            $changes = [];
+            foreach ($validated as $field => $newValue) {
+                if ($oldData[$field] !== $newValue) {
+                    $changes[] = [
+                        'field' => $this->getFieldLabel($field),
+                        'old' => $oldData[$field],
+                        'new' => $newValue
+                    ];
+                }
+            }
+
+            // Jika ada perubahan, catat di log
+            if (!empty($changes)) {
+                $detailPerubahan = array_map(function ($change) {
+                    return "{$change['field']}: {$change['old']} → {$change['new']}";
+                }, $changes);
+
+                LogAktivitas::create([
+                    'user_id' => Auth::id(),
+                    'aktivitas' => 'Update Aplikasi',
+                    'tipe_aktivitas' => 'update',
+                    'modul' => 'Aplikasi',
+                    'detail' => "Mengupdate aplikasi '{$oldData['nama']}' dengan perubahan:\n" .
+                        implode("\n", $detailPerubahan)
+                ]);
+            }
 
             DB::commit();
 

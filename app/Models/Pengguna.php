@@ -25,6 +25,10 @@ class Pengguna extends Authenticatable
         'remember_token',
     ];
 
+    protected $dates = [
+        'last_activity'
+    ];
+
     // Helper method untuk cek role
     public function isSuperAdmin()
     {
@@ -34,5 +38,10 @@ class Pengguna extends Authenticatable
     public function isAdmin()
     {
         return $this->role === 'admin';
+    }
+
+    public function logAktivitas()
+    {
+        return $this->hasMany(LogAktivitas::class, 'user_id', 'id_user');
     }
 }

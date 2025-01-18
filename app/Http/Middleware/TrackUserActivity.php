@@ -17,21 +17,33 @@ class TrackUserActivity
 
         if (Auth::check()) {
             $user = Auth::user();
-            $path = $request->path();
-            $method = $request->method();
-            
-            // Tentukan tipe aktivitas dan detail berdasarkan request
-            $aktivitas = $this->getActivityType($method, $path);
-            $detail = $this->getActivityDetail($request, $method, $path);
-            
-            // Simpan log
-            LogAktivitas::create([
-                'user_id' => $user->id,
-                'aktivitas' => $aktivitas,
-                'modul' => $this->getModulName($path),
-                'detail' => $detail,
-                'tipe_aktivitas' => strtolower($method)
+
+            // Update last_activity
+            $user->update(['last_activity' => now()]);
+
+            // Log untuk debugging
+            \Log::info('User activity tracked', [
+                'user_id' => $user->id_user,
+                'last_activity' => $user->last_activity,
+                'path' => $request->path()
             ]);
+
+            // Catat aktivitas jika bukan request AJAX
+            if (!$request->ajax()) {
+                $path = $request->path();
+                $method = $request->method();
+
+                $aktivitas = $this->getActivityType($method, $path);
+                if ($aktivitas) {
+                    LogAktivitas::create([
+                        'user_id' => $user->id_user,
+                        'aktivitas' => $aktivitas,
+                        'tipe_aktivitas' => strtolower($method),
+                        'modul' => $this->getModulName($path),
+                        'detail' => $this->getActivityDetail($request, $method, $path)
+                    ]);
+                }
+            }
         }
 
         return $response;
@@ -51,7 +63,7 @@ class TrackUserActivity
         if (str_contains($path, 'aplikasi')) {
             $nama = $request->nama ?? $request->route('nama');
             $oldNama = $request->route('nama');
-            
+
             // Debug lebih detail dengan data spesifik
             logger('DETAIL PERUBAHAN APLIKASI:', [
                 'METHOD' => $method,
@@ -65,7 +77,7 @@ class TrackUserActivity
             if ($method === 'POST') {
                 return "Menambahkan aplikasi: $nama";
             }
-            
+
             if ($method === 'PUT') {
                 $changes = [];
                 foreach ($request->all() as $key => $value) {
@@ -75,7 +87,7 @@ class TrackUserActivity
                 }
                 return "Mengubah data aplikasi: " . implode(', ', $changes);
             }
-            
+
             if ($method === 'DELETE') {
                 return "Menghapus aplikasi: $nama";
             }
@@ -85,7 +97,7 @@ class TrackUserActivity
         if (str_contains($path, 'atribut')) {
             $namaAtribut = $request->nama_atribut ?? '';
             $aplikasi = $request->id_aplikasi ? \App\Models\Aplikasi::find($request->id_aplikasi)->nama : '';
-            
+
             if ($method === 'POST') return "Menambahkan atribut '$namaAtribut' pada aplikasi $aplikasi";
             if ($method === 'PUT') return "Mengubah atribut '$namaAtribut' pada aplikasi $aplikasi";
             if ($method === 'DELETE') return "Menghapus atribut dari aplikasi $aplikasi";
