@@ -1,247 +1,373 @@
 // Konfigurasi global toastr
 toastr.options = {
-    "closeButton": true,
-    "newestOnTop": true,
-    "progressBar": true,
-    "positionClass": "toast-top-right",
-    "preventDuplicates": true,
-    "timeOut": "3000"
+    closeButton: true,
+    newestOnTop: true,
+    progressBar: true,
+    positionClass: "toast-top-right",
+    preventDuplicates: true,
+    timeOut: "3000",
 };
 
 // Fungsi untuk menampilkan flash message
 function showFlashMessages() {
-    const flashMessage = localStorage.getItem('flash_message');
+    const flashMessage = localStorage.getItem("flash_message");
     if (flashMessage) {
         toastr.success(flashMessage, "Berhasil");
-        localStorage.removeItem('flash_message');
+        localStorage.removeItem("flash_message");
     }
 }
 
-// Panggil fungsi saat dokumen siap
-$(document).ready(function() {
+// Fungsi untuk menampilkan detail aplikasi
+window.showAppDetail = function (id) {
+    $.ajax({
+        url: `/aplikasi/${id}`,
+        method: "GET",
+        success: function (response) {
+            const app = response; // Sesuaikan dengan struktur response
+
+            // Update informasi dasar aplikasi
+            $("#detail-nama").text(app.nama);
+            $("#detail-opd").text(app.opd);
+            $("#detail-status").html(`
+                <span class="badge ${
+                    app.status_pemakaian === "Aktif"
+                        ? "bg-success"
+                        : "bg-danger"
+                }">
+                    ${app.status_pemakaian}
+                </span>
+            `);
+            $("#detail-pengembang").text(app.pengembang);
+
+            // Update atribut tambahan
+            let atributHtml = '<table class="table">';
+            atributHtml += `
+                <thead>
+                    <tr>
+                        <th>Nama Atribut</th>
+                        <th>Nilai</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            if (app.atribut_tambahans && app.atribut_tambahans.length > 0) {
+                app.atribut_tambahans.forEach((atribut) => {
+                    atributHtml += `
+                        <tr>
+                            <td>${atribut.nama_atribut}</td>
+                            <td>${atribut.pivot.nilai_atribut || "-"}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                atributHtml += `
+                    <tr>
+                        <td colspan="2" class="text-center">Tidak ada atribut tambahan</td>
+                    </tr>
+                `;
+            }
+
+            atributHtml += "</tbody></table>";
+            $("#detail-atribut").html(atributHtml);
+
+            $("#detailAppModal").modal("show");
+        },
+        error: function () {
+            toastr.error("Gagal memuat detail aplikasi");
+        },
+    });
+};
+
+// Fungsi untuk menampilkan form edit atribut
+window.editAppAtribut = function (id) {
+    $.ajax({
+        url: `/aplikasi/${id}/atribut`,
+        method: "GET",
+        success: function (response) {
+            const atributs = response.atribut_tambahans;
+            let html = "";
+
+            if (atributs && atributs.length > 0) {
+                atributs.forEach((atribut) => {
+                    html += `
+                        <div class="mb-3">
+                            <label class="form-label">${
+                                atribut.nama_atribut
+                            }</label>
+                            <input type="text" 
+                                   class="form-control"
+                                   name="nilai_atribut[${atribut.id_atribut}]"
+                                   value="${atribut.pivot?.nilai_atribut || ""}"
+                                   placeholder="Masukkan nilai untuk ${
+                                       atribut.nama_atribut
+                                   }">
+                        </div>
+                    `;
+                });
+            } else {
+                html =
+                    '<div class="alert alert-info">Belum ada atribut yang ditambahkan</div>';
+            }
+
+            $("#atributFields").html(html);
+            $("#editAtributForm").data("app-id", id);
+            $("#editAtributModal").modal("show");
+        },
+        error: function () {
+            toastr.error("Gagal memuat data atribut");
+        },
+    });
+};
+
+$(document).ready(function () {
     showFlashMessages();
-    
+
     // Inisialisasi Select2 pada modal tambah
-    $('#tambahAtributModal .select2').select2({
-        theme: 'bootstrap-5',
-        width: '100%',
-        dropdownParent: $('#tambahAtributModal'),
-        placeholder: 'Pilih Aplikasi',
+    $("#tambahAtributModal .select2").select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        dropdownParent: $("#tambahAtributModal"),
+        placeholder: "Pilih Aplikasi",
         allowClear: true,
         language: {
-            noResults: function() {
+            noResults: function () {
                 return "Data tidak ditemukan";
             },
-            searching: function() {
+            searching: function () {
                 return "Mencari...";
-            }
-        }
+            },
+        },
     });
 
     // Inisialisasi Select2 pada modal edit
-    $('#editAtributModal .select2').select2({
-        theme: 'bootstrap-5',
-        width: '100%',
-        dropdownParent: $('#editAtributModal'),
-        placeholder: 'Pilih Aplikasi',
+    $("#editAtributModal .select2").select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        dropdownParent: $("#editAtributModal"),
+        placeholder: "Pilih Aplikasi",
         allowClear: true,
         language: {
-            noResults: function() {
+            noResults: function () {
                 return "Data tidak ditemukan";
             },
-            searching: function() {
+            searching: function () {
                 return "Mencari...";
-            }
-        }
+            },
+        },
     });
 
     // Reset Select2 saat modal ditutup
-    $('#tambahAtributModal').on('hidden.bs.modal', function () {
-        $('.select2').val('').trigger('change');
+    $("#tambahAtributModal").on("hidden.bs.modal", function () {
+        $(".select2").val("").trigger("change");
     });
 
     // Handle form submit untuk delete
-    $('form[method="POST"]').on('submit', function(e) {
-        if ($(this).find('input[name="_method"]').val() === 'DELETE') {
+    $('form[method="POST"]').on("submit", function (e) {
+        if ($(this).find('input[name="_method"]').val() === "DELETE") {
             e.preventDefault();
-            if (confirm('Yakin ingin menghapus atribut ini?')) {
+            if (confirm("Yakin ingin menghapus atribut ini?")) {
                 const form = $(this);
                 $.ajax({
-                    url: form.attr('action'),
-                    method: 'POST',
+                    url: form.attr("action"),
+                    method: "POST",
                     data: form.serialize(),
-                    success: function(response) {
+                    success: function (response) {
                         // Langsung redirect tanpa menyimpan ke localStorage
-                        window.location.href = '/atribut';
+                        window.location.href = "/atribut";
                     },
-                    error: function(xhr) {
-                        toastr.error('Terjadi kesalahan saat menghapus data', 'Error');
-                    }
+                    error: function (xhr) {
+                        toastr.error(
+                            "Terjadi kesalahan saat menghapus data",
+                            "Error"
+                        );
+                    },
                 });
             }
         }
     });
 
     // Handle form submit untuk tambah dan edit
-    $('#tambahAtributModal form, #editAtributModal form').on('submit', function(e) {
-        e.preventDefault();
-        const form = $(this);
-        const isEdit = form.find('input[name="_method"]').val() === 'PUT';
+    $("#tambahAtributModal form, #editAtributModal form").on(
+        "submit",
+        function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const isEdit = form.find('input[name="_method"]').val() === "PUT";
 
-        $.ajax({
-            url: form.attr('action'),
-            method: 'POST',
-            data: form.serialize(),
-            success: function(response) {
-                localStorage.setItem('flash_message', 
-                    isEdit ? 'Data atribut berhasil diperbarui!' : 'Data atribut berhasil ditambahkan!'
-                );
-                window.location.reload();
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-                    let errorMessage = '<ul class="m-0">';
-                    Object.values(errors).forEach(error => {
-                        errorMessage += `<li>${error[0]}</li>`;
-                    });
-                    errorMessage += '</ul>';
-                    toastr.error(errorMessage, 'Validasi Gagal');
-                } else {
-                    toastr.error('Terjadi kesalahan saat menyimpan data', 'Error');
-                }
-            }
-        });
-    });
+            $.ajax({
+                url: form.attr("action"),
+                method: "POST",
+                data: form.serialize(),
+                success: function (response) {
+                    localStorage.setItem(
+                        "flash_message",
+                        isEdit
+                            ? "Data atribut berhasil diperbarui!"
+                            : "Data atribut berhasil ditambahkan!"
+                    );
+                    window.location.reload();
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        const errors = xhr.responseJSON.errors;
+                        let errorMessage = '<ul class="m-0">';
+                        Object.values(errors).forEach((error) => {
+                            errorMessage += `<li>${error[0]}</li>`;
+                        });
+                        errorMessage += "</ul>";
+                        toastr.error(errorMessage, "Validasi Gagal");
+                    } else {
+                        toastr.error(
+                            "Terjadi kesalahan saat menyimpan data",
+                            "Error"
+                        );
+                    }
+                },
+            });
+        }
+    );
 
     // Handle tombol edit
-    $('.edit-btn').on('click', function() {
-        const id = $(this).data('id');
-        
+    $(".edit-btn").on("click", function () {
+        const id = $(this).data("id");
+
         $.ajax({
             url: `/atribut/${id}/edit`,
-            method: 'GET',
-            success: function(response) {
-                $('#editAtributForm').attr('action', `/atribut/${id}`);
-                $('#editAtributModal select[name="id_aplikasi"]').val(response.id_aplikasi).trigger('change');
-                $('#editAtributModal input[name="nama_atribut"]').val(response.nama_atribut);
-                $('#editAtributModal input[name="nilai_atribut"]').val(response.nilai_atribut);
+            method: "GET",
+            success: function (response) {
+                $("#editAtributForm").attr("action", `/atribut/${id}`);
+                $('#editAtributModal select[name="id_aplikasi"]')
+                    .val(response.id_aplikasi)
+                    .trigger("change");
+                $('#editAtributModal input[name="nama_atribut"]').val(
+                    response.nama_atribut
+                );
+                $('#editAtributModal input[name="nilai_atribut"]').val(
+                    response.nilai_atribut
+                );
             },
-            error: function(xhr) {
-                toastr.error('Gagal mengambil data atribut', 'Error');
-            }
+            error: function (xhr) {
+                toastr.error("Gagal mengambil data atribut", "Error");
+            },
         });
     });
 
     // Inisialisasi Select2
-    $('.select2').select2({
-        theme: 'bootstrap-5'
+    $(".select2").select2({
+        theme: "bootstrap-5",
     });
 
-    // Handle form submission
-    $('#formTambahAtribut').on('submit', function(e) {
+    // Handle submit form tambah atribut
+    $("#tambahAtributForm").on("submit", function (e) {
         e.preventDefault();
-        
-        let form = $(this);
-        let formData = new FormData(this);
-        
-        // Disable submit button
-        form.find('button[type="submit"]').prop('disabled', true);
-        
+        const formData = $(this).serialize();
+
         $.ajax({
-            url: form.attr('action'),
-            type: 'POST',
+            url: "/atribut",
+            method: "POST",
             data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if(response.success) {
-                    toastr.success('Atribut berhasil ditambahkan');
-                    setTimeout(function() {
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                if (response.success) {
+                    $("#tambahAtributModal").modal("hide");
+                    toastr.success(response.message);
+                    // Reset form
+                    $("#tambahAtributForm")[0].reset();
+                    // Refresh halaman setelah delay
+                    setTimeout(() => {
                         window.location.reload();
-                    }, 1500);
+                    }, 1000);
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    // Validation errors
+                    const errors = xhr.responseJSON.errors;
+                    let errorMessage = "";
+                    for (let field in errors) {
+                        errorMessage += `${errors[field]}\n`;
+                    }
+                    toastr.error(errorMessage);
                 } else {
-                    toastr.error('Gagal menambahkan atribut');
+                    toastr.error("Gagal menambahkan atribut");
                 }
             },
-            error: function(xhr) {
-                console.error('Error:', xhr);
-                if(xhr.responseJSON && xhr.responseJSON.errors) {
-                    $.each(xhr.responseJSON.errors, function(key, value) {
-                        toastr.error(value[0]);
-                    });
-                }
-            },
-            complete: function() {
-                // Re-enable submit button
-                form.find('button[type="submit"]').prop('disabled', false);
-            }
         });
     });
 
     // Konfigurasi Select2 untuk dropdown dengan pencarian
-    $('.select2-with-search').select2({
-        theme: 'bootstrap-5',
-        width: '100%',
-        dropdownParent: $('#tambahAtributModal'),
-        placeholder: 'Cari dan pilih aplikasi...',
+    $(".select2-with-search").select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        dropdownParent: $("#tambahAtributModal"),
+        placeholder: "Cari dan pilih aplikasi...",
         allowClear: true,
         language: {
-            noResults: function() {
+            noResults: function () {
                 return "Aplikasi tidak ditemukan";
             },
-            searching: function() {
+            searching: function () {
                 return "Mencari...";
-            }
+            },
         },
         templateResult: formatAplikasi,
         templateSelection: formatAplikasi,
-        escapeMarkup: function(markup) {
+        escapeMarkup: function (markup) {
             return markup;
-        }
+        },
     });
 
     // Format tampilan aplikasi di dropdown
     function formatAplikasi(aplikasi) {
         if (!aplikasi.id) return aplikasi.text;
-        
+
         var $aplikasi = $(
-            '<span><i class="bi bi-app me-2"></i>' + aplikasi.text + '</span>'
+            '<span><i class="bi bi-app me-2"></i>' + aplikasi.text + "</span>"
         );
-        
+
         return $aplikasi;
     }
 
     // Reset Select2 saat modal ditutup
-    $('#tambahAtributModal').on('hidden.bs.modal', function() {
-        $('.select2-with-search').val('').trigger('change');
+    $("#tambahAtributModal").on("hidden.bs.modal", function () {
+        $(".select2-with-search").val("").trigger("change");
     });
 
     // Fungsi untuk melakukan filter table
     function filterTable() {
-        const searchTerm = $('#searchInput').val().toLowerCase();
-        const atributFilter = $('#atributFilter').val().toLowerCase();
-        
-        $('table tbody tr').each(function() {
+        const searchTerm = $("#searchInput").val().toLowerCase();
+        const atributFilter = $("#atributFilter").val().toLowerCase();
+
+        $("table tbody tr").each(function () {
             const row = $(this);
-            const aplikasiName = row.find('td:nth-child(2)').text().toLowerCase();
-            const atributName = row.find('td:nth-child(3)').text().toLowerCase();
-            
+            const aplikasiName = row
+                .find("td:nth-child(2)")
+                .text()
+                .toLowerCase();
+            const atributName = row
+                .find("td:nth-child(3)")
+                .text()
+                .toLowerCase();
+
             const matchSearch = aplikasiName.includes(searchTerm);
-            const matchFilter = atributFilter === '' || atributName === atributFilter;
-            
+            const matchFilter =
+                atributFilter === "" || atributName === atributFilter;
+
             if (matchSearch && matchFilter) {
                 row.show();
             } else {
                 row.hide();
             }
         });
-        
+
         // Tampilkan pesan jika tidak ada hasil
-        const visibleRows = $('table tbody tr:visible').length;
+        const visibleRows = $("table tbody tr:visible").length;
         if (visibleRows === 0) {
-            if ($('table tbody .no-data-row').length === 0) {
-                $('table tbody').append(`
+            if ($("table tbody .no-data-row").length === 0) {
+                $("table tbody").append(`
                     <tr class="no-data-row">
                         <td colspan="5" class="text-center py-3">
                             <i class="bi bi-inbox text-muted d-block mb-1" style="font-size: 1.5rem;"></i>
@@ -251,30 +377,70 @@ $(document).ready(function() {
                 `);
             }
         } else {
-            $('.no-data-row').remove();
+            $(".no-data-row").remove();
         }
     }
 
     // Event listener untuk input pencarian
-    $('#searchInput').on('input', function() {
+    $("#searchInput").on("input", function () {
         filterTable();
     });
 
     // Event listener untuk filter atribut
-    $('#atributFilter').on('change', function() {
+    $("#atributFilter").on("change", function () {
         filterTable();
     });
 
     // Inisialisasi Select2 untuk filter atribut
-    $('#atributFilter').select2({
-        theme: 'bootstrap-5',
-        width: '100%',
-        placeholder: 'Filter berdasarkan atribut',
+    $("#atributFilter").select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Filter berdasarkan atribut",
         allowClear: true,
         language: {
-            noResults: function() {
+            noResults: function () {
                 return "Atribut tidak ditemukan";
-            }
-        }
+            },
+        },
     });
-}); 
+
+    // Handle submit form edit atribut
+    $("#editAtributForm").on("submit", function (e) {
+        e.preventDefault();
+        const appId = $(this).data("app-id");
+        const formData = $(this).serialize();
+
+        $.ajax({
+            url: `/aplikasi/${appId}/update-atribut`,
+            method: "PUT",
+            data: formData,
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                if (response.success) {
+                    $("#editAtributModal").modal("hide");
+                    toastr.success("Nilai atribut berhasil diperbarui");
+
+                    // Refresh detail jika modal detail sedang terbuka
+                    if ($("#detailAppModal").hasClass("show")) {
+                        showAppDetail(appId);
+                    }
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    // Validation error
+                    const errors = xhr.responseJSON.errors;
+                    let errorMessage = "Validasi Gagal:\n";
+                    for (let field in errors) {
+                        errorMessage += `${errors[field]}\n`;
+                    }
+                    toastr.error(errorMessage);
+                } else {
+                    toastr.error("Gagal memperbarui nilai atribut");
+                }
+            },
+        });
+    });
+});
