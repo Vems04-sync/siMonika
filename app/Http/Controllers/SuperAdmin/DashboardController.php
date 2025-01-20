@@ -65,9 +65,12 @@ class DashboardController extends Controller
                     'email' => $admin->email,
                     'last_activity' => $lastActivity ? $lastActivity->created_at : null,
                     'last_action' => $lastActivity ? $lastActivity->aktivitas : 'Tidak ada aktivitas',
-                    'status' => $isOnline ? 'Online' : 'Offline'
+                    'status' => $isOnline ? 'Online' : 'Offline',
+                    'sort_order' => $isOnline ? 0 : 1
                 ];
-            });
+            })
+            ->sortBy('sort_order')
+            ->values();
 
         $data['admin_aktif'] = $activeAdmins;
 

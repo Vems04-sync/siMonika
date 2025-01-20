@@ -128,13 +128,7 @@
                                             <span class="badge bg-secondary">Offline</span>
                                         @endif
                                     </td>
-                                    <td>
-                                        @if ($admin['last_activity'])
-                                            {{ \Carbon\Carbon::parse($admin['last_activity'])->diffForHumans() }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
+                                    <td>{{ \Carbon\Carbon::parse($admin['last_activity'])->diffForHumans() }}</td>
                                     <td>{{ $admin['last_action'] }}</td>
                                 </tr>
                             @empty
