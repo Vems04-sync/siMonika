@@ -191,6 +191,11 @@ function showTablePage() {
     for (let i = start; i < end; i++) {
         if (visibleRows[i]) {
             visibleRows[i].style.display = "";
+            // Update nomor urut
+            const numberCell = visibleRows[i].cells[0];
+            if (numberCell) {
+                numberCell.textContent = i + 1;
+            }
         }
     }
 

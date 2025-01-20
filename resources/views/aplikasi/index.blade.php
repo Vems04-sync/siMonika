@@ -203,7 +203,8 @@
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="ps-4">Nama</th>
+                                <th scope="col" class="ps-4">No</th>
+                                <th scope="col">Nama</th>
                                 <th scope="col">OPD</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Tahun Pembuatan</th>
@@ -217,9 +218,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($aplikasis as $aplikasi)
+                            @foreach ($aplikasis as $index => $aplikasi)
                                 <tr>
-                                    <td class="fw-medium ps-4">{{ $aplikasi->nama }}</td>
+                                    <td class="ps-4">{{ $index + 1 }}</td>
+                                    <td class="fw-medium">{{ $aplikasi->nama }}</td>
                                     <td>{{ $aplikasi->opd }}</td>
                                     <td>
                                         @if ($aplikasi->status_pemakaian == 'Aktif')
