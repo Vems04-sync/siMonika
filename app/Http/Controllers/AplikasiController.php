@@ -114,8 +114,20 @@ class AplikasiController extends Controller
      */
     public function show($id)
     {
-        $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
-        return response()->json($aplikasi);
+        try {
+            $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
+            
+            return response()->json([
+                'success' => true,
+                'aplikasi' => $aplikasi,
+                'atribut_tambahan' => $aplikasi->atributTambahans
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aplikasi tidak ditemukan'
+            ], 404);
+        }
     }
 
     /**

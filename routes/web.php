@@ -116,6 +116,6 @@ Route::get('/aplikasi/{id}/atribut', [AplikasiController::class, 'getAtribut']);
 Route::put('/aplikasi/{id}/update-atribut', [AplikasiController::class, 'updateAtribut'])->name('aplikasi.updateAtribut');
 
 // Routes untuk aplikasi
-Route::get('/aplikasi/{id}', [AplikasiController::class, 'show']);
+Route::get('/aplikasi/{id}', [AplikasiController::class, 'show'])->name('aplikasi.show');
 Route::get('/aplikasi/{id}/atribut', [AplikasiController::class, 'getAtribut']);
 Route::put('/aplikasi/{id}/atribut', [AplikasiController::class, 'updateAtribut']);
