@@ -50,8 +50,9 @@ class AuthController extends \Illuminate\Routing\Controller
                 'last_activity' => now()
             ]);
 
+            // Ubah redirect untuk super admin ke dashboard super admin
             if (Auth::user()->isSuperAdmin()) {
-                return redirect()->route('admin.index');
+                return redirect()->route('super-admin.dashboard');
             }
             return redirect()->route('dashboard');
         }
