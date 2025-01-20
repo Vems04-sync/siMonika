@@ -260,7 +260,6 @@
                                         <th>No</th>
                                         <th>Nama Aplikasi</th>
                                         <th>Nilai Atribut</th>
-                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="detailAtributContent">
@@ -271,9 +270,6 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <button type="button" class="btn btn-primary" id="btnAddToApps">
-                            <i class="bi bi-plus-circle me-1"></i>Tambah ke Aplikasi Lain
-                        </button>
                     </div>
                 </div>
             </div>
@@ -531,21 +527,6 @@
                                         <td>${index + 1}</td>
                                         <td>${item.nama}</td>
                                         <td>${item.pivot.nilai_atribut || '-'}</td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <button class="btn btn-warning btn-edit-nilai" 
-                                                        data-aplikasi-id="${item.id_aplikasi}"
-                                                        data-nilai="${item.pivot.nilai_atribut || ''}"
-                                                        title="Edit Nilai">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-danger btn-remove-atribut" 
-                                                        data-aplikasi-id="${item.id_aplikasi}"
-                                                        title="Hapus dari Aplikasi">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
                                     </tr>
                                 `);
                                 });
@@ -761,6 +742,53 @@
                 });
             }
         });
+    </script>
+
+    <script>
+        function showAppDetail(id) {
+            $.ajax({
+                url: `/aplikasi/${id}/detail`,
+                method: 'GET',
+                success: function(response) {
+                    console.log('Response:', response); // Debug response
+                    
+                    if (response.success) {
+                        const app = response.data;
+                        
+                        // Update informasi aplikasi
+                        $('#detail-nama').text(app.nama);
+                        $('#detail-opd').text(app.opd);
+                        $('#detail-status').text(app.status_pemakaian);
+                        $('#detail-pengembang').text(app.pengembang);
+
+                        // Update atribut tambahan
+                        let atributHtml = '<table class="table table-borderless">';
+                        if (app.atribut_tambahans && app.atribut_tambahans.length > 0) {
+                            app.atribut_tambahans.forEach(atribut => {
+                                atributHtml += `
+                                    <tr>
+                                        <td width="40%">${atribut.nama_atribut}</td>
+                                        <td>${atribut.pivot.nilai_atribut || '-'}</td>
+                                    </tr>`;
+                            });
+                        } else {
+                            atributHtml += '<tr><td colspan="2">Tidak ada atribut tambahan</td></tr>';
+                        }
+                        atributHtml += '</table>';
+                        $('#detail-atribut').html(atributHtml);
+
+                        // Tampilkan modal
+                        $('#detailAppModal').modal('show');
+                    } else {
+                        toastr.error(response.message || 'Gagal memuat detail aplikasi');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Ajax error:', xhr);
+                    toastr.error('Terjadi kesalahan saat memuat data');
+                }
+            });
+        }
     </script>
 </body>
 

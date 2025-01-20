@@ -176,7 +176,9 @@
                         </div>
                         <div class="card-footer bg-transparent border-top-0">
                             <div class="d-flex justify-content-between">
-                                <button class="btn btn-info btn-detail" data-id="{{ $aplikasi->id_aplikasi }}" data-bs-toggle="modal" data-bs-target="#detailAplikasiModal">
+                                <button class="btn btn-info btn-detail" 
+                                    data-id="{{ $aplikasi->id_aplikasi }}"
+                                    type="button">
                                     <i class="bi bi-eye"></i>
                                 </button>
                                 <div>
@@ -249,7 +251,8 @@
                                     <td class="text-center pe-4">
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-sm btn-info btn-detail"
-                                                data-nama="{{ $aplikasi->nama }}">
+                                                data-id="{{ $aplikasi->id_aplikasi }}"
+                                                type="button">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                             <button class="btn btn-sm btn-warning btn-edit"
@@ -456,33 +459,27 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-    $(document).ready(function() {
-        $(document).on('click', '.btn-detail', function() {
-            const id = $(this).data('id');
-            console.log('ID yang dikirim:', id); // Debug ID
-            
-            $.get(`/aplikasi/${id}`, function(response) {
-                console.log('Response:', response); // Debug response
-                
+    function showDetail(id) {
+        $.ajax({
+            url: `/aplikasi/${id}`,
+            method: 'GET',
+            success: function(response) {
                 if (response.success) {
                     const app = response.aplikasi;
-                    console.log('Data aplikasi:', app); // Debug data aplikasi
                     
                     // Update informasi aplikasi
-                    $('#detail-nama').text(app.nama);
-                    $('#detail-opd').text(app.opd);
-                    $('#detail-uraian').text(app.uraian);
-                    $('#detail-tahun').text(app.tahun_pembuatan);
-                    $('#detail-jenis').text(app.jenis);
-                    $('#detail-basis').text(app.basis_aplikasi);
-                    $('#detail-bahasa').text(app.bahasa_framework);
-                    $('#detail-database').text(app.database);
-                    $('#detail-pengembang').text(app.pengembang);
-                    $('#detail-server').text(app.lokasi_server);
-                    $('#detail-status').text(app.status_pemakaian);
-                    
-                    console.log('Atribut tambahan:', response.atribut_tambahan); // Debug atribut
-                    
+                    $('#detail-nama').text(app.nama || '-');
+                    $('#detail-opd').text(app.opd || '-');
+                    $('#detail-uraian').text(app.uraian || '-');
+                    $('#detail-tahun').text(app.tahun_pembuatan || '-');
+                    $('#detail-jenis').text(app.jenis || '-');
+                    $('#detail-basis').text(app.basis_aplikasi || '-');
+                    $('#detail-bahasa').text(app.bahasa_framework || '-');
+                    $('#detail-database').text(app.database || '-');
+                    $('#detail-pengembang').text(app.pengembang || '-');
+                    $('#detail-server').text(app.lokasi_server || '-');
+                    $('#detail-status').text(app.status_pemakaian || '-');
+
                     // Update atribut tambahan
                     let atributHtml = '<table class="table table-borderless">';
                     if (response.atribut_tambahan && response.atribut_tambahan.length > 0) {
@@ -490,7 +487,7 @@
                             atributHtml += `
                                 <tr>
                                     <td width="40%">${atribut.nama_atribut}</td>
-                                    <td>${atribut.nilai_atribut || '-'}</td>
+                                    <td>${atribut.pivot.nilai_atribut || '-'}</td>
                                 </tr>`;
                         });
                     } else {
@@ -498,19 +495,29 @@
                     }
                     atributHtml += '</table>';
                     $('#atribut-tambahan-content').html(atributHtml);
-                    
+
+                    // Tampilkan modal
                     $('#detailAplikasiModal').modal('show');
                 } else {
-                    console.error('Error:', response); // Debug error
-                    toastr.error('Gagal memuat detail aplikasi');
+                    toastr.error(response.message || 'Gagal memuat detail aplikasi');
                 }
-            }).fail(function(xhr) {
-                console.error('Ajax error:', xhr); // Debug ajax error
+            },
+            error: function(xhr) {
+                console.error('Ajax error:', xhr);
                 toastr.error('Terjadi kesalahan saat memuat data');
-            });
+            }
+        });
+    }
+
+    // Tambahkan event listener untuk tombol detail
+    $(document).ready(function() {
+        // Debug: Log ketika tombol detail diklik
+        $('.btn-detail').click(function() {
+            const id = $(this).data('id');
+            console.log('Detail button clicked, ID:', id);
+            showDetail(id);
         });
     });
     </script>
 </body>
-
 </html>
