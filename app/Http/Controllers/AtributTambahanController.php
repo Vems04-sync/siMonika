@@ -19,37 +19,53 @@ class AtributTambahanController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_atribut' => 'required|string|max:100|unique:atribut_tambahans',
-            'tipe_data' => 'required|in:varchar,number,date,text',
-            'nilai_default' => 'nullable|string'
-        ]);
-
         try {
-            DB::beginTransaction();
-            
-            Log::info('Request data:', $request->all());
-            
-            $atribut = AtributTambahan::create([
-                'nama_atribut' => $request->nama_atribut,
-                'tipe_data' => $request->tipe_data
+            // Validasi request
+            $validated = $request->validate([
+                'nama_atribut' => 'required|string|max:100|unique:atribut_tambahans',
+                'tipe_data' => 'required|in:varchar,number,date,text',
+                'nilai_default' => 'nullable|string'
+            ], [
+                'nama_atribut.required' => 'Nama atribut wajib diisi',
+                'nama_atribut.unique' => 'Nama atribut sudah digunakan',
+                'tipe_data.required' => 'Tipe data wajib diisi',
+                'tipe_data.in' => 'Tipe data tidak valid'
             ]);
-            
-            Log::info('Created atribut:', $atribut->toArray());
-            
+
+            DB::beginTransaction();
+
+            // Buat atribut baru
+            $atribut = AtributTambahan::create([
+                'nama_atribut' => $validated['nama_atribut'],
+                'tipe_data' => $validated['tipe_data']
+            ]);
+
             // Terapkan ke semua aplikasi
             $aplikasis = Aplikasi::all();
             foreach ($aplikasis as $aplikasi) {
                 $aplikasi->atributTambahans()->attach($atribut->id_atribut, [
-                    'nilai_atribut' => $request->nilai_default
+                    'nilai_atribut' => $validated['nilai_default'] ?? null
                 ]);
             }
-            
+
             DB::commit();
-            return redirect()->back()->with('success', 'Atribut berhasil ditambahkan ke semua aplikasi');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Atribut berhasil ditambahkan ke semua aplikasi'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('error', 'Gagal menambahkan atribut: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menambahkan atribut: ' . $e->getMessage()
+            ], 500);
         }
     }
 

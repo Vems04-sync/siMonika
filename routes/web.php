@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/delete/{nama}', [AplikasiController::class, 'destroyByNama'])->name('aplikasi.destroyByNama');
         Route::get('/detail/{nama}', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
         Route::get('/export', [AplikasiController::class, 'export'])->name('aplikasi.export');
+        Route::get('/{id}/detail', [AplikasiController::class, 'getDetail'])->name('aplikasi.detail');
     });
 
     Route::get('/chart-data', [AplikasiController::class, 'getChartData']);
@@ -107,4 +108,14 @@ Route::put('/atribut/{id_aplikasi}/nilai', [AtributController::class, 'updateNil
 Route::delete('/atribut/{id_aplikasi}/{id_atribut}', [AtributController::class, 'removeFromApp'])->name('atribut.removeFromApp');
 
 // Tambahkan route untuk detail aplikasi
-Route::get('/aplikasi/{id}', [AplikasiController::class, 'show'])->name('aplikasi.show');
+Route::get('/aplikasi/{id}/detail', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
+Route::get('/aplikasi/{id}/atribut', [AplikasiController::class, 'getAtribut']);
+// Route::put('/aplikasi/{id}/atribut', [AplikasiController::class, 'updateAtribut']);
+
+// Route untuk update atribut aplikasi
+Route::put('/aplikasi/{id}/update-atribut', [AplikasiController::class, 'updateAtribut'])->name('aplikasi.updateAtribut');
+
+// Routes untuk aplikasi
+Route::get('/aplikasi/{id}', [AplikasiController::class, 'show']);
+Route::get('/aplikasi/{id}/atribut', [AplikasiController::class, 'getAtribut']);
+Route::put('/aplikasi/{id}/atribut', [AplikasiController::class, 'updateAtribut']);

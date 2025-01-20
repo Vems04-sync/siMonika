@@ -66,7 +66,7 @@ class AplikasiController extends Controller
             ]);
 
             DB::beginTransaction();
-            
+
             // Buat aplikasi baru
             $aplikasi = Aplikasi::create($validated);
 
@@ -114,36 +114,8 @@ class AplikasiController extends Controller
      */
     public function show($id)
     {
-        try {
-            $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
-            
-            // Ambil semua atribut yang tersedia
-            $allAtributs = AtributTambahan::all();
-            
-            // Siapkan data atribut dengan nilai
-            $atributValues = [];
-            foreach ($allAtributs as $atribut) {
-                $nilai = $aplikasi->atributTambahans
-                    ->where('id_atribut', $atribut->id_atribut)
-                    ->first();
-                    
-                $atributValues[] = [
-                    'nama_atribut' => $atribut->nama_atribut,
-                    'nilai_atribut' => $nilai ? $nilai->pivot->nilai_atribut : null
-                ];
-            }
-
-            return response()->json([
-                'success' => true,
-                'aplikasi' => $aplikasi,
-                'atribut_tambahan' => $atributValues
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
+        return response()->json($aplikasi);
     }
 
     /**
@@ -201,7 +173,7 @@ class AplikasiController extends Controller
             if ($request->has('atribut')) {
                 // Hapus atribut yang ada terlebih dahulu
                 $aplikasi->atributTambahans()->detach();
-                
+
                 // Tambahkan atribut baru
                 foreach ($request->atribut as $id_atribut => $nilai) {
                     if (!empty($nilai)) {
@@ -420,67 +392,87 @@ class AplikasiController extends Controller
     /**
      * Get detail aplikasi by nama.
      */
-    public function getDetail($nama)
+    public function getDetail($id)
     {
         try {
-            // Dapatkan semua kolom dari tabel
-            $columns = Schema::getColumnListing('aplikasis');
+            $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
 
-            // Ambil data berdasarkan kolom yang ada
-            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-
-            // Siapkan data untuk response, exclude kolom yang tidak perlu ditampilkan
-            $detailData = [];
-            foreach ($columns as $column) {
-                // Skip kolom yang tidak perlu ditampilkan
-                if (!in_array($column, ['id', 'created_at', 'updated_at'])) {
-                    $detailData[$column] = $aplikasi->$column;
-                }
-            }
-
-            return response()->json($detailData);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'nama' => $aplikasi->nama,
+                    'opd' => $aplikasi->opd,
+                    'status_pemakaian' => $aplikasi->status_pemakaian,
+                    'pengembang' => $aplikasi->pengembang,
+                    'tahun_pembuatan' => $aplikasi->tahun_pembuatan,
+                    'jenis' => $aplikasi->jenis,
+                    'basis_aplikasi' => $aplikasi->basis_aplikasi,
+                    'bahasa_framework' => $aplikasi->bahasa_framework,
+                    'database' => $aplikasi->database,
+                    'lokasi_server' => $aplikasi->lokasi_server,
+                    'atribut_tambahans' => $aplikasi->atributTambahans
+                ]
+            ]);
         } catch (\Exception $e) {
-            info('Error di detail: ' . $e->getMessage());
-            return response()->json(['error' => 'Data tidak ditemukan'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memuat data: ' . $e->getMessage()
+            ], 500);
         }
     }
 
     /**
      * Get detail aplikasi by nama.
      */
-    public function detail($nama)
+    public function detail($id)
     {
         try {
-            // Ambil data aplikasi
-            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-
-            // Ambil atribut tambahan dengan nilai dari tabel pivot
-            $atributTambahan = DB::table('aplikasi_atribut')
-                ->join('atribut_tambahans', 'aplikasi_atribut.id_atribut', '=', 'atribut_tambahans.id_atribut')
-                ->where('aplikasi_atribut.id_aplikasi', $aplikasi->id_aplikasi)
-                ->select(
-                    'atribut_tambahans.nama_atribut',
-                    'atribut_tambahans.tipe_data',
-                    'aplikasi_atribut.nilai_atribut'
-                )
-                ->get();
+            // Ambil data aplikasi dengan atribut tambahannya
+            $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
 
             return response()->json([
                 'success' => true,
-                'aplikasi' => $aplikasi,
-                'atribut_tambahan' => $atributTambahan,
-                'debug' => [
-                    'id_aplikasi' => $aplikasi->id_aplikasi,
-                    'count_atribut' => $atributTambahan->count()
-                ]
+                'data' => $aplikasi
             ]);
         } catch (\Exception $e) {
-            Log::error('Error di detail: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'error' => 'Data tidak ditemukan',
-                'message' => $e->getMessage()
-            ], 404);
+                'message' => 'Gagal memuat detail aplikasi'
+            ], 500);
+        }
+    }
+
+    public function getAtribut($id)
+    {
+        $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
+        return response()->json([
+            'success' => true,
+            'atribut_tambahans' => $aplikasi->atributTambahans
+        ]);
+    }
+
+    public function updateAtribut(Request $request, $id)
+    {
+        try {
+            $aplikasi = Aplikasi::findOrFail($id);
+
+            // Update nilai atribut
+            foreach ($request->nilai_atribut as $atributId => $nilai) {
+                DB::table('aplikasi_atribut')
+                    ->where('id_aplikasi', $id)
+                    ->where('id_atribut', $atributId)
+                    ->update(['nilai_atribut' => $nilai]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nilai atribut berhasil diperbarui'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui nilai atribut: ' . $e->getMessage()
+            ], 500);
         }
     }
 
