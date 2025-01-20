@@ -18,8 +18,8 @@ toggleViewBtn.addEventListener("click", function () {
         appTable.style.display = "block";
         toggleViewBtn.innerHTML =
             '<i class="bi bi-card-list"></i><span class="ms-2">Ubah Tampilan</span>';
-        setupPagination();
-        showTablePage();
+        currentPage = 1; // Reset ke halaman pertama
+        showTablePage(); // Ini akan memanggil setupPagination()
     }
 });
 
@@ -27,12 +27,13 @@ toggleViewBtn.addEventListener("click", function () {
 const itemsPerPage = 10;
 let currentPage = 1;
 
-function setupPagination() {
-    const table = document.querySelector("#appTable tbody");
-    const visibleRows = Array.from(table.querySelectorAll("tr")).filter(
-        (row) => row.style.display !== "none"
-    );
-    const pageCount = Math.ceil(visibleRows.length / itemsPerPage);
+function setupPagination(totalRows) {
+    const pageCount = Math.ceil(totalRows / itemsPerPage);
+
+    // Pastikan currentPage valid
+    if (currentPage > pageCount) {
+        currentPage = pageCount || 1;
+    }
 
     let paginationContainer = document.querySelector("#tablePagination");
     if (!paginationContainer) {
@@ -42,48 +43,99 @@ function setupPagination() {
         document.querySelector("#appTable").appendChild(paginationContainer);
     }
 
-    // Pastikan currentPage tidak melebihi pageCount
-    if (currentPage > pageCount) {
-        currentPage = pageCount || 1;
-    }
-
+    // Buat HTML pagination
     let paginationHtml = '<ul class="pagination">';
+    
+    // Tombol Previous
     paginationHtml += `
         <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
-            <a class="page-link" href="#" data-page="${
-                currentPage - 1
-            }">Previous</a>
+            <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
         </li>
     `;
 
-    for (let i = 1; i <= pageCount; i++) {
+    // Tampilkan semua nomor halaman jika total halaman <= 7
+    if (pageCount <= 7) {
+        for (let i = 1; i <= pageCount; i++) {
+            paginationHtml += `
+                <li class="page-item ${currentPage === i ? "active" : ""}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        }
+    } else {
+        // Logika untuk pagination dengan ellipsis
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(pageCount, startPage + 4);
+        
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+
+        // Selalu tampilkan halaman pertama
         paginationHtml += `
-            <li class="page-item ${currentPage === i ? "active" : ""}">
-                <a class="page-link" href="#" data-page="${i}">${i}</a>
+            <li class="page-item ${currentPage === 1 ? "active" : ""}">
+                <a class="page-link" href="#" data-page="1">1</a>
             </li>
         `;
+
+        if (startPage > 2) {
+            paginationHtml += `
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            `;
+        }
+
+        // Tampilkan halaman di tengah
+        for (let i = startPage; i <= endPage; i++) {
+            if (i !== 1 && i !== pageCount) {
+                paginationHtml += `
+                    <li class="page-item ${currentPage === i ? "active" : ""}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `;
+            }
+        }
+
+        if (endPage < pageCount - 1) {
+            paginationHtml += `
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            `;
+        }
+
+        // Selalu tampilkan halaman terakhir
+        if (pageCount > 1) {
+            paginationHtml += `
+                <li class="page-item ${currentPage === pageCount ? "active" : ""}">
+                    <a class="page-link" href="#" data-page="${pageCount}">${pageCount}</a>
+                </li>
+            `;
+        }
     }
 
+    // Tombol Next
     paginationHtml += `
         <li class="page-item ${currentPage === pageCount ? "disabled" : ""}">
-            <a class="page-link" href="#" data-page="${
-                currentPage + 1
-            }">Next</a>
+            <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
         </li>
     </ul>`;
 
     paginationContainer.innerHTML = paginationHtml;
 
-    // Update event listeners untuk pagination
-    const paginationLinks = paginationContainer.querySelectorAll(".page-link");
-    paginationLinks.forEach((link) => {
+    // Event listeners untuk pagination
+    paginationContainer.querySelectorAll(".page-link").forEach((link) => {
         link.addEventListener("click", (e) => {
             e.preventDefault();
             const newPage = parseInt(link.dataset.page);
-            if (newPage >= 1 && newPage <= pageCount) {
+            if (!isNaN(newPage) && newPage >= 1 && newPage <= pageCount) {
                 currentPage = newPage;
                 showTablePage();
-                setupPagination();
             }
         });
     });
@@ -91,20 +143,59 @@ function setupPagination() {
 
 function showTablePage() {
     const table = document.querySelector("#appTable tbody");
-    const visibleRows = Array.from(table.querySelectorAll("tr")).filter(
-        (row) => row.style.display !== "none"
-    );
+    const rows = Array.from(table.querySelectorAll("tr"));
+    
+    // Filter baris yang seharusnya terlihat berdasarkan filter yang aktif
+    const visibleRows = rows.filter(row => {
+        const title = row.querySelector("td:first-child").textContent.toLowerCase();
+        const status = row.querySelector(".status-badge").textContent.trim().toLowerCase() === "aktif" ? "active" : "unused";
+        const jenis = row.cells[4].textContent.trim();
+        const basis = row.cells[5].textContent.trim();
+        const bahasa = row.cells[6].textContent.trim();
+        const database = row.cells[7].textContent.trim();
+        const pengembang = row.cells[8].textContent.trim();
+        const lokasi = row.cells[9].textContent.trim();
+
+        const searchTerm = document.getElementById("searchApp").value.toLowerCase();
+        const statusFilter = document.getElementById("statusFilter").value;
+        const jenisFilter = document.getElementById("jenisFilter").value;
+        const basisFilter = document.getElementById("basisFilter").value;
+        const bahasaFilter = document.getElementById("bahasaFilter").value;
+        const databaseFilter = document.getElementById("databaseFilter").value;
+        const pengembangFilter = document.getElementById("pengembangFilter").value;
+        const lokasiFilter = document.getElementById("lokasiFilter").value;
+
+        const matchesSearch = !searchTerm || title.includes(searchTerm);
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesJenis = !jenisFilter || jenis.toLowerCase() === jenisFilter.toLowerCase();
+        const matchesBasis = !basisFilter || basis.toLowerCase().includes(basisFilter.toLowerCase());
+        const matchesBahasa = !bahasaFilter || bahasa.toLowerCase() === bahasaFilter.toLowerCase();
+        const matchesDatabase = !databaseFilter || database.toLowerCase() === databaseFilter.toLowerCase();
+        const matchesPengembang = !pengembangFilter || pengembang.toLowerCase() === pengembangFilter.toLowerCase();
+        const matchesLokasi = !lokasiFilter || lokasi.toLowerCase() === lokasiFilter.toLowerCase();
+
+        return matchesSearch && matchesStatus && matchesJenis && matchesBasis && 
+               matchesBahasa && matchesDatabase && matchesPengembang && matchesLokasi;
+    });
 
     // Sembunyikan semua baris terlebih dahulu
-    visibleRows.forEach((row) => (row.style.display = "none"));
+    rows.forEach(row => {
+        row.style.display = "none";
+    });
 
-    // Tampilkan hanya baris yang sesuai dengan halaman saat ini
+    // Hitung start dan end index untuk halaman saat ini
     const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
+    const end = Math.min(start + itemsPerPage, visibleRows.length);
 
-    for (let i = start; i < end && i < visibleRows.length; i++) {
-        visibleRows[i].style.display = "";
+    // Tampilkan baris yang sesuai dengan halaman saat ini
+    for (let i = start; i < end; i++) {
+        if (visibleRows[i]) {
+            visibleRows[i].style.display = "";
+        }
     }
+
+    // Update pagination
+    setupPagination(visibleRows.length);
 }
 
 function filterApps() {
@@ -455,7 +546,7 @@ $(document).ready(function () {
         resetForm();
     });
 
-    // Handle form submission
+    // Update fungsi untuk menangani form submission
     $("#appForm").on("submit", function (e) {
         e.preventDefault();
         const form = $(this);
@@ -487,14 +578,11 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     $("#appModal").modal("hide");
-                    setTimeout(() => {
-                        toastr.success(
-                            isEdit
-                                ? "Aplikasi berhasil diperbarui"
-                                : "Aplikasi berhasil ditambahkan"
-                        );
-                        setTimeout(() => window.location.reload(), 1000);
-                    }, 500);
+                    // Simpan pesan ke sessionStorage
+                    sessionStorage.setItem('flash_message', isEdit ? "Aplikasi berhasil diperbarui" : "Aplikasi berhasil ditambahkan");
+                    sessionStorage.setItem('flash_type', 'success');
+                    // Redirect atau refresh halaman
+                    window.location.reload();
                 } else {
                     toastr.error(response.message || "Terjadi kesalahan");
                     submitBtn.prop("disabled", false);
@@ -512,17 +600,13 @@ $(document).ready(function () {
                     });
                     toastr.error("Mohon periksa kembali input Anda");
                 } else {
-                    // Jika response menunjukkan sukses meskipun status error
                     if (xhr.responseJSON && xhr.responseJSON.success) {
                         $("#appModal").modal("hide");
-                        setTimeout(() => {
-                            toastr.success(
-                                isEdit
-                                    ? "Aplikasi berhasil diperbarui"
-                                    : "Aplikasi berhasil ditambahkan"
-                            );
-                            setTimeout(() => window.location.reload(), 1000);
-                        }, 500);
+                        // Simpan pesan ke sessionStorage
+                        sessionStorage.setItem('flash_message', isEdit ? "Aplikasi berhasil diperbarui" : "Aplikasi berhasil ditambahkan");
+                        sessionStorage.setItem('flash_type', 'success');
+                        // Redirect atau refresh halaman
+                        window.location.reload();
                     } else {
                         toastr.error(
                             xhr.responseJSON?.message ||
@@ -609,33 +693,21 @@ function deleteApp(appId) {
                 url: `/aplikasi/delete/${appId}`,
                 method: "DELETE",
                 headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
-                        "content"
-                    ),
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
                 success: function (response) {
                     loadingOverlay.remove();
-                    Swal.fire({
-                        title: "Berhasil!",
-                        text: "Data aplikasi telah dihapus",
-                        icon: "success",
-                        timer: 1500,
-                        showConfirmButton: false,
-                    }).then(() => {
-                        window.location.href = "/aplikasi";
-                    });
+                    // Simpan pesan ke sessionStorage
+                    sessionStorage.setItem('flash_message', 'Data aplikasi berhasil dihapus');
+                    sessionStorage.setItem('flash_type', 'success');
+                    window.location.reload();
                 },
                 error: function (xhr) {
                     loadingOverlay.remove();
-                    Swal.fire({
-                        title: "Gagal!",
-                        text: "Terjadi kesalahan saat menghapus data",
-                        icon: "error",
-                        timer: 1500,
-                        showConfirmButton: false,
-                    }).then(() => {
-                        window.location.href = "/aplikasi";
-                    });
+                    // Simpan pesan error ke sessionStorage
+                    sessionStorage.setItem('flash_message', 'Gagal menghapus data aplikasi');
+                    sessionStorage.setItem('flash_type', 'error');
+                    window.location.reload();
                 },
             });
         }
@@ -790,4 +862,22 @@ $(document).on("click", ".card-detail-btn", function (e) {
     const nama = $(this).data("nama");
     viewAppDetails(nama);
     $("#detailModal").modal("show");
+});
+
+// Tambahkan event listener untuk menampilkan flash message saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    const flashMessage = sessionStorage.getItem('flash_message');
+    const flashType = sessionStorage.getItem('flash_type');
+    
+    if (flashMessage) {
+        if (flashType === 'success') {
+            toastr.success(flashMessage);
+        } else if (flashType === 'error') {
+            toastr.error(flashMessage);
+        }
+        
+        // Hapus flash message dari sessionStorage
+        sessionStorage.removeItem('flash_message');
+        sessionStorage.removeItem('flash_type');
+    }
 });
