@@ -367,79 +367,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // CRUD Operations
-function viewAppDetails(nama) {
-    console.log("Fetching details for:", nama); // Debug
-
-    // Show loading
-    $("#loadingState").removeClass("d-none");
-    $("#contentState").addClass("d-none");
-    $("#errorState").addClass("d-none");
-
-    $.ajax({
-        url: `/aplikasi/detail/${nama}`,
-        method: "GET",
-        success: function (response) {
-            console.log("Response received:", response); // Debug
-
-            // Populate aplikasi details
-            let detailHTML = "";
-            for (let key in response.aplikasi) {
-                if (
-                    key !== "id_aplikasi" &&
-                    key !== "created_at" &&
-                    key !== "updated_at"
-                ) {
-                    detailHTML += `
-                        <tr>
-                            <th>${formatLabel(key)}</th>
-                            <td>${response.aplikasi[key] || "-"}</td>
-                        </tr>
-                    `;
-                }
-            }
-            console.log("Detail HTML:", detailHTML); // Debug
-            $("#detailTable").html(detailHTML);
-
-            // Populate atribut tambahan
-            if (
-                response.atribut_tambahan &&
-                response.atribut_tambahan.length > 0
-            ) {
-                console.log("Atribut found:", response.atribut_tambahan); // Debug
-                let atributHTML = "";
-                response.atribut_tambahan.forEach(function (atribut) {
-                    atributHTML += `
-                        <tr>
-                            <td>${atribut.nama_atribut}</td>
-                            <td>${atribut.nilai_atribut || "-"}</td>
-                        </tr>
-                    `;
-                });
-                $("#atributTable").html(atributHTML);
-                $("#atributContent").removeClass("d-none");
-                $("#noAtributMessage").addClass("d-none");
-            } else {
-                console.log("No atribut found"); // Debug
-                $("#atributContent").addClass("d-none");
-                $("#noAtributMessage").removeClass("d-none");
-            }
-
-            // Show content
-            $("#loadingState").addClass("d-none");
-            $("#contentState").removeClass("d-none");
-
-            // Make sure modal is shown
-            $("#detailModal").modal("show");
-        },
-        error: function (xhr) {
-            console.error("Error:", xhr);
-            $("#loadingState").addClass("d-none");
-            $("#contentState").addClass("d-none");
-            $("#errorState").removeClass("d-none");
-            $("#errorMessage").text("Gagal memuat detail aplikasi");
-        },
-    });
-}
+// Hapus atau komentar fungsi viewAppDetails yang lama
 
 // Helper function to format label
 function formatLabel(key) {
@@ -844,45 +772,62 @@ $(document).on("click", ".save-nilai", function () {
 
 // Tambahkan event listener untuk tombol detail
 $(document).ready(function () {
-    // Untuk tombol detail di tampilan tabel
-    $(document).on("click", ".btn-detail", function (e) {
+    // Event handler untuk tombol detail (baik di tabel maupun card)
+    $(document).on('click', '.btn-detail, .card-detail-btn', function(e) {
         e.preventDefault();
-        const nama = $(this).data("nama");
-        console.log("Detail button clicked for:", nama); // Debugging
-        viewAppDetails(nama);
-        $("#detailModal").modal("show");
-    });
-
-    // Untuk tombol detail di tampilan card (jika ada)
-    $(document).on("click", ".card-detail-btn", function (e) {
-        e.preventDefault();
-        const nama = $(this).data("nama");
-        viewAppDetails(nama);
-        $("#detailModal").modal("show");
-    });
-});
-
-$(document).on("click", ".card-detail-btn", function (e) {
-    e.preventDefault();
-    const nama = $(this).data("nama");
-    viewAppDetails(nama);
-    $("#detailModal").modal("show");
-});
-
-// Tambahkan event listener untuk menampilkan flash message saat halaman dimuat
-document.addEventListener('DOMContentLoaded', function() {
-    const flashMessage = sessionStorage.getItem('flash_message');
-    const flashType = sessionStorage.getItem('flash_type');
-    
-    if (flashMessage) {
-        if (flashType === 'success') {
-            toastr.success(flashMessage);
-        } else if (flashType === 'error') {
-            toastr.error(flashMessage);
-        }
+        const nama = $(this).data('nama');
         
-        // Hapus flash message dari sessionStorage
-        sessionStorage.removeItem('flash_message');
-        sessionStorage.removeItem('flash_type');
-    }
+        // Tampilkan loading state
+        const loadingOverlay = $('<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">')
+            .append('<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>');
+        $('body').append(loadingOverlay);
+        
+        // Ajax request untuk detail aplikasi
+        $.ajax({
+            url: `/aplikasi/detail/${nama}`,
+            method: 'GET',
+            success: function(response) {
+                const app = response.aplikasi;
+                
+                // Update informasi aplikasi
+                $('#detail-nama').text(app.nama);
+                $('#detail-opd').text(app.opd);
+                $('#detail-uraian').text(app.uraian);
+                $('#detail-tahun').text(app.tahun_pembuatan);
+                $('#detail-jenis').text(app.jenis);
+                $('#detail-basis').text(app.basis_aplikasi);
+                $('#detail-bahasa').text(app.bahasa_framework);
+                $('#detail-database').text(app.database);
+                $('#detail-pengembang').text(app.pengembang);
+                $('#detail-server').text(app.lokasi_server);
+                $('#detail-status').text(app.status_pemakaian);
+                
+                // Update atribut tambahan
+                let atributHtml = '<table class="table table-borderless">';
+                if (response.atribut_tambahan && response.atribut_tambahan.length > 0) {
+                    response.atribut_tambahan.forEach(atribut => {
+                        atributHtml += `
+                            <tr>
+                                <td width="40%">${atribut.nama_atribut}</td>
+                                <td>${atribut.nilai_atribut || '-'}</td>
+                            </tr>`;
+                    });
+                } else {
+                    atributHtml += '<tr><td colspan="2">Tidak ada atribut tambahan</td></tr>';
+                }
+                atributHtml += '</table>';
+                $('#atribut-tambahan-content').html(atributHtml);
+                
+                // Tampilkan modal
+                $('#detailAplikasiModal').modal('show');
+            },
+            error: function(xhr) {
+                console.log('Error:', xhr);
+                // Hapus notifikasi error
+            },
+            complete: function() {
+                loadingOverlay.remove();
+            }
+        });
+    });
 });
