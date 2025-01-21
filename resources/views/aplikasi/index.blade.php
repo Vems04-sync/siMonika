@@ -349,18 +349,26 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="edit_tahun_pembuatan" class="form-label">Tahun Pembuatan</label>
-                                <input type="text" class="form-control" id="edit_tahun_pembuatan" name="tahun_pembuatan" required>
+                                <input type="date" class="form-control" id="edit_tahun_pembuatan" name="tahun_pembuatan" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_jenis" class="form-label">Jenis</label>
-                                <input type="text" class="form-control" id="edit_jenis" name="jenis" required>
+                                <select class="form-select" id="edit_jenis" name="jenis" required>
+                                    <option value="Layanan Publik">Layanan Publik</option>
+                                    <option value="Administrasi Pemerintahan">Administrasi Pemerintahan</option>
+                                    <option value="Fungsi Tertentu">Fungsi Tertentu</option>
+                                </select>
                             </div>
                         </div>
 
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="edit_basis_aplikasi" class="form-label">Basis Aplikasi</label>
-                                <input type="text" class="form-control" id="edit_basis_aplikasi" name="basis_aplikasi" required>
+                                <select class="form-select" id="edit_basis_aplikasi" name="basis_aplikasi" required>
+                                    <option value="Mobile">Mobile</option>
+                                    <option value="Website">Website</option>
+                                    <option value="Desktop">Desktop</option>
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_bahasa_framework" class="form-label">Bahasa/Framework</label>
@@ -371,18 +379,31 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="edit_database" class="form-label">Database</label>
-                                <input type="text" class="form-control" id="edit_database" name="database" required>
+                                <select class="form-select" id="edit_database" name="database" required>
+                                    <option value="MySQL">MySQL</option>
+                                    <option value="PostgreSQL">PostgreSQL</option>
+                                    <option value="MongoDB">MongoDB</option>
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_pengembang" class="form-label">Pengembang</label>
-                                <input type="text" class="form-control" id="edit_pengembang" name="pengembang" required>
+                                <select class="form-select" id="edit_pengembang" name="pengembang" required>
+                                    <option value="Internal OPD">Internal OPD</option>
+                                    <option value="Diskominfo">Diskominfo</option>
+                                    <option value="Vendor">Vendor</option>
+                                </select>
                             </div>
                         </div>
 
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="edit_lokasi_server" class="form-label">Lokasi Server</label>
-                                <input type="text" class="form-control" id="edit_lokasi_server" name="lokasi_server" required>
+                                <select class="form-select" id="edit_lokasi_server" name="lokasi_server" required>
+                                    <option value="Server Diskominfo">Server Diskominfo</option>
+                                    <option value="Server Internal OPD">Server Internal OPD</option>
+                                    <option value="PDN">PDN</option>
+                                    <option value="Vendor">Vendor</option>
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_status_pemakaian" class="form-label">Status Pemakaian</label>
@@ -403,8 +424,6 @@
             </div>
         </div>
     </div>
-
-    @include('aplikasi.edit')
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
