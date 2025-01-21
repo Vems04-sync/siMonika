@@ -125,118 +125,74 @@ class AplikasiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Aplikasi tidak ditemukan'
-            ], 404);
+                'message' => 'Gagal memuat detail aplikasi: ' . $e->getMessage()
+            ]);
         }
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($nama)
+    public function edit($id)
     {
-        try {
-            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-            return response()->json($aplikasi);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memuat data aplikasi'
-            ], 404);
-        }
+        $aplikasi = Aplikasi::findOrFail($id);
+        $existingAtributs = DB::table('aplikasi_atribut')
+            ->where('id_aplikasi', $id)
+            ->pluck('nilai_atribut', 'id_atribut')
+            ->toArray();
+
+        return response()->json([
+            'success' => true,
+            'aplikasi' => $aplikasi,
+            'existingAtributs' => $existingAtributs
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $nama)
+    public function update(Request $request, $id)
     {
-        DB::beginTransaction();
         try {
-            $aplikasi = Aplikasi::where('nama', $nama)->firstOrFail();
-
-            // Simpan data lama sebelum diupdate
-            $oldData = $aplikasi->toArray();
-
-            // Validasi
-            $validated = $request->validate([
-                'nama' => [
-                    'required',
-                    'string',
-                    'max:255',
-                    Rule::unique('aplikasis')->ignore($aplikasi->id_aplikasi, 'id_aplikasi')
-                ],
-                'opd' => 'required|string|max:255',
-                'uraian' => 'nullable|string',
-                'tahun_pembuatan' => 'required|date',
-                'jenis' => 'required|string|max:255',
-                'basis_aplikasi' => 'required|in:Website,Desktop,Mobile',
-                'bahasa_framework' => 'required|string|max:255',
-                'database' => 'required|string|max:255',
-                'pengembang' => 'required|string|max:255',
-                'lokasi_server' => 'required|string|max:255',
-                'status_pemakaian' => 'required|in:Aktif,Tidak Aktif'
+            DB::beginTransaction();
+            
+            $aplikasi = Aplikasi::findOrFail($id);
+            
+            // Update aplikasi
+            $aplikasi->update([
+                'nama' => $request->nama,
+                'opd' => $request->opd,
+                'uraian' => $request->uraian,
+                'tahun_pembuatan' => $request->tahun_pembuatan,
+                'jenis' => $request->jenis,
+                'basis_aplikasi' => $request->basis_aplikasi,
+                'bahasa_framework' => $request->bahasa_framework,
+                'database' => $request->database,
+                'pengembang' => $request->pengembang,
+                'lokasi_server' => $request->lokasi_server,
+                'status_pemakaian' => $request->status_pemakaian,
             ]);
 
-            // Update aplikasi
-            $aplikasi->update($validated);
-
-            // Update atribut tambahan
+            // Update atribut tambahan jika ada
             if ($request->has('atribut')) {
-                // Hapus atribut yang ada terlebih dahulu
-                $aplikasi->atributTambahans()->detach();
-
-                // Tambahkan atribut baru
                 foreach ($request->atribut as $id_atribut => $nilai) {
-                    if (!empty($nilai)) {
-                        $aplikasi->atributTambahans()->attach($id_atribut, ['nilai_atribut' => $nilai]);
-                    }
+                    $aplikasi->atributTambahan()->updateOrCreate(
+                        ['id_atribut' => $id_atribut],
+                        ['nilai_atribut' => $nilai]
+                    );
                 }
-            }
-
-            // Siapkan detail perubahan
-            $changes = [];
-            foreach ($validated as $field => $newValue) {
-                if ($oldData[$field] !== $newValue) {
-                    $changes[] = [
-                        'field' => $this->getFieldLabel($field),
-                        'old' => $oldData[$field],
-                        'new' => $newValue
-                    ];
-                }
-            }
-
-            // Jika ada perubahan, catat di log
-            if (!empty($changes)) {
-                $detailPerubahan = array_map(function ($change) {
-                    return "{$change['field']}: {$change['old']} → {$change['new']}";
-                }, $changes);
-
-                LogAktivitas::create([
-                    'user_id' => Auth::id(),
-                    'aktivitas' => 'Update Aplikasi',
-                    'tipe_aktivitas' => 'update',
-                    'modul' => 'Aplikasi',
-                    'detail' => "Mengupdate aplikasi '{$oldData['nama']}' dengan perubahan:\n" .
-                        implode("\n", $detailPerubahan)
-                ]);
             }
 
             DB::commit();
-
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Aplikasi berhasil diperbarui'
             ]);
-        } catch (ValidationException $e) {
-            DB::rollback();
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors()
-            ], 422);
         } catch (\Exception $e) {
-            DB::rollback();
+            DB::rollBack();
+            Log::error('Error updating aplikasi: ' . $e->getMessage());
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memperbarui aplikasi: ' . $e->getMessage()
@@ -247,17 +203,33 @@ class AplikasiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    // public function destroy(Aplikasi $aplikasi)
-    // {
-    //     try {
-    //         $aplikasi->delete();
-    //         return redirect()->route('aplikasi.index')
-    //             ->with('success', 'Aplikasi berhasil dihapus.');
-    //     } catch (\Exception $e) {
-    //         return redirect()->route('aplikasi.index')
-    //             ->with('error', 'Gagal menghapus aplikasi: ' . $e->getMessage());
-    //     }
-    // }
+    public function destroy($id)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $aplikasi = Aplikasi::findOrFail($id);
+            
+            // Hapus atribut tambahan terlebih dahulu
+            $aplikasi->atributTambahan()->detach();
+            
+            // Hapus aplikasi
+            $aplikasi->delete();
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Aplikasi berhasil dihapus'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus aplikasi: ' . $e->getMessage()
+            ]);
+        }
+    }
 
     /**
      * Remove the specified resource from storage by nama.
@@ -402,54 +374,29 @@ class AplikasiController extends Controller
     }
 
     /**
-     * Get detail aplikasi by nama.
-     */
-    public function getDetail($id)
-    {
-        try {
-            $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
-
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'nama' => $aplikasi->nama,
-                    'opd' => $aplikasi->opd,
-                    'status_pemakaian' => $aplikasi->status_pemakaian,
-                    'pengembang' => $aplikasi->pengembang,
-                    'tahun_pembuatan' => $aplikasi->tahun_pembuatan,
-                    'jenis' => $aplikasi->jenis,
-                    'basis_aplikasi' => $aplikasi->basis_aplikasi,
-                    'bahasa_framework' => $aplikasi->bahasa_framework,
-                    'database' => $aplikasi->database,
-                    'lokasi_server' => $aplikasi->lokasi_server,
-                    'atribut_tambahans' => $aplikasi->atributTambahans
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat memuat data: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Get detail aplikasi by nama.
+     * Get detail aplikasi.
      */
     public function detail($id)
     {
         try {
-            // Ambil data aplikasi dengan atribut tambahannya
             $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
+            
+            // Debug log
+            \Log::info('Detail aplikasi:', [
+                'aplikasi' => $aplikasi->toArray(),
+                'atribut_count' => $aplikasi->atributTambahans->count()
+            ]);
 
             return response()->json([
                 'success' => true,
-                'data' => $aplikasi
+                'data' => $aplikasi,
+                'message' => 'Detail aplikasi berhasil dimuat'
             ]);
         } catch (\Exception $e) {
+            \Log::error('Error in detail method: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memuat detail aplikasi'
+                'message' => 'Gagal memuat detail aplikasi: ' . $e->getMessage()
             ], 500);
         }
     }

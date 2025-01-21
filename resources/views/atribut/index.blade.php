@@ -749,32 +749,39 @@
             $.ajax({
                 url: `/aplikasi/${id}/detail`,
                 method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 success: function(response) {
-                    console.log('Response:', response); // Debug response
+                    console.log('Response:', response); // Debug log
                     
                     if (response.success) {
                         const app = response.data;
                         
-                        // Update informasi aplikasi
-                        $('#detail-nama').text(app.nama);
-                        $('#detail-opd').text(app.opd);
-                        $('#detail-status').text(app.status_pemakaian);
-                        $('#detail-pengembang').text(app.pengembang);
+                        // Update informasi dasar aplikasi
+                        $('#detail-nama').text(app.nama || '-');
+                        $('#detail-opd').text(app.opd || '-');
+                        $('#detail-status').text(app.status_pemakaian || '-');
+                        $('#detail-pengembang').text(app.pengembang || '-');
 
-                        // Update atribut tambahan
-                        let atributHtml = '<table class="table table-borderless">';
+                        // Update atribut tambahan dengan format yang lebih baik
+                        let atributHtml = '<div class="table-responsive"><table class="table table-bordered">';
+                        atributHtml += '<thead><tr><th>Nama Atribut</th><th>Nilai</th></tr></thead><tbody>';
+                        
                         if (app.atribut_tambahans && app.atribut_tambahans.length > 0) {
                             app.atribut_tambahans.forEach(atribut => {
+                                const nilai = atribut.pivot.nilai_atribut || '-';
                                 atributHtml += `
                                     <tr>
-                                        <td width="40%">${atribut.nama_atribut}</td>
-                                        <td>${atribut.pivot.nilai_atribut || '-'}</td>
+                                        <td><strong>${atribut.nama_atribut}</strong></td>
+                                        <td>${nilai}</td>
                                     </tr>`;
                             });
                         } else {
-                            atributHtml += '<tr><td colspan="2">Tidak ada atribut tambahan</td></tr>';
+                            atributHtml += '<tr><td colspan="2" class="text-center">Tidak ada atribut tambahan</td></tr>';
                         }
-                        atributHtml += '</table>';
+                        
+                        atributHtml += '</tbody></table></div>';
                         $('#detail-atribut').html(atributHtml);
 
                         // Tampilkan modal
@@ -783,8 +790,8 @@
                         toastr.error(response.message || 'Gagal memuat detail aplikasi');
                     }
                 },
-                error: function(xhr) {
-                    console.error('Ajax error:', xhr);
+                error: function(xhr, status, error) {
+                    console.error('Ajax error:', {xhr, status, error}); // Debug log
                     toastr.error('Terjadi kesalahan saat memuat data');
                 }
             });

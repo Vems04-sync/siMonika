@@ -1,129 +1,153 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Aplikasi</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
-<body>
-    <h1>Edit Aplikasi</h1>
-
-    @if ($errors->any())
-        <div style="color: red;">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form action="{{ route('aplikasi.update', $aplikasi->nama) }}" method="POST">
-        @csrf
-        @method('PUT')
-
-        <div class="mb-3">
-            <label for="nama" class="form-label">Nama Aplikasi:</label>
-            <input type="text" class="form-control" id="nama" name="nama" value="{{ $aplikasi->nama }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="opd" class="form-label">OPD:</label>
-            <input type="text" class="form-control" id="opd" name="opd" value="{{ $aplikasi->opd }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="uraian" class="form-label">Uraian:</label>
-            <textarea class="form-control" id="uraian" name="uraian">{{ $aplikasi->uraian }}</textarea>
-        </div>
-
-        <div class="mb-3">
-            <label for="tahun_pembuatan" class="form-label">Tahun Pembuatan:</label>
-            <input type="date" class="form-control" id="tahun_pembuatan" name="tahun_pembuatan" value="{{ $aplikasi->tahun_pembuatan }}">
-        </div>
-
-        <div class="mb-3">
-            <label for="jenis" class="form-label">Jenis:</label>
-            <select class="form-control" id="jenis" name="jenis" required>
-                <option value="Layanan Publik" {{ $aplikasi->jenis == 'Layanan Publik' ? 'selected' : '' }}>Layanan Publik</option>
-                <option value="Administrasi Pemerintahan" {{ $aplikasi->jenis == 'Administrasi Pemerintahan' ? 'selected' : '' }}>Administrasi Pemerintahan</option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="basis_aplikasi" class="form-label">Basis Aplikasi:</label>
-            <select class="form-control" id="basis_aplikasi" name="basis_aplikasi" required>
-                <option value="Mobile" {{ $aplikasi->basis_aplikasi == 'Mobile' ? 'selected' : '' }}>Mobile</option>
-                <option value="Web" {{ $aplikasi->basis_aplikasi == 'Web' ? 'selected' : '' }}>Web</option>
-                <option value="Desktop" {{ $aplikasi->basis_aplikasi == 'Desktop' ? 'selected' : '' }}>Desktop</option>
-            </select>
-        </div>
-
-        <div>
-            <label for="bahasa_framework">Bahasa Pemrograman/Framework:</label><br>
-            <input type="text" id="bahasa_framework" name="bahasa_framework" value="{{ old('bahasa_framework', $aplikasi->bahasa_framework) }}">
-        </div>
-
-        <div>
-            <label for="database">Database:</label><br>
-            <select id="database" name="database">
-                <option value="MySQL" {{ old('database', $aplikasi->database) == 'MySQL' ? 'selected' : '' }}>MySQL</option>
-                <option value="PostgreSQL" {{ old('database', $aplikasi->database) == 'PostgreSQL' ? 'selected' : '' }}>PostgreSQL</option>
-                <option value="MongoDB" {{ old('database', $aplikasi->database) == 'MongoDB' ? 'selected' : '' }}>MongoDB</option>
-            </select>
-        </div>
-
-        <div>
-            <label for="pengembang">Pengembang:</label><br>
-            <select id="pengembang" name="pengembang">
-                <option value="Internal OPD" {{ old('pengembang', $aplikasi->pengembang) == 'Internal OPD' ? 'selected' : '' }}>Internal OPD</option>
-                <option value="Diskominfo" {{ old('pengembang', $aplikasi->pengembang) == 'Diskominfo' ? 'selected' : '' }}>Diskominfo</option>
-                <option value="Vendor" {{ old('pengembang', $aplikasi->pengembang) == 'Vendor' ? 'selected' : '' }}>Vendor</option>
-            </select>
-        </div>
-
-        <div>
-            <label for="lokasi_server">Lokasi Server:</label><br>
-            <select id="lokasi_server" name="lokasi_server">
-                <option value="Server Diskominfo" {{ old('lokasi_server', $aplikasi->lokasi_server) == 'Server Diskominfo' ? 'selected' : '' }}>Server Diskominfo</option>
-                <option value="Server Internal OPD" {{ old('lokasi_server', $aplikasi->lokasi_server) == 'Server Internal OPD' ? 'selected' : '' }}>Server Internal OPD</option>
-                <option value="PDN" {{ old('lokasi_server', $aplikasi->lokasi_server) == 'PDN' ? 'selected' : '' }}>PDN</option>
-                <option value="Vendor" {{ old('lokasi_server', $aplikasi->lokasi_server) == 'Vendor' ? 'selected' : '' }}>Vendor</option>
-            </select>
-        </div>
-
-        <div>
-            <label for="status_pemakaian">Status Pemakaian:</label><br>
-            <select id="status_pemakaian" name="status_pemakaian">
-                <option value="Aktif" {{ old('status_pemakaian', $aplikasi->status_pemakaian) == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                <option value="Tidak Aktif" {{ old('status_pemakaian', $aplikasi->status_pemakaian) == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-            </select>
-        </div>
-
-        <div class="row g-3 mt-3">
-            <div class="col-12">
-                <h5>Atribut Tambahan</h5>
-                @foreach($atributs as $atribut)
-                    @if(isset($existingAtributs[$atribut->id_atribut]))
-                        <div class="mb-3">
-                            <label for="atribut_{{ $atribut->id_atribut }}" class="form-label">
-                                {{ $atribut->nama_atribut }}
-                                <small class="text-muted">({{ ucfirst($atribut->tipe_data) }})</small>
-                            </label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="atribut_{{ $atribut->id_atribut }}"
-                                   name="atribut[{{ $atribut->id_atribut }}]"
-                                   value="{{ $existingAtributs[$atribut->id_atribut] }}">
+<!-- Edit Application Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Aplikasi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                
+                <form id="editForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="edit_nama" class="form-label">Nama Aplikasi</label>
+                            <input type="text" class="form-control" id="edit_nama" name="nama" required>
                         </div>
+                        <div class="col-md-6">
+                            <label for="edit_opd" class="form-label">OPD</label>
+                            <input type="text" class="form-control" id="edit_opd" name="opd" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_uraian" class="form-label">Uraian</label>
+                        <textarea class="form-control" id="edit_uraian" name="uraian"></textarea>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="edit_tahun_pembuatan" class="form-label">Tahun Pembuatan</label>
+                            <input type="date" class="form-control" id="edit_tahun_pembuatan" name="tahun_pembuatan">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_jenis" class="form-label">Jenis</label>
+                            <select class="form-select" id="edit_jenis" name="jenis" required>
+                                <option value="Layanan Publik">Layanan Publik</option>
+                                <option value="Administrasi Pemerintahan">Administrasi Pemerintahan</option>
+                                <option value="Fungsi Tertentu">Fungsi Tertentu</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="edit_basis_aplikasi" class="form-label">Basis Aplikasi</label>
+                            <select class="form-select" id="edit_basis_aplikasi" name="basis_aplikasi" required>
+                                <option value="Mobile">Mobile</option>
+                                <option value="Website">Website</option>
+                                <option value="Desktop">Desktop</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_bahasa_framework" class="form-label">Bahasa/Framework</label>
+                            <input type="text" class="form-control" id="edit_bahasa_framework" name="bahasa_framework" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="edit_database" class="form-label">Database</label>
+                            <select class="form-select" id="edit_database" name="database" required>
+                                <option value="MySQL">MySQL</option>
+                                <option value="PostgreSQL">PostgreSQL</option>
+                                <option value="MongoDB">MongoDB</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_pengembang" class="form-label">Pengembang</label>
+                            <select class="form-select" id="edit_pengembang" name="pengembang" required>
+                                <option value="Internal OPD">Internal OPD</option>
+                                <option value="Diskominfo">Diskominfo</option>
+                                <option value="Vendor">Vendor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="edit_lokasi_server" class="form-label">Lokasi Server</label>
+                            <select class="form-select" id="edit_lokasi_server" name="lokasi_server" required>
+                                <option value="Server Diskominfo">Server Diskominfo</option>
+                                <option value="Server Internal OPD">Server Internal OPD</option>
+                                <option value="PDN">PDN</option>
+                                <option value="Vendor">Vendor</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_status_pemakaian" class="form-label">Status Pemakaian</label>
+                            <select class="form-select" id="edit_status_pemakaian" name="status_pemakaian" required>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Tidak Aktif">Tidak Aktif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    @if(isset($atributs))
+                    <div class="row g-3 mt-3">
+                        <div class="col-12">
+                            <h6>Atribut Tambahan</h6>
+                            @foreach($atributs as $atribut)
+                                <div class="mb-3">
+                                    <label for="edit_atribut_{{ $atribut->id_atribut }}" class="form-label">
+                                        {{ $atribut->nama_atribut }}
+                                        <small class="text-muted">({{ ucfirst($atribut->tipe_data) }})</small>
+                                    </label>
+                                    @php
+                                        $nilai_atribut = isset($existingAtributs[$atribut->id_atribut]) ? $existingAtributs[$atribut->id_atribut] : '';
+                                    @endphp
+                                    @switch($atribut->tipe_data)
+                                        @case('date')
+                                            <input type="date" class="form-control" 
+                                                id="edit_atribut_{{ $atribut->id_atribut }}"
+                                                name="atribut[{{ $atribut->id_atribut }}]"
+                                                value="{{ $nilai_atribut }}">
+                                            @break
+                                        @case('number')
+                                            <input type="number" class="form-control" 
+                                                id="edit_atribut_{{ $atribut->id_atribut }}"
+                                                name="atribut[{{ $atribut->id_atribut }}]"
+                                                value="{{ $nilai_atribut }}">
+                                            @break
+                                        @default
+                                            <input type="text" class="form-control" 
+                                                id="edit_atribut_{{ $atribut->id_atribut }}"
+                                                name="atribut[{{ $atribut->id_atribut }}]"
+                                                value="{{ $nilai_atribut }}">
+                                    @endswitch
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                     @endif
-                @endforeach
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    </div>
+                </form>
             </div>
         </div>
-
-        <div class="mt-3">
-            <button type="submit" class="btn btn-primary">Simpan</button>
-            <a href="{{ route('aplikasi.index') }}" class="btn btn-secondary">Batal</a>
-        </div>
-    </form>
-</body>
-</html> 
+    </div>
+</div>

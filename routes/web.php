@@ -33,15 +33,21 @@ Route::middleware(['auth'])->group(function () {
 
     // Definisikan route secara manual dan terorganisir
     Route::prefix('aplikasi')->group(function () {
+        // Route dasar aplikasi
         Route::get('/', [AplikasiController::class, 'index'])->name('aplikasi.index');
         Route::get('/create', [AplikasiController::class, 'create'])->name('aplikasi.create');
         Route::post('/', [AplikasiController::class, 'store'])->name('aplikasi.store');
-        Route::get('/edit/{nama}', [AplikasiController::class, 'editByNama'])->name('aplikasi.editByNama');
-        Route::put('/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
-        Route::delete('/delete/{nama}', [AplikasiController::class, 'destroyByNama'])->name('aplikasi.destroyByNama');
-        Route::get('/detail/{nama}', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
         Route::get('/export', [AplikasiController::class, 'export'])->name('aplikasi.export');
-        Route::get('/{id}/detail', [AplikasiController::class, 'getDetail'])->name('aplikasi.detail');
+        
+        // Route dengan parameter id
+        Route::get('/{id}/detail', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
+        Route::get('/{id}/edit', [AplikasiController::class, 'edit'])->name('aplikasi.edit');
+        Route::put('/{id}', [AplikasiController::class, 'update'])->name('aplikasi.update');
+        Route::delete('/{id}', [AplikasiController::class, 'destroy'])->name('aplikasi.destroy');
+        
+        // Route untuk atribut
+        Route::get('/{id}/atribut', [AplikasiController::class, 'getAtribut']);
+        Route::put('/{id}/atribut', [AplikasiController::class, 'updateAtribut'])->name('aplikasi.updateAtribut');
     });
 
     Route::get('/chart-data', [AplikasiController::class, 'getChartData']);
@@ -119,3 +125,26 @@ Route::put('/aplikasi/{id}/update-atribut', [AplikasiController::class, 'updateA
 Route::get('/aplikasi/{id}', [AplikasiController::class, 'show'])->name('aplikasi.show');
 Route::get('/aplikasi/{id}/atribut', [AplikasiController::class, 'getAtribut']);
 Route::put('/aplikasi/{id}/atribut', [AplikasiController::class, 'updateAtribut']);
+
+Route::put('/aplikasi/{id}', [AplikasiController::class, 'update'])->name('aplikasi.update');
+Route::delete('/aplikasi/{id}', [AplikasiController::class, 'destroy'])->name('aplikasi.destroy');
+
+Route::get('/aplikasi/detail/{id}', [AplikasiController::class, 'getDetail'])->name('aplikasi.detail');
+
+// Hapus atau comment route yang duplikat
+Route::middleware(['auth'])->group(function () {
+    Route::prefix('aplikasi')->group(function () {
+        Route::get('/', [AplikasiController::class, 'index'])->name('aplikasi.index');
+        Route::get('/create', [AplikasiController::class, 'create'])->name('aplikasi.create');
+        Route::post('/', [AplikasiController::class, 'store'])->name('aplikasi.store');
+        Route::get('/{id}/edit', [AplikasiController::class, 'edit'])->name('aplikasi.edit');
+        Route::put('/{id}', [AplikasiController::class, 'update'])->name('aplikasi.update');
+        Route::delete('/{id}', [AplikasiController::class, 'destroy'])->name('aplikasi.destroy');
+        Route::get('/{id}/detail', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
+        Route::get('/export', [AplikasiController::class, 'export'])->name('aplikasi.export');
+        
+        // Route untuk atribut
+        Route::get('/{id}/atribut', [AplikasiController::class, 'getAtribut']);
+        Route::put('/{id}/atribut', [AplikasiController::class, 'updateAtribut'])->name('aplikasi.updateAtribut');
+    });
+});

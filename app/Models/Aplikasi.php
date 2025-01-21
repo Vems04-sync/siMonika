@@ -32,6 +32,16 @@ class Aplikasi extends Model
                     ->withPivot('nilai_atribut');
     }
 
+    // Method untuk mendapatkan nilai atribut
+    public function getNilaiAtribut($id_atribut)
+    {
+        $atribut = $this->atributTambahans()
+            ->where('atribut_tambahans.id_atribut', $id_atribut)
+            ->first();
+            
+        return $atribut ? $atribut->pivot->nilai_atribut : null;
+    }
+
     // Method untuk menambah atribut ke semua aplikasi
     public static function addGlobalAttribute($namaAtribut)
     {
