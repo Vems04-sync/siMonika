@@ -635,6 +635,31 @@
             }
         });
     }
+
+    // Add this code after your existing scripts
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleViewBtn = document.getElementById('toggleView');
+        const cardView = document.getElementById('cardView');
+        const tableView = document.getElementById('tableView');
+        const toggleIcon = toggleViewBtn.querySelector('i');
+        const toggleText = toggleViewBtn.querySelector('span');
+
+        toggleViewBtn.addEventListener('click', function() {
+            if (cardView.style.display !== 'none') {
+                // Switch to table view
+                cardView.style.display = 'none';
+                tableView.style.display = 'block';
+                toggleIcon.className = 'bi bi-grid';
+                toggleText.textContent = 'Tampilan Card';
+            } else {
+                // Switch to card view
+                cardView.style.display = 'flex';
+                tableView.style.display = 'none';
+                toggleIcon.className = 'bi bi-table';
+                toggleText.textContent = 'Tampilan Tabel';
+            }
+        });
+    });
     </script>
 </body>
 </html>
