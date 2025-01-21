@@ -90,18 +90,22 @@ window.editAppAtribut = function (id) {
 
             if (atributs && atributs.length > 0) {
                 atributs.forEach((atribut) => {
+                    // Tambahkan atribut type sesuai tipe data
+                    const inputType = getInputType(atribut.tipe_data);
                     html += `
                         <div class="mb-3">
                             <label class="form-label">${
                                 atribut.nama_atribut
                             }</label>
-                            <input type="text" 
+                            <input type="${inputType}"
                                    class="form-control"
                                    name="nilai_atribut[${atribut.id_atribut}]"
                                    value="${atribut.pivot?.nilai_atribut || ""}"
+                                   ${getInputAttributes(atribut.tipe_data)}
                                    placeholder="Masukkan nilai untuk ${
                                        atribut.nama_atribut
                                    }">
+                            <div class="invalid-feedback"></div>
                         </div>
                     `;
                 });
@@ -119,6 +123,28 @@ window.editAppAtribut = function (id) {
         },
     });
 };
+
+function getInputType(tipeData) {
+    switch (tipeData) {
+        case "number":
+            return "number";
+        case "date":
+            return "date";
+        default:
+            return "text";
+    }
+}
+
+function getInputAttributes(tipeData) {
+    switch (tipeData) {
+        case "number":
+            return 'step="any"';
+        case "varchar":
+            return 'maxlength="255"';
+        default:
+            return "";
+    }
+}
 
 $(document).ready(function () {
     showFlashMessages();
@@ -407,38 +433,41 @@ $(document).ready(function () {
     // Handle submit form edit atribut
     $("#editAtributForm").on("submit", function (e) {
         e.preventDefault();
+        const form = $(this);
+        const formData = new FormData(this);
         const appId = $(this).data("app-id");
-        const formData = $(this).serialize();
+
+        // Tambahkan CSRF token
+        formData.append("_token", $('meta[name="csrf-token"]').attr("content"));
 
         $.ajax({
             url: `/aplikasi/${appId}/update-atribut`,
-            method: "PUT",
+            method: "POST",
             data: formData,
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
+            processData: false,
+            contentType: false,
             success: function (response) {
                 if (response.success) {
                     $("#editAtributModal").modal("hide");
                     toastr.success("Nilai atribut berhasil diperbarui");
-
-                    // Refresh detail jika modal detail sedang terbuka
-                    if ($("#detailAppModal").hasClass("show")) {
-                        showAppDetail(appId);
-                    }
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    toastr.error(
+                        response.message || "Gagal memperbarui nilai atribut"
+                    );
                 }
             },
             error: function (xhr) {
                 if (xhr.status === 422) {
-                    // Validation error
-                    const errors = xhr.responseJSON.errors;
-                    let errorMessage = "Validasi Gagal:\n";
-                    for (let field in errors) {
-                        errorMessage += `${errors[field]}\n`;
+                    const error = xhr.responseJSON;
+                    toastr.error(error.message);
+                    if (error.field) {
+                        const input = form.find(`input[name="${error.field}"]`);
+                        input.addClass("is-invalid");
+                        input.siblings(".invalid-feedback").text(error.message);
                     }
-                    toastr.error(errorMessage);
                 } else {
-                    toastr.error("Gagal memperbarui nilai atribut");
+                    toastr.error("Terjadi kesalahan saat menyimpan data");
                 }
             },
         });
