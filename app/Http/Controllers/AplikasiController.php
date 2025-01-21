@@ -382,7 +382,7 @@ class AplikasiController extends Controller
             $aplikasi = Aplikasi::with('atributTambahans')->findOrFail($id);
             
             // Debug log
-            \Log::info('Detail aplikasi:', [
+            Log::info('Detail aplikasi:', [
                 'aplikasi' => $aplikasi->toArray(),
                 'atribut_count' => $aplikasi->atributTambahans->count()
             ]);
@@ -393,7 +393,7 @@ class AplikasiController extends Controller
                 'message' => 'Detail aplikasi berhasil dimuat'
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error in detail method: ' . $e->getMessage());
+            Log::error('Error in detail method: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memuat detail aplikasi: ' . $e->getMessage()
