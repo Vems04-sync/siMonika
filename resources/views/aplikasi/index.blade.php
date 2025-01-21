@@ -679,6 +679,163 @@
             }
         });
     });
+
+    // Fungsi filter untuk tampilan card
+    function filterCards() {
+        const statusFilter = document.getElementById('statusFilter').value;
+        const jenisFilter = document.getElementById('jenisFilter').value;
+        const basisFilter = document.getElementById('basisFilter').value;
+        const bahasaFilter = document.getElementById('bahasaFilter').value;
+        const databaseFilter = document.getElementById('databaseFilter').value;
+        const pengembangFilter = document.getElementById('pengembangFilter').value;
+        const lokasiFilter = document.getElementById('lokasiFilter').value;
+        
+        const cards = document.querySelectorAll('.app-card');
+
+        cards.forEach(card => {
+            let showCard = true;
+            
+            // Status filtering
+            if (statusFilter && card.dataset.status !== statusFilter) {
+                showCard = false;
+            }
+            
+            // Jenis filtering
+            if (jenisFilter && card.dataset.jenis !== jenisFilter) {
+                showCard = false;
+            }
+            
+            // Basis filtering
+            if (basisFilter && card.dataset.basis !== basisFilter) {
+                showCard = false;
+            }
+            
+            // Bahasa filtering
+            if (bahasaFilter && card.dataset.bahasa !== bahasaFilter) {
+                showCard = false;
+            }
+            
+            // Database filtering
+            if (databaseFilter && card.dataset.database !== databaseFilter) {
+                showCard = false;
+            }
+            
+            // Pengembang filtering
+            if (pengembangFilter && card.dataset.pengembang !== pengembangFilter) {
+                showCard = false;
+            }
+            
+            // Lokasi filtering
+            if (lokasiFilter && card.dataset.lokasi !== lokasiFilter) {
+                showCard = false;
+            }
+
+            card.style.display = showCard ? '' : 'none';
+        });
+    }
+
+    // Fungsi filter untuk tampilan tabel
+    function filterTabel() {
+        const statusFilter = document.getElementById('statusFilter').value;
+        const jenisFilter = document.getElementById('jenisFilter').value;
+        const basisFilter = document.getElementById('basisFilter').value;
+        const bahasaFilter = document.getElementById('bahasaFilter').value;
+        const databaseFilter = document.getElementById('databaseFilter').value;
+        const pengembangFilter = document.getElementById('pengembangFilter').value;
+        const lokasiFilter = document.getElementById('lokasiFilter').value;
+        
+        const barisTable = document.querySelectorAll('#tableView tbody tr');
+
+        barisTable.forEach(baris => {
+            let tampilkanBaris = true;
+            
+            // Status filtering (kolom ke-4)
+            if (statusFilter) {
+                const kolomStatus = baris.querySelector('td:nth-child(4) span');
+                const statusText = kolomStatus.textContent.trim();
+                const statusBaris = statusText === 'Aktif' ? 'active' : 'unused';
+                if (statusBaris !== statusFilter) {
+                    tampilkanBaris = false;
+                }
+            }
+            
+            // Jenis filtering (kolom ke-6)
+            if (jenisFilter) {
+                const kolomJenis = baris.querySelector('td:nth-child(6)');
+                if (kolomJenis && kolomJenis.textContent.trim() !== jenisFilter) {
+                    tampilkanBaris = false;
+                }
+            }
+            
+            // Basis filtering (kolom ke-7)
+            if (basisFilter) {
+                const kolomBasis = baris.querySelector('td:nth-child(7)');
+                const basisText = kolomBasis ? kolomBasis.textContent.trim().replace(/[\n\r]+|[\s]{2,}/g, ' ') : '';
+                if (!basisText.includes(basisFilter)) {
+                    tampilkanBaris = false;
+                }
+            }
+            
+            // Bahasa filtering (kolom ke-8)
+            if (bahasaFilter) {
+                const kolomBahasa = baris.querySelector('td:nth-child(8)');
+                if (kolomBahasa && kolomBahasa.textContent.trim() !== bahasaFilter) {
+                    tampilkanBaris = false;
+                }
+            }
+            
+            // Database filtering (kolom ke-9)
+            if (databaseFilter) {
+                const kolomDatabase = baris.querySelector('td:nth-child(9)');
+                if (kolomDatabase && kolomDatabase.textContent.trim() !== databaseFilter) {
+                    tampilkanBaris = false;
+                }
+            }
+            
+            // Pengembang filtering (kolom ke-10)
+            if (pengembangFilter) {
+                const kolomPengembang = baris.querySelector('td:nth-child(10)');
+                if (kolomPengembang && kolomPengembang.textContent.trim() !== pengembangFilter) {
+                    tampilkanBaris = false;
+                }
+            }
+            
+            // Lokasi filtering (kolom ke-11)
+            if (lokasiFilter) {
+                const kolomLokasi = baris.querySelector('td:nth-child(11)');
+                if (kolomLokasi && kolomLokasi.textContent.trim() !== lokasiFilter) {
+                    tampilkanBaris = false;
+                }
+            }
+
+            baris.style.display = tampilkanBaris ? '' : 'none';
+        });
+    }
+
+    // Event listeners untuk semua filter
+    const filters = [
+        'statusFilter', 
+        'jenisFilter', 
+        'basisFilter', 
+        'bahasaFilter', 
+        'databaseFilter', 
+        'pengembangFilter', 
+        'lokasiFilter'
+    ];
+
+    filters.forEach(filterId => {
+        document.getElementById(filterId).addEventListener('change', function() {
+            const cardView = document.getElementById('cardView');
+            if (cardView.style.display !== 'none') {
+                filterCards();
+            } else {
+                filterTabel();
+            }
+        });
+    });
+
+    // Inisialisasi filtering saat halaman dimuat
+    filterCards();
     </script>
 </body>
 </html>
