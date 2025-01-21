@@ -541,14 +541,19 @@
                 if (response.success) {
                     const app = response.aplikasi;
                     
-                    // Set form action URL with the correct id
+                    // Set form action URL dengan ID yang benar
                     $('#editForm').attr('action', `/aplikasi/${app.id_aplikasi}`);
                     
-                    // Populate form fields
+                    // Mengisi form dengan data yang ada
                     $('#edit_nama').val(app.nama);
                     $('#edit_opd').val(app.opd);
                     $('#edit_uraian').val(app.uraian);
-                    $('#edit_tahun_pembuatan').val(app.tahun_pembuatan);
+                    
+                    // Format tanggal ke format yang sesuai dengan input date
+                    const tanggal = new Date(app.tahun_pembuatan);
+                    const formattedDate = tanggal.toISOString().split('T')[0];
+                    $('#edit_tahun_pembuatan').val(formattedDate);
+                    
                     $('#edit_jenis').val(app.jenis);
                     $('#edit_basis_aplikasi').val(app.basis_aplikasi);
                     $('#edit_bahasa_framework').val(app.bahasa_framework);
@@ -557,7 +562,7 @@
                     $('#edit_lokasi_server').val(app.lokasi_server);
                     $('#edit_status_pemakaian').val(app.status_pemakaian);
 
-                    // Show modal
+                    // Tampilkan modal
                     $('#editModal').modal('show');
                 } else {
                     toastr.error('Gagal memuat data aplikasi');
@@ -570,20 +575,16 @@
         });
     }
 
-    // Form submit handler
+    // Form submit handler untuk edit
     $('#editForm').on('submit', function(e) {
         e.preventDefault();
         const form = $(this);
         const url = form.attr('action');
         
-        // Tambahkan token CSRF
-        const data = new FormData(form[0]);
-        data.append('_method', 'PUT'); // Untuk method spoofing
-        
         $.ajax({
             url: url,
             method: 'POST',
-            data: data,
+            data: new FormData(this),
             processData: false,
             contentType: false,
             headers: {
@@ -593,6 +594,7 @@
                 if (response.success) {
                     $('#editModal').modal('hide');
                     toastr.success('Aplikasi berhasil diperbarui');
+                    // Reload halaman setelah berhasil update
                     setTimeout(function() {
                         window.location.reload();
                     }, 1000);
@@ -601,8 +603,16 @@
                 }
             },
             error: function(xhr) {
-                console.error('Ajax error:', xhr);
-                toastr.error('Terjadi kesalahan saat memperbarui data');
+                if (xhr.status === 422) {
+                    // Validation errors
+                    const errors = xhr.responseJSON.errors;
+                    Object.keys(errors).forEach(key => {
+                        toastr.error(errors[key][0]);
+                    });
+                } else {
+                    console.error('Ajax error:', xhr);
+                    toastr.error('Terjadi kesalahan saat memperbarui data');
+                }
             }
         });
     });
