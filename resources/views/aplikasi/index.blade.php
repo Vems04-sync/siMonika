@@ -812,6 +812,58 @@
         });
     }
 
+    // Fungsi pencarian untuk tampilan tabel
+    function searchTabel() {
+        const searchValue = document.getElementById('searchApp').value.toLowerCase();
+        const barisTable = document.querySelectorAll('#tableView tbody tr');
+
+        barisTable.forEach(baris => {
+            const nama = baris.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const opd = baris.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            const jenis = baris.querySelector('td:nth-child(6)').textContent.toLowerCase();
+            const basis = baris.querySelector('td:nth-child(7)').textContent.toLowerCase();
+            const bahasa = baris.querySelector('td:nth-child(8)').textContent.toLowerCase();
+            const database = baris.querySelector('td:nth-child(9)').textContent.toLowerCase();
+            const pengembang = baris.querySelector('td:nth-child(10)').textContent.toLowerCase();
+            const lokasi = baris.querySelector('td:nth-child(11)').textContent.toLowerCase();
+
+            const matchSearch = nama.includes(searchValue) ||
+                              opd.includes(searchValue) ||
+                              jenis.includes(searchValue) ||
+                              basis.includes(searchValue) ||
+                              bahasa.includes(searchValue) ||
+                              database.includes(searchValue) ||
+                              pengembang.includes(searchValue) ||
+                              lokasi.includes(searchValue);
+
+            // Hanya tampilkan baris jika memenuhi kriteria pencarian dan filter
+            const displayStyle = baris.style.display;
+            if (matchSearch) {
+                if (displayStyle === 'none') {
+                    // Jika baris disembunyikan oleh filter, tetap sembunyikan
+                    baris.style.display = 'none';
+                } else {
+                    // Jika baris tidak disembunyikan oleh filter, tampilkan
+                    baris.style.display = '';
+                }
+            } else {
+                baris.style.display = 'none';
+            }
+        });
+    }
+
+    // Event listener untuk input pencarian
+    document.getElementById('searchApp').addEventListener('input', function() {
+        const cardView = document.getElementById('cardView');
+        if (cardView.style.display !== 'none') {
+            // Gunakan fungsi search untuk card view jika sudah ada
+            // searchCards();
+        } else {
+            filterTabel(); // Jalankan filter terlebih dahulu
+            searchTabel(); // Kemudian jalankan pencarian
+        }
+    });
+
     // Event listeners untuk semua filter
     const filters = [
         'statusFilter', 
