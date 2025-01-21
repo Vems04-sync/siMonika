@@ -38,13 +38,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/create', [AplikasiController::class, 'create'])->name('aplikasi.create');
         Route::post('/', [AplikasiController::class, 'store'])->name('aplikasi.store');
         Route::get('/export', [AplikasiController::class, 'export'])->name('aplikasi.export');
-        
+
         // Route dengan parameter id
         Route::get('/{id}/detail', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
         Route::get('/{id}/edit', [AplikasiController::class, 'edit'])->name('aplikasi.edit');
         Route::put('/{id}', [AplikasiController::class, 'update'])->name('aplikasi.update');
         Route::delete('/{id}', [AplikasiController::class, 'destroy'])->name('aplikasi.destroy');
-        
+
         // Route untuk atribut
         Route::get('/{id}/atribut', [AplikasiController::class, 'getAtribut']);
         Route::put('/{id}/atribut', [AplikasiController::class, 'updateAtribut'])->name('aplikasi.updateAtribut');
@@ -119,7 +119,7 @@ Route::get('/aplikasi/{id}/atribut', [AplikasiController::class, 'getAtribut']);
 // Route::put('/aplikasi/{id}/atribut', [AplikasiController::class, 'updateAtribut']);
 
 // Route untuk update atribut aplikasi
-Route::put('/aplikasi/{id}/update-atribut', [AplikasiController::class, 'updateAtribut'])->name('aplikasi.updateAtribut');
+Route::post('/aplikasi/{id}/update-atribut', [AtributTambahanController::class, 'update'])->name('aplikasi.update-atribut');
 
 // Routes untuk aplikasi
 Route::get('/aplikasi/{id}', [AplikasiController::class, 'show'])->name('aplikasi.show');
@@ -142,7 +142,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{id}', [AplikasiController::class, 'destroy'])->name('aplikasi.destroy');
         Route::get('/{id}/detail', [AplikasiController::class, 'detail'])->name('aplikasi.detail');
         Route::get('/export', [AplikasiController::class, 'export'])->name('aplikasi.export');
-        
+
         // Route untuk atribut
         Route::get('/{id}/atribut', [AplikasiController::class, 'getAtribut']);
         Route::put('/{id}/atribut', [AplikasiController::class, 'updateAtribut'])->name('aplikasi.updateAtribut');

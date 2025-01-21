@@ -8,6 +8,7 @@ use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AtributTambahanController extends Controller
 {
@@ -68,34 +69,68 @@ class AtributTambahanController extends Controller
         try {
             DB::beginTransaction();
 
-            $request->validate([
-                'id_aplikasi' => 'required|exists:aplikasis,id_aplikasi',
-                'nilai_atribut' => 'nullable|string'
-            ]);
+            $aplikasi = Aplikasi::findOrFail($id);
+            $atributUpdates = $request->input('nilai_atribut', []);
+            $successCount = 0;
+            $errors = [];
 
-            $aplikasi = Aplikasi::findOrFail($request->id_aplikasi);
-            $atribut = AtributTambahan::findOrFail($id);
+            foreach ($atributUpdates as $atributId => $nilai) {
+                try {
+                    $atribut = AtributTambahan::findOrFail($atributId);
 
-            $oldValue = $aplikasi->getNilaiAtribut($id);
+                    // Validasi berdasarkan tipe data
+                    $rules = $this->getValidationRules($atribut->tipe_data);
+                    $validator = Validator::make(
+                        ['nilai_atribut' => $nilai],
+                        ['nilai_atribut' => $rules]
+                    );
 
-            $aplikasi->atributTambahans()->updateExistingPivot($id, [
-                'nilai_atribut' => $request->nilai_atribut
-            ]);
+                    if ($validator->fails()) {
+                        $errors[] = "Nilai untuk {$atribut->nama_atribut} tidak sesuai dengan tipe data " .
+                            $this->getTypeLabel($atribut->tipe_data);
+                        continue;
+                    }
 
-            // Catat di log aktivitas
-            LogAktivitas::create([
-                'user_id' => Auth::id(),
-                'aktivitas' => 'Update Atribut',
-                'tipe_aktivitas' => 'update',
-                'modul' => 'Atribut',
-                'detail' => "Mengubah nilai atribut '{$atribut->nama_atribut}' pada aplikasi '{$aplikasi->nama}' dari '{$oldValue}' menjadi '{$request->nilai_atribut}'"
-            ]);
+                    $oldValue = $aplikasi->getNilaiAtribut($atributId);
+
+                    $aplikasi->atributTambahans()->updateExistingPivot($atributId, [
+                        'nilai_atribut' => $nilai
+                    ]);
+
+                    // Log aktivitas
+                    LogAktivitas::create([
+                        'user_id' => Auth::id(),
+                        'aktivitas' => 'Update Nilai Atribut',
+                        'tipe_aktivitas' => 'update',
+                        'modul' => 'Atribut',
+                        'detail' => "Mengubah nilai atribut '{$atribut->nama_atribut}' pada aplikasi '{$aplikasi->nama}' dari '{$oldValue}' menjadi '{$nilai}'"
+                    ]);
+
+                    $successCount++;
+                } catch (\Exception $e) {
+                    $errors[] = "Gagal memperbarui atribut: " . $e->getMessage();
+                }
+            }
+
+            if (count($errors) > 0) {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => implode("\n", $errors)
+                ], 422);
+            }
 
             DB::commit();
-            return redirect()->back()->with('success', 'Nilai atribut berhasil diperbarui');
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil memperbarui ' . $successCount . ' nilai atribut'
+            ]);
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('error', 'Gagal memperbarui nilai atribut');
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui nilai atribut: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -159,6 +194,20 @@ class AtributTambahanController extends Controller
             $atribut = AtributTambahan::findOrFail($id);
             $aplikasi = Aplikasi::findOrFail($request->id_aplikasi);
 
+            // Validasi berdasarkan tipe data
+            $rules = $this->getValidationRules($atribut->tipe_data);
+            $validator = Validator::make(
+                ['nilai_atribut' => $request->nilai_atribut],
+                ['nilai_atribut' => $rules]
+            );
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nilai tidak sesuai dengan tipe data ' . $this->getTypeLabel($atribut->tipe_data)
+                ], 422);
+            }
+
             $oldValue = $aplikasi->getNilaiAtribut($id);
 
             $aplikasi->atributTambahans()->updateExistingPivot($id, [
@@ -182,6 +231,38 @@ class AtributTambahanController extends Controller
                 'success' => false,
                 'message' => 'Gagal mengupdate nilai atribut'
             ], 500);
+        }
+    }
+
+    private function getValidationRules($tipeData)
+    {
+        switch ($tipeData) {
+            case 'number':
+                return 'nullable|numeric';
+            case 'date':
+                return 'nullable|date';
+            case 'varchar':
+                return 'nullable|string|max:255';
+            case 'text':
+                return 'nullable|string';
+            default:
+                return 'nullable|string';
+        }
+    }
+
+    private function getTypeLabel($tipeData)
+    {
+        switch ($tipeData) {
+            case 'number':
+                return 'Angka';
+            case 'date':
+                return 'Tanggal';
+            case 'varchar':
+                return 'Teks (max 255 karakter)';
+            case 'text':
+                return 'Teks Panjang';
+            default:
+                return 'Teks';
         }
     }
 }
