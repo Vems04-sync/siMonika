@@ -211,7 +211,7 @@ class AplikasiController extends Controller
             $aplikasi = Aplikasi::findOrFail($id);
             
             // Hapus atribut tambahan terlebih dahulu
-            $aplikasi->atributTambahan()->detach();
+            $aplikasi->atributTambahans()->detach();
             
             // Hapus aplikasi
             $aplikasi->delete();

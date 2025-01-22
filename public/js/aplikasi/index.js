@@ -511,7 +511,7 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     $("#appModal").modal("hide");
-                    // Simpan pesan ke sessionStorage
+                    // Simpan pesan ke sessionStorage untuk ditampilkan setelah refresh
                     sessionStorage.setItem('flash_message', isEdit ? "Aplikasi berhasil diperbarui" : "Aplikasi berhasil ditambahkan");
                     sessionStorage.setItem('flash_type', 'success');
                     // Redirect atau refresh halaman
@@ -535,7 +535,7 @@ $(document).ready(function () {
                 } else {
                     if (xhr.responseJSON && xhr.responseJSON.success) {
                         $("#appModal").modal("hide");
-                        // Simpan pesan ke sessionStorage
+                        // Simpan pesan ke sessionStorage untuk ditampilkan setelah refresh
                         sessionStorage.setItem('flash_message', isEdit ? "Aplikasi berhasil diperbarui" : "Aplikasi berhasil ditambahkan");
                         sessionStorage.setItem('flash_type', 'success');
                         // Redirect atau refresh halaman
@@ -830,4 +830,53 @@ $(document).ready(function () {
             }
         });
     });
+});
+
+// Form submit handler untuk edit
+$('#editForm').on('submit', function(e) {
+    e.preventDefault();
+    const form = $(this);
+    const url = form.attr('action');
+    
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: new FormData(this),
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            if (response.success) {
+                $('#editModal').modal('hide');
+                // Simpan pesan ke sessionStorage untuk ditampilkan setelah refresh
+                sessionStorage.setItem('flash_message', 'Data aplikasi berhasil diperbarui');
+                sessionStorage.setItem('flash_type', 'success');
+                window.location.reload();
+            }
+        },
+        error: function(xhr) {
+            // Simpan pesan error ke sessionStorage
+            sessionStorage.setItem('flash_message', 'Gagal memperbarui data aplikasi');
+            sessionStorage.setItem('flash_type', 'error');
+            window.location.reload();
+        }
+    });
+});
+
+// Tambahkan event listener untuk document ready
+$(document).ready(function() {
+    // Cek flash message dari sessionStorage
+    const flashMessage = sessionStorage.getItem('flash_message');
+    const flashType = sessionStorage.getItem('flash_type');
+    
+    if (flashMessage) {
+        // Tampilkan notifikasi
+        toastr[flashType || 'success'](flashMessage);
+        
+        // Hapus flash message dari sessionStorage
+        sessionStorage.removeItem('flash_message');
+        sessionStorage.removeItem('flash_type');
+    }
 });
