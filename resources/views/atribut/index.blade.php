@@ -69,66 +69,67 @@
             </button>
         </div>
 
-        <div class="card">
-            <div class="card-body">
-                <!-- Tambahkan form pencarian dan filter di sini -->
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <select id="atributFilter" class="form-select">
-                            <option value="">Semua Atribut</option>
-                            @php
-                                $uniqueAtributs = $atributs->pluck('nama_atribut')->unique();
-                            @endphp
-                            @foreach ($uniqueAtributs as $nama_atribut)
-                                <option value="{{ $nama_atribut }}">{{ $nama_atribut }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Nama Atribut</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($atributs as $index => $atribut)
-                                <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $atribut->nama_atribut }}</td>
-                                    <td>
-                                        <button class="btn btn-info btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#detailAtributModal"
-                                            onclick="loadAtributDetail('{{ $atribut->id_atribut }}')">
-                                            <i class="bi bi-info-circle"></i> Detail
-                                        </button>
-                                        <button class="btn btn-danger btn-sm"
-                                            onclick="deleteAtribut('{{ $atribut->id_atribut }}')">
-                                            <i class="bi bi-trash"></i> Hapus
-                                        </button>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="text-center">Tidak ada data atribut</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Filter untuk tabel atribut -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <select id="atributFilter" class="form-select">
+                    <option value="">Semua Atribut</option>
+                    @foreach ($atributs as $atribut)
+                        <option value="{{ strtolower($atribut->nama_atribut) }}">
+                            {{ $atribut->nama_atribut }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
         </div>
 
-        <!-- Setelah card tabel atribut yang sudah ada -->
+        <!-- Tabel atribut dengan id spesifik -->
+        <div class="table-responsive">
+            <table class="table table-hover" id="tabelAtribut">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Atribut</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($atributs as $index => $atribut)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $atribut->nama_atribut }}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#detailAtributModal"
+                                    onclick="loadAtributDetail('{{ $atribut->id_atribut }}')">
+                                    <i class="bi bi-info-circle"></i> Detail
+                                </button>
+                                <button class="btn btn-danger btn-sm"
+                                    onclick="deleteAtribut('{{ $atribut->id_atribut }}')">
+                                    <i class="bi bi-trash"></i> Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center">Tidak ada data atribut</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Search untuk tabel aplikasi -->
         <div class="card mt-4">
             <div class="card-body">
-                <h5 class="mb-3">Daftar Aplikasi</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Daftar Aplikasi</h5>
+                    <div class="col-md-4">
+                        <input type="text" id="searchAplikasi" class="form-control" placeholder="Cari aplikasi...">
+                    </div>
+                </div>
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="tabelAplikasi">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -201,11 +202,11 @@
                                     <option value="text">Text Panjang (TEXT)</option>
                                 </select>
                             </div>
-                            <div class="mb-3">
+                            {{-- <div class="mb-3">
                                 <label class="form-label">Nilai Default (Opsional)</label>
                                 <input type="text" name="nilai_default" class="form-control">
                                 <div class="form-text">Nilai awal yang akan diterapkan ke semua aplikasi</div>
-                            </div>
+                            </div> --}}
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
