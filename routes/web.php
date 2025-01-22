@@ -62,6 +62,12 @@ Route::middleware(['auth'])->group(function () {
     // Route untuk Super Admin (tanpa middleware di route)
     Route::get('/super-admin/dashboard', [SuperAdminDashboard::class, 'index'])
         ->name('super-admin.dashboard');
+
+    // Tambahkan route untuk mendapatkan dan mengupdate atribut tambahan
+    Route::get('/aplikasi/{id}/atribut-tambahan', [AplikasiController::class, 'getAtributTambahan'])
+        ->name('aplikasi.atribut-tambahan');
+    Route::put('/aplikasi/{id}/atribut-tambahan', [AplikasiController::class, 'updateAtributTambahan'])
+        ->name('aplikasi.update-atribut-tambahan');
 });
 
 // Route untuk admin
@@ -102,7 +108,6 @@ Route::post('/atribut/check-duplicate', [AtributController::class, 'checkDuplica
 Route::get('/atribut/{id}/edit', [AtributController::class, 'edit'])->name('atribut.edit');
 
 Route::resource('atribut', AtributTambahanController::class);
-
 // Route untuk aplikasi
 Route::get('/aplikasi/{nama}/edit', [AplikasiController::class, 'edit'])->name('aplikasi.edit');
 Route::put('/aplikasi/{nama}', [AplikasiController::class, 'update'])->name('aplikasi.update');
@@ -148,3 +153,4 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{id}/atribut', [AplikasiController::class, 'updateAtribut'])->name('aplikasi.updateAtribut');
     });
 });
+
