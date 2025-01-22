@@ -135,17 +135,28 @@ class AplikasiController extends Controller
      */
     public function edit($id)
     {
-        $aplikasi = Aplikasi::findOrFail($id);
-        $existingAtributs = DB::table('aplikasi_atribut')
-            ->where('id_aplikasi', $id)
-            ->pluck('nilai_atribut', 'id_atribut')
-            ->toArray();
+        try {
+            $aplikasi = Aplikasi::with(['atributTambahans' => function($query) {
+                $query->withPivot('nilai_atribut');
+            }])->findOrFail($id);
 
-        return response()->json([
-            'success' => true,
-            'aplikasi' => $aplikasi,
-            'existingAtributs' => $existingAtributs
-        ]);
+            // Debug untuk melihat data
+            Log::info('Data aplikasi:', ['aplikasi' => $aplikasi->toArray()]);
+
+            $atributs = AtributTambahan::all();
+
+            return response()->json([
+                'success' => true,
+                'aplikasi' => $aplikasi,
+                'atributs' => $atributs
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in edit method: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat data aplikasi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -158,37 +169,59 @@ class AplikasiController extends Controller
             
             $aplikasi = Aplikasi::findOrFail($id);
             
-            // Update aplikasi
-            $aplikasi->update([
-                'nama' => $request->nama,
-                'opd' => $request->opd,
-                'uraian' => $request->uraian,
-                'tahun_pembuatan' => $request->tahun_pembuatan,
-                'jenis' => $request->jenis,
-                'basis_aplikasi' => $request->basis_aplikasi,
-                'bahasa_framework' => $request->bahasa_framework,
-                'database' => $request->database,
-                'pengembang' => $request->pengembang,
-                'lokasi_server' => $request->lokasi_server,
-                'status_pemakaian' => $request->status_pemakaian,
+            // Validasi request
+            $validated = $request->validate([
+                'nama' => ['required', Rule::unique('aplikasis')->ignore($aplikasi->id_aplikasi, 'id_aplikasi')],
+                'opd' => 'required',
+                'uraian' => 'nullable',
+                'tahun_pembuatan' => 'required|date',
+                'jenis' => 'required',
+                'basis_aplikasi' => 'required|in:Website,Desktop,Mobile',
+                'bahasa_framework' => 'required',
+                'database' => 'required',
+                'pengembang' => 'required',
+                'lokasi_server' => 'required',
+                'status_pemakaian' => 'required|in:Aktif,Tidak Aktif'
             ]);
 
-            // Update atribut tambahan jika ada
+            // Update aplikasi
+            $aplikasi->update($validated);
+
+            // Update atribut tambahan
             if ($request->has('atribut')) {
+                // Hapus semua atribut yang ada terlebih dahulu
+                $aplikasi->atributTambahans()->detach();
+                
+                // Tambahkan atribut baru
                 foreach ($request->atribut as $id_atribut => $nilai) {
-                    $aplikasi->atributTambahan()->updateOrCreate(
-                        ['id_atribut' => $id_atribut],
-                        ['nilai_atribut' => $nilai]
-                    );
+                    if (!empty($nilai)) {
+                        $aplikasi->atributTambahans()->attach($id_atribut, ['nilai_atribut' => $nilai]);
+                    }
                 }
             }
 
             DB::commit();
+
+            // Catat log aktivitas
+            LogAktivitas::create([
+                'user_id' => Auth::id(),
+                'aktivitas' => 'Update Aplikasi',
+                'tipe_aktivitas' => 'update',
+                'modul' => 'Aplikasi',
+                'detail' => "Memperbarui aplikasi '{$aplikasi->nama}'"
+            ]);
             
             return response()->json([
                 'success' => true,
                 'message' => 'Aplikasi berhasil diperbarui'
             ]);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error updating aplikasi: ' . $e->getMessage());
