@@ -136,29 +136,36 @@
                                     </div>
                                     <h5 class="card-title mb-0">{{ $aplikasi->nama }}</h5>
                                 </div>
-                                <div class="status-badge {{ $aplikasi->status_pemakaian == 'Aktif' ? 'bg-success' : 'bg-danger' }}">
+                                <div
+                                    class="status-badge {{ $aplikasi->status_pemakaian == 'Aktif' ? 'bg-success' : 'bg-danger' }}">
                                     {{ $aplikasi->status_pemakaian }}
                                 </div>
                             </div>
 
                             <div class="app-info mb-3">
-                                <p class="mb-2"><i class="bi bi-calendar me-2"></i>Tahun Pembuatan: {{ $aplikasi->tahun_pembuatan }}</p>
+                                <p class="mb-2"><i class="bi bi-calendar me-2"></i>Tahun Pembuatan:
+                                    {{ $aplikasi->tahun_pembuatan }}</p>
                                 <p class="mb-2"><i class="bi bi-tag me-2"></i>Jenis: {{ $aplikasi->jenis }}</p>
-                                <p class="mb-2"><i class="bi bi-device-mobile me-2"></i>Basis Aplikasi: {{ $aplikasi->basis_aplikasi }}</p>
-                                <p class="mb-2"><i class="bi bi-code-slash me-2"></i>Bahasa Framework: {{ $aplikasi->bahasa_framework }}</p>
+                                <p class="mb-2"><i class="bi bi-device-mobile me-2"></i>Basis Aplikasi:
+                                    {{ $aplikasi->basis_aplikasi }}</p>
+                                <p class="mb-2"><i class="bi bi-code-slash me-2"></i>Bahasa Framework:
+                                    {{ $aplikasi->bahasa_framework }}</p>
                             </div>
 
                             <p class="card-text text-muted">{{ Str::limit($aplikasi->uraian, 100) }}</p>
 
                             <div class="d-flex justify-content-between mt-3">
-                                <button class="btn btn-info btn-sm" onclick="showDetail('{{ $aplikasi->id_aplikasi }}')">
+                                <button class="btn btn-info btn-sm"
+                                    onclick="showDetail('{{ $aplikasi->id_aplikasi }}')">
                                     <i class="bi bi-eye">Detail</i>
                                 </button>
                                 <div>
-                                    <a href="javascript:void(0)" class="btn btn-warning btn-sm" onclick="editApp('{{ $aplikasi->id_aplikasi }}')">
+                                    <a href="javascript:void(0)" class="btn btn-warning btn-sm"
+                                        onclick="editApp('{{ $aplikasi->id_aplikasi }}')">
                                         <i class="bi bi-pencil"></i> Edit
                                     </a>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteApp('{{ $aplikasi->id_aplikasi }}')">
+                                    <button class="btn btn-danger btn-sm"
+                                        onclick="deleteApp('{{ $aplikasi->id_aplikasi }}')">
                                         <i class="bi bi-trash"></i> Hapus
                                     </button>
                                 </div>
@@ -197,7 +204,8 @@
                                     <td class="fw-medium">{{ $aplikasi->nama }}</td>
                                     <td>{{ $aplikasi->opd }}</td>
                                     <td>
-                                        <span class="badge {{ $aplikasi->status_pemakaian == 'Aktif' ? 'bg-success' : 'bg-danger' }}">
+                                        <span
+                                            class="badge {{ $aplikasi->status_pemakaian == 'Aktif' ? 'bg-success' : 'bg-danger' }}">
                                             {{ $aplikasi->status_pemakaian }}
                                         </span>
                                     </td>
@@ -219,10 +227,12 @@
                                     <td>{{ $aplikasi->lokasi_server }}</td>
                                     <td class="text-center pe-4">
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-info btn-sm" onclick="showDetail({{ $aplikasi->id_aplikasi }})">
+                                            <button class="btn btn-info btn-sm"
+                                                onclick="showDetail({{ $aplikasi->id_aplikasi }})">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-warning btn-sm" onclick="editApp('{{ $aplikasi->id_aplikasi }}')">
+                                            <button class="btn btn-warning btn-sm"
+                                                onclick="editApp('{{ $aplikasi->id_aplikasi }}')">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button class="btn btn-sm btn-danger"
@@ -349,7 +359,8 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="edit_tahun_pembuatan" class="form-label">Tahun Pembuatan</label>
-                                <input type="date" class="form-control" id="edit_tahun_pembuatan" name="tahun_pembuatan" required>
+                                <input type="date" class="form-control" id="edit_tahun_pembuatan"
+                                    name="tahun_pembuatan" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_jenis" class="form-label">Jenis</label>
@@ -372,7 +383,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_bahasa_framework" class="form-label">Bahasa/Framework</label>
-                                <input type="text" class="form-control" id="edit_bahasa_framework" name="bahasa_framework" required>
+                                <input type="text" class="form-control" id="edit_bahasa_framework"
+                                    name="bahasa_framework" required>
                             </div>
                         </div>
 
@@ -407,7 +419,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_status_pemakaian" class="form-label">Status Pemakaian</label>
-                                <select class="form-select" id="edit_status_pemakaian" name="status_pemakaian" required>
+                                <select class="form-select" id="edit_status_pemakaian" name="status_pemakaian"
+                                    required>
                                     <option value="">Pilih status</option>
                                     <option value="Aktif">Aktif</option>
                                     <option value="Tidak Aktif">Tidak Aktif</option>
@@ -457,447 +470,455 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-    function showDetail(id) {
-        $.ajax({
-            url: `/aplikasi/${id}/detail`,
-            method: 'GET',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                console.log('Response:', response); // Debug log
-                
-                if (response.success) {
-                    const app = response.data;
-                    
-                    // Populate modal fields
-                    $('#detail-nama').text(app.nama || '-');
-                    $('#detail-opd').text(app.opd || '-');
-                    $('#detail-uraian').text(app.uraian || '-');
-                    $('#detail-tahun').text(app.tahun_pembuatan || '-');
-                    $('#detail-jenis').text(app.jenis || '-');
-                    $('#detail-basis').text(app.basis_aplikasi || '-');
-                    $('#detail-bahasa').text(app.bahasa_framework || '-');
-                    $('#detail-database').text(app.database || '-');
-                    $('#detail-pengembang').text(app.pengembang || '-');
-                    $('#detail-server').text(app.lokasi_server || '-');
-                    
-                    // Tambahkan kelas untuk styling status
-                    const statusClass = app.status_pemakaian === 'Aktif' ? 'text-success' : 'text-danger';
-                    $('#detail-status').html(`<span class="${statusClass}">${app.status_pemakaian || '-'}</span>`);
+        function showDetail(id) {
+            $.ajax({
+                url: `/aplikasi/${id}/detail`,
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    console.log('Response:', response); // Debug log
 
-                    // Build atribut tambahan table dengan styling yang lebih baik
-                    let atributContent = '<div class="table-responsive">';
-                    atributContent += '<table class="table table-bordered table-hover">';
-                    atributContent += '<thead class="table-light"><tr><th>Nama Atribut</th><th>Nilai</th></tr></thead>';
-                    atributContent += '<tbody>';
-                    
-                    if (app.atribut_tambahans && app.atribut_tambahans.length > 0) {
-                        app.atribut_tambahans.forEach(atribut => {
-                            const nilai = atribut.pivot?.nilai_atribut || '-';
-                            atributContent += `
+                    if (response.success) {
+                        const app = response.data;
+
+                        // Populate modal fields
+                        $('#detail-nama').text(app.nama || '-');
+                        $('#detail-opd').text(app.opd || '-');
+                        $('#detail-uraian').text(app.uraian || '-');
+                        $('#detail-tahun').text(app.tahun_pembuatan || '-');
+                        $('#detail-jenis').text(app.jenis || '-');
+                        $('#detail-basis').text(app.basis_aplikasi || '-');
+                        $('#detail-bahasa').text(app.bahasa_framework || '-');
+                        $('#detail-database').text(app.database || '-');
+                        $('#detail-pengembang').text(app.pengembang || '-');
+                        $('#detail-server').text(app.lokasi_server || '-');
+
+                        // Tambahkan kelas untuk styling status
+                        const statusClass = app.status_pemakaian === 'Aktif' ? 'text-success' : 'text-danger';
+                        $('#detail-status').html(
+                            `<span class="${statusClass}">${app.status_pemakaian || '-'}</span>`);
+
+                        // Build atribut tambahan table dengan styling yang lebih baik
+                        let atributContent = '<div class="table-responsive">';
+                        atributContent += '<table class="table table-bordered table-hover">';
+                        atributContent +=
+                            '<thead class="table-light"><tr><th>Nama Atribut</th><th>Nilai</th></tr></thead>';
+                        atributContent += '<tbody>';
+
+                        if (app.atribut_tambahans && app.atribut_tambahans.length > 0) {
+                            app.atribut_tambahans.forEach(atribut => {
+                                const nilai = atribut.pivot?.nilai_atribut || '-';
+                                atributContent += `
                                 <tr>
                                     <td class="fw-medium">${atribut.nama_atribut}</td>
                                     <td>${nilai}</td>
                                 </tr>`;
-                        });
-                    } else {
-                        atributContent += `
+                            });
+                        } else {
+                            atributContent += `
                             <tr>
                                 <td colspan="2" class="text-center text-muted">
                                     <i class="bi bi-info-circle me-2"></i>
                                     Tidak ada atribut tambahan
                                 </td>
                             </tr>`;
+                        }
+
+                        atributContent += '</tbody></table></div>';
+                        $('#atribut-tambahan-content').html(atributContent);
+
+                        // Show modal
+                        $('#detailAplikasiModal').modal('show');
+                    } else {
+                        toastr.error(response.message || 'Gagal memuat detail aplikasi');
                     }
-                    
-                    atributContent += '</tbody></table></div>';
-                    $('#atribut-tambahan-content').html(atributContent);
-
-                    // Show modal
-                    $('#detailAplikasiModal').modal('show');
-                } else {
-                    toastr.error(response.message || 'Gagal memuat detail aplikasi');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ajax error:', {
+                        xhr,
+                        status,
+                        error
+                    }); // Debug log
+                    toastr.error('Terjadi kesalahan saat memuat data');
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error('Ajax error:', {xhr, status, error}); // Debug log
-                toastr.error('Terjadi kesalahan saat memuat data');
-            }
+            });
+        }
+
+        // Event handler untuk tombol detail
+        $(document).on('click', '.btn-info', function() {
+            const id = $(this).closest('tr').find('td:first').text();
+            showDetail(id);
         });
-    }
 
-    // Event handler untuk tombol detail
-    $(document).on('click', '.btn-info', function() {
-        const id = $(this).closest('tr').find('td:first').text();
-        showDetail(id);
-    });
+        function editApp(id) {
+            $.ajax({
+                url: `/aplikasi/${id}/edit`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        const app = response.aplikasi;
 
-    function editApp(id) {
-        $.ajax({
-            url: `/aplikasi/${id}/edit`,
-            method: 'GET',
-            success: function(response) {
-                if (response.success) {
-                    const app = response.aplikasi;
-                    
-                    // Set form action URL dengan ID yang benar
-                    $('#editForm').attr('action', `/aplikasi/${app.id_aplikasi}`);
-                    
-                    // Mengisi form dengan data yang ada
-                    $('#edit_nama').val(app.nama);
-                    $('#edit_opd').val(app.opd);
-                    $('#edit_uraian').val(app.uraian);
-                    
-                    // Format tanggal ke format yang sesuai dengan input date
-                    const tanggal = new Date(app.tahun_pembuatan);
-                    const formattedDate = tanggal.toISOString().split('T')[0];
-                    $('#edit_tahun_pembuatan').val(formattedDate);
-                    
-                    $('#edit_jenis').val(app.jenis);
-                    $('#edit_basis_aplikasi').val(app.basis_aplikasi);
-                    $('#edit_bahasa_framework').val(app.bahasa_framework);
-                    $('#edit_database').val(app.database);
-                    $('#edit_pengembang').val(app.pengembang);
-                    $('#edit_lokasi_server').val(app.lokasi_server);
-                    $('#edit_status_pemakaian').val(app.status_pemakaian);
+                        // Set form action URL dengan ID yang benar
+                        $('#editForm').attr('action', `/aplikasi/${app.id_aplikasi}`);
 
-                    // Tampilkan modal
-                    $('#editModal').modal('show');
-                } else {
-                    toastr.error('Gagal memuat data aplikasi');
-                }
-            },
-            error: function(xhr) {
-                console.error('Ajax error:', xhr);
-                toastr.error('Terjadi kesalahan saat memuat data');
-            }
-        });
-    }
+                        // Mengisi form dengan data yang ada
+                        $('#edit_nama').val(app.nama);
+                        $('#edit_opd').val(app.opd);
+                        $('#edit_uraian').val(app.uraian);
 
-    // Form submit handler untuk edit
-    $('#editForm').on('submit', function(e) {
-        e.preventDefault();
-        const form = $(this);
-        const url = form.attr('action');
-        
-        $.ajax({
-            url: url,
-            method: 'POST',
-            data: new FormData(this),
-            processData: false,
-            contentType: false,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.success) {
-                    $('#editModal').modal('hide');
-                    toastr.success('Aplikasi berhasil diperbarui');
-                    // Reload halaman setelah berhasil update
-                    setTimeout(function() {
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    toastr.error(response.message || 'Gagal memperbarui aplikasi');
-                }
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    // Validation errors
-                    const errors = xhr.responseJSON.errors;
-                    Object.keys(errors).forEach(key => {
-                        toastr.error(errors[key][0]);
-                    });
-                } else {
+                        // Format tanggal ke format yang sesuai dengan input date
+                        const tanggal = new Date(app.tahun_pembuatan);
+                        const formattedDate = tanggal.toISOString().split('T')[0];
+                        $('#edit_tahun_pembuatan').val(formattedDate);
+
+                        $('#edit_jenis').val(app.jenis);
+                        $('#edit_basis_aplikasi').val(app.basis_aplikasi);
+                        $('#edit_bahasa_framework').val(app.bahasa_framework);
+                        $('#edit_database').val(app.database);
+                        $('#edit_pengembang').val(app.pengembang);
+                        $('#edit_lokasi_server').val(app.lokasi_server);
+                        $('#edit_status_pemakaian').val(app.status_pemakaian);
+
+                        // Tampilkan modal
+                        $('#editModal').modal('show');
+                    } else {
+                        toastr.error('Gagal memuat data aplikasi');
+                    }
+                },
+                error: function(xhr) {
                     console.error('Ajax error:', xhr);
-                    toastr.error('Terjadi kesalahan saat memperbarui data');
+                    toastr.error('Terjadi kesalahan saat memuat data');
                 }
-            }
-        });
-    });
+            });
+        }
 
-    function deleteApp(id) {
-        Swal.fire({
-            title: 'Apakah anda yakin?',
-            text: "Data aplikasi akan dihapus permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/aplikasi/${id}`,
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
+        // Form submit handler untuk edit
+        $('#editForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const url = form.attr('action');
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#editModal').modal('hide');
+                        toastr.success('Aplikasi berhasil diperbarui');
+                        // Reload halaman setelah berhasil update
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        toastr.error(response.message || 'Gagal memperbarui aplikasi');
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        // Validation errors
+                        const errors = xhr.responseJSON.errors;
+                        Object.keys(errors).forEach(key => {
+                            toastr.error(errors[key][0]);
+                        });
+                    } else {
+                        console.error('Ajax error:', xhr);
+                        toastr.error('Terjadi kesalahan saat memperbarui data');
+                    }
+                }
+            });
+        });
+
+        function deleteApp(id) {
+            Swal.fire({
+                title: 'Apakah anda yakin?',
+                text: "Data aplikasi akan dihapus permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/aplikasi/${id}`,
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire(
+                                    'Terhapus!',
+                                    'Data aplikasi berhasil dihapus.',
+                                    'success'
+                                );
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1000);
+                            } else {
+                                Swal.fire(
+                                    'Gagal!',
+                                    response.message,
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(xhr) {
                             Swal.fire(
-                                'Terhapus!',
-                                'Data aplikasi berhasil dihapus.',
-                                'success'
-                            );
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1000);
-                        } else {
-                            Swal.fire(
-                                'Gagal!',
-                                response.message,
+                                'Error!',
+                                'Terjadi kesalahan saat menghapus data.',
                                 'error'
                             );
                         }
-                    },
-                    error: function(xhr) {
-                        Swal.fire(
-                            'Error!',
-                            'Terjadi kesalahan saat menghapus data.',
-                            'error'
-                        );
-                    }
-                });
-            }
-        });
-    }
-
-    // Add this code after your existing scripts
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggleViewBtn = document.getElementById('toggleView');
-        const cardView = document.getElementById('cardView');
-        const tableView = document.getElementById('tableView');
-        const toggleIcon = toggleViewBtn.querySelector('i');
-        const toggleText = toggleViewBtn.querySelector('span');
-
-        toggleViewBtn.addEventListener('click', function() {
-            if (cardView.style.display !== 'none') {
-                // Switch to table view
-                cardView.style.display = 'none';
-                tableView.style.display = 'block';
-                toggleIcon.className = 'bi bi-grid';
-                toggleText.textContent = 'Tampilan Card';
-            } else {
-                // Switch to card view
-                cardView.style.display = 'flex';
-                tableView.style.display = 'none';
-                toggleIcon.className = 'bi bi-table';
-                toggleText.textContent = 'Tampilan Tabel';
-            }
-        });
-    });
-
-    // Fungsi filter untuk tampilan card
-    function filterCards() {
-        const statusFilter = document.getElementById('statusFilter').value;
-        const jenisFilter = document.getElementById('jenisFilter').value;
-        const basisFilter = document.getElementById('basisFilter').value;
-        const bahasaFilter = document.getElementById('bahasaFilter').value;
-        const databaseFilter = document.getElementById('databaseFilter').value;
-        const pengembangFilter = document.getElementById('pengembangFilter').value;
-        const lokasiFilter = document.getElementById('lokasiFilter').value;
-        
-        const cards = document.querySelectorAll('.app-card');
-
-        cards.forEach(card => {
-            let showCard = true;
-            
-            // Status filtering
-            if (statusFilter && card.dataset.status !== statusFilter) {
-                showCard = false;
-            }
-            
-            // Jenis filtering
-            if (jenisFilter && card.dataset.jenis !== jenisFilter) {
-                showCard = false;
-            }
-            
-            // Basis filtering
-            if (basisFilter && card.dataset.basis !== basisFilter) {
-                showCard = false;
-            }
-            
-            // Bahasa filtering
-            if (bahasaFilter && card.dataset.bahasa !== bahasaFilter) {
-                showCard = false;
-            }
-            
-            // Database filtering
-            if (databaseFilter && card.dataset.database !== databaseFilter) {
-                showCard = false;
-            }
-            
-            // Pengembang filtering
-            if (pengembangFilter && card.dataset.pengembang !== pengembangFilter) {
-                showCard = false;
-            }
-            
-            // Lokasi filtering
-            if (lokasiFilter && card.dataset.lokasi !== lokasiFilter) {
-                showCard = false;
-            }
-
-            card.style.display = showCard ? '' : 'none';
-        });
-    }
-
-    // Fungsi filter untuk tampilan tabel
-    function filterTabel() {
-        const statusFilter = document.getElementById('statusFilter').value;
-        const jenisFilter = document.getElementById('jenisFilter').value;
-        const basisFilter = document.getElementById('basisFilter').value;
-        const bahasaFilter = document.getElementById('bahasaFilter').value;
-        const databaseFilter = document.getElementById('databaseFilter').value;
-        const pengembangFilter = document.getElementById('pengembangFilter').value;
-        const lokasiFilter = document.getElementById('lokasiFilter').value;
-        
-        const barisTable = document.querySelectorAll('#tableView tbody tr');
-
-        barisTable.forEach(baris => {
-            let tampilkanBaris = true;
-            
-            // Status filtering (kolom ke-4)
-            if (statusFilter) {
-                const kolomStatus = baris.querySelector('td:nth-child(4) span');
-                const statusText = kolomStatus.textContent.trim();
-                const statusBaris = statusText === 'Aktif' ? 'active' : 'unused';
-                if (statusBaris !== statusFilter) {
-                    tampilkanBaris = false;
+                    });
                 }
-            }
-            
-            // Jenis filtering (kolom ke-6)
-            if (jenisFilter) {
-                const kolomJenis = baris.querySelector('td:nth-child(6)');
-                if (kolomJenis && kolomJenis.textContent.trim() !== jenisFilter) {
-                    tampilkanBaris = false;
-                }
-            }
-            
-            // Basis filtering (kolom ke-7)
-            if (basisFilter) {
-                const kolomBasis = baris.querySelector('td:nth-child(7)');
-                const basisText = kolomBasis ? kolomBasis.textContent.trim().replace(/[\n\r]+|[\s]{2,}/g, ' ') : '';
-                if (!basisText.includes(basisFilter)) {
-                    tampilkanBaris = false;
-                }
-            }
-            
-            // Bahasa filtering (kolom ke-8)
-            if (bahasaFilter) {
-                const kolomBahasa = baris.querySelector('td:nth-child(8)');
-                if (kolomBahasa && kolomBahasa.textContent.trim() !== bahasaFilter) {
-                    tampilkanBaris = false;
-                }
-            }
-            
-            // Database filtering (kolom ke-9)
-            if (databaseFilter) {
-                const kolomDatabase = baris.querySelector('td:nth-child(9)');
-                if (kolomDatabase && kolomDatabase.textContent.trim() !== databaseFilter) {
-                    tampilkanBaris = false;
-                }
-            }
-            
-            // Pengembang filtering (kolom ke-10)
-            if (pengembangFilter) {
-                const kolomPengembang = baris.querySelector('td:nth-child(10)');
-                if (kolomPengembang && kolomPengembang.textContent.trim() !== pengembangFilter) {
-                    tampilkanBaris = false;
-                }
-            }
-            
-            // Lokasi filtering (kolom ke-11)
-            if (lokasiFilter) {
-                const kolomLokasi = baris.querySelector('td:nth-child(11)');
-                if (kolomLokasi && kolomLokasi.textContent.trim() !== lokasiFilter) {
-                    tampilkanBaris = false;
-                }
-            }
-
-            baris.style.display = tampilkanBaris ? '' : 'none';
-        });
-    }
-
-    // Fungsi pencarian untuk tampilan tabel
-    function searchTabel() {
-        const searchValue = document.getElementById('searchApp').value.toLowerCase();
-        const barisTable = document.querySelectorAll('#tableView tbody tr');
-
-        barisTable.forEach(baris => {
-            const nama = baris.querySelector('td:nth-child(2)').textContent.toLowerCase();
-            const opd = baris.querySelector('td:nth-child(3)').textContent.toLowerCase();
-            const jenis = baris.querySelector('td:nth-child(6)').textContent.toLowerCase();
-            const basis = baris.querySelector('td:nth-child(7)').textContent.toLowerCase();
-            const bahasa = baris.querySelector('td:nth-child(8)').textContent.toLowerCase();
-            const database = baris.querySelector('td:nth-child(9)').textContent.toLowerCase();
-            const pengembang = baris.querySelector('td:nth-child(10)').textContent.toLowerCase();
-            const lokasi = baris.querySelector('td:nth-child(11)').textContent.toLowerCase();
-
-            const matchSearch = nama.includes(searchValue) ||
-                              opd.includes(searchValue) ||
-                              jenis.includes(searchValue) ||
-                              basis.includes(searchValue) ||
-                              bahasa.includes(searchValue) ||
-                              database.includes(searchValue) ||
-                              pengembang.includes(searchValue) ||
-                              lokasi.includes(searchValue);
-
-            // Hanya tampilkan baris jika memenuhi kriteria pencarian dan filter
-            const displayStyle = baris.style.display;
-            if (matchSearch) {
-                if (displayStyle === 'none') {
-                    // Jika baris disembunyikan oleh filter, tetap sembunyikan
-                    baris.style.display = 'none';
-                } else {
-                    // Jika baris tidak disembunyikan oleh filter, tampilkan
-                    baris.style.display = '';
-                }
-            } else {
-                baris.style.display = 'none';
-            }
-        });
-    }
-
-    // Event listener untuk input pencarian
-    document.getElementById('searchApp').addEventListener('input', function() {
-        const cardView = document.getElementById('cardView');
-        if (cardView.style.display !== 'none') {
-            // Gunakan fungsi search untuk card view jika sudah ada
-            // searchCards();
-        } else {
-            filterTabel(); // Jalankan filter terlebih dahulu
-            searchTabel(); // Kemudian jalankan pencarian
+            });
         }
-    });
 
-    // Event listeners untuk semua filter
-    const filters = [
-        'statusFilter', 
-        'jenisFilter', 
-        'basisFilter', 
-        'bahasaFilter', 
-        'databaseFilter', 
-        'pengembangFilter', 
-        'lokasiFilter'
-    ];
+        // Add this code after your existing scripts
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleViewBtn = document.getElementById('toggleView');
+            const cardView = document.getElementById('cardView');
+            const tableView = document.getElementById('tableView');
+            const toggleIcon = toggleViewBtn.querySelector('i');
+            const toggleText = toggleViewBtn.querySelector('span');
 
-    filters.forEach(filterId => {
-        document.getElementById(filterId).addEventListener('change', function() {
+            toggleViewBtn.addEventListener('click', function() {
+                if (cardView.style.display !== 'none') {
+                    // Switch to table view
+                    cardView.style.display = 'none';
+                    tableView.style.display = 'block';
+                    toggleIcon.className = 'bi bi-grid';
+                    toggleText.textContent = 'Tampilan Card';
+                } else {
+                    // Switch to card view
+                    cardView.style.display = 'flex';
+                    tableView.style.display = 'none';
+                    toggleIcon.className = 'bi bi-table';
+                    toggleText.textContent = 'Tampilan Tabel';
+                }
+            });
+        });
+
+        // Fungsi filter untuk tampilan card
+        function filterCards() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const jenisFilter = document.getElementById('jenisFilter').value;
+            const basisFilter = document.getElementById('basisFilter').value;
+            const bahasaFilter = document.getElementById('bahasaFilter').value;
+            const databaseFilter = document.getElementById('databaseFilter').value;
+            const pengembangFilter = document.getElementById('pengembangFilter').value;
+            const lokasiFilter = document.getElementById('lokasiFilter').value;
+
+            const cards = document.querySelectorAll('.app-card');
+
+            cards.forEach(card => {
+                let showCard = true;
+
+                // Status filtering
+                if (statusFilter && card.dataset.status !== statusFilter) {
+                    showCard = false;
+                }
+
+                // Jenis filtering
+                if (jenisFilter && card.dataset.jenis !== jenisFilter) {
+                    showCard = false;
+                }
+
+                // Basis filtering
+                if (basisFilter && card.dataset.basis !== basisFilter) {
+                    showCard = false;
+                }
+
+                // Bahasa filtering
+                if (bahasaFilter && card.dataset.bahasa !== bahasaFilter) {
+                    showCard = false;
+                }
+
+                // Database filtering
+                if (databaseFilter && card.dataset.database !== databaseFilter) {
+                    showCard = false;
+                }
+
+                // Pengembang filtering
+                if (pengembangFilter && card.dataset.pengembang !== pengembangFilter) {
+                    showCard = false;
+                }
+
+                // Lokasi filtering
+                if (lokasiFilter && card.dataset.lokasi !== lokasiFilter) {
+                    showCard = false;
+                }
+
+                card.style.display = showCard ? '' : 'none';
+            });
+        }
+
+        // Fungsi filter untuk tampilan tabel
+        function filterTabel() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const jenisFilter = document.getElementById('jenisFilter').value;
+            const basisFilter = document.getElementById('basisFilter').value;
+            const bahasaFilter = document.getElementById('bahasaFilter').value;
+            const databaseFilter = document.getElementById('databaseFilter').value;
+            const pengembangFilter = document.getElementById('pengembangFilter').value;
+            const lokasiFilter = document.getElementById('lokasiFilter').value;
+
+            const barisTable = document.querySelectorAll('#tableView tbody tr');
+
+            barisTable.forEach(baris => {
+                let tampilkanBaris = true;
+
+                // Status filtering (kolom ke-4)
+                if (statusFilter) {
+                    const kolomStatus = baris.querySelector('td:nth-child(4) span');
+                    const statusText = kolomStatus.textContent.trim();
+                    const statusBaris = statusText === 'Aktif' ? 'active' : 'unused';
+                    if (statusBaris !== statusFilter) {
+                        tampilkanBaris = false;
+                    }
+                }
+
+                // Jenis filtering (kolom ke-6)
+                if (jenisFilter) {
+                    const kolomJenis = baris.querySelector('td:nth-child(6)');
+                    if (kolomJenis && kolomJenis.textContent.trim() !== jenisFilter) {
+                        tampilkanBaris = false;
+                    }
+                }
+
+                // Basis filtering (kolom ke-7)
+                if (basisFilter) {
+                    const kolomBasis = baris.querySelector('td:nth-child(7)');
+                    const basisText = kolomBasis ? kolomBasis.textContent.trim().replace(/[\n\r]+|[\s]{2,}/g, ' ') :
+                        '';
+                    if (!basisText.includes(basisFilter)) {
+                        tampilkanBaris = false;
+                    }
+                }
+
+                // Bahasa filtering (kolom ke-8)
+                if (bahasaFilter) {
+                    const kolomBahasa = baris.querySelector('td:nth-child(8)');
+                    if (kolomBahasa && kolomBahasa.textContent.trim() !== bahasaFilter) {
+                        tampilkanBaris = false;
+                    }
+                }
+
+                // Database filtering (kolom ke-9)
+                if (databaseFilter) {
+                    const kolomDatabase = baris.querySelector('td:nth-child(9)');
+                    if (kolomDatabase && kolomDatabase.textContent.trim() !== databaseFilter) {
+                        tampilkanBaris = false;
+                    }
+                }
+
+                // Pengembang filtering (kolom ke-10)
+                if (pengembangFilter) {
+                    const kolomPengembang = baris.querySelector('td:nth-child(10)');
+                    if (kolomPengembang && kolomPengembang.textContent.trim() !== pengembangFilter) {
+                        tampilkanBaris = false;
+                    }
+                }
+
+                // Lokasi filtering (kolom ke-11)
+                if (lokasiFilter) {
+                    const kolomLokasi = baris.querySelector('td:nth-child(11)');
+                    if (kolomLokasi && kolomLokasi.textContent.trim() !== lokasiFilter) {
+                        tampilkanBaris = false;
+                    }
+                }
+
+                baris.style.display = tampilkanBaris ? '' : 'none';
+            });
+        }
+
+        // Fungsi pencarian untuk tampilan tabel
+        function searchTabel() {
+            const searchValue = document.getElementById('searchApp').value.toLowerCase();
+            const barisTable = document.querySelectorAll('#tableView tbody tr');
+
+            barisTable.forEach(baris => {
+                const nama = baris.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const opd = baris.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                const jenis = baris.querySelector('td:nth-child(6)').textContent.toLowerCase();
+                const basis = baris.querySelector('td:nth-child(7)').textContent.toLowerCase();
+                const bahasa = baris.querySelector('td:nth-child(8)').textContent.toLowerCase();
+                const database = baris.querySelector('td:nth-child(9)').textContent.toLowerCase();
+                const pengembang = baris.querySelector('td:nth-child(10)').textContent.toLowerCase();
+                const lokasi = baris.querySelector('td:nth-child(11)').textContent.toLowerCase();
+
+                const matchSearch = nama.includes(searchValue) ||
+                    opd.includes(searchValue) ||
+                    jenis.includes(searchValue) ||
+                    basis.includes(searchValue) ||
+                    bahasa.includes(searchValue) ||
+                    database.includes(searchValue) ||
+                    pengembang.includes(searchValue) ||
+                    lokasi.includes(searchValue);
+
+                // Hanya tampilkan baris jika memenuhi kriteria pencarian dan filter
+                const displayStyle = baris.style.display;
+                if (matchSearch) {
+                    if (displayStyle === 'none') {
+                        // Jika baris disembunyikan oleh filter, tetap sembunyikan
+                        baris.style.display = 'none';
+                    } else {
+                        // Jika baris tidak disembunyikan oleh filter, tampilkan
+                        baris.style.display = '';
+                    }
+                } else {
+                    baris.style.display = 'none';
+                }
+            });
+        }
+
+        // Event listener untuk input pencarian
+        document.getElementById('searchApp').addEventListener('input', function() {
             const cardView = document.getElementById('cardView');
             if (cardView.style.display !== 'none') {
-                filterCards();
+                // Gunakan fungsi search untuk card view jika sudah ada
+                // searchCards();
             } else {
-                filterTabel();
+                filterTabel(); // Jalankan filter terlebih dahulu
+                searchTabel(); // Kemudian jalankan pencarian
             }
         });
-    });
 
-    // Inisialisasi filtering saat halaman dimuat
-    filterCards();
+        // Event listeners untuk semua filter
+        const filters = [
+            'statusFilter',
+            'jenisFilter',
+            'basisFilter',
+            'bahasaFilter',
+            'databaseFilter',
+            'pengembangFilter',
+            'lokasiFilter'
+        ];
+
+        filters.forEach(filterId => {
+            document.getElementById(filterId).addEventListener('change', function() {
+                const cardView = document.getElementById('cardView');
+                if (cardView.style.display !== 'none') {
+                    filterCards();
+                } else {
+                    filterTabel();
+                }
+            });
+        });
+
+        // Inisialisasi filtering saat halaman dimuat
+        filterCards();
     </script>
 </body>
+
 </html>
