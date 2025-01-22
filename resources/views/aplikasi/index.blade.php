@@ -415,6 +415,45 @@
                             </div>
                         </div>
 
+                        <!-- Tambahkan bagian Atribut Tambahan -->
+                        <div class="row g-3 mt-3">
+                            <div class="col-12">
+                                <h5>Atribut Tambahan</h5>
+                                @foreach($atributs as $atribut)
+                                    <div class="mb-3">
+                                        <label for="edit_atribut_{{ $atribut->id_atribut }}" class="form-label">
+                                            {{ $atribut->nama_atribut }}
+                                            <small class="text-muted">({{ ucfirst($atribut->tipe_data) }})</small>
+                                        </label>
+                                        @switch($atribut->tipe_data)
+                                            @case('date')
+                                                <input type="date" 
+                                                       class="form-control" 
+                                                       id="edit_atribut_{{ $atribut->id_atribut }}"
+                                                       name="atribut[{{ $atribut->id_atribut }}]">
+                                                @break
+                                            @case('number')
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="edit_atribut_{{ $atribut->id_atribut }}"
+                                                       name="atribut[{{ $atribut->id_atribut }}]">
+                                                @break
+                                            @case('text')
+                                                <textarea class="form-control" 
+                                                        id="edit_atribut_{{ $atribut->id_atribut }}"
+                                                        name="atribut[{{ $atribut->id_atribut }}]"></textarea>
+                                                @break
+                                            @default
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       id="edit_atribut_{{ $atribut->id_atribut }}"
+                                                       name="atribut[{{ $atribut->id_atribut }}]">
+                                        @endswitch
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
                         <div class="mt-4">
                             <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -534,45 +573,51 @@
     });
 
     function editApp(id) {
-        $.ajax({
-            url: `/aplikasi/${id}/edit`,
-            method: 'GET',
-            success: function(response) {
-                if (response.success) {
-                    const app = response.aplikasi;
+        fetch(`/aplikasi/${id}/detail`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const aplikasi = data.data;
                     
-                    // Set form action URL dengan ID yang benar
-                    $('#editForm').attr('action', `/aplikasi/${app.id_aplikasi}`);
-                    
-                    // Mengisi form dengan data yang ada
-                    $('#edit_nama').val(app.nama);
-                    $('#edit_opd').val(app.opd);
-                    $('#edit_uraian').val(app.uraian);
-                    
-                    // Format tanggal ke format yang sesuai dengan input date
-                    const tanggal = new Date(app.tahun_pembuatan);
-                    const formattedDate = tanggal.toISOString().split('T')[0];
-                    $('#edit_tahun_pembuatan').val(formattedDate);
-                    
-                    $('#edit_jenis').val(app.jenis);
-                    $('#edit_basis_aplikasi').val(app.basis_aplikasi);
-                    $('#edit_bahasa_framework').val(app.bahasa_framework);
-                    $('#edit_database').val(app.database);
-                    $('#edit_pengembang').val(app.pengembang);
-                    $('#edit_lokasi_server').val(app.lokasi_server);
-                    $('#edit_status_pemakaian').val(app.status_pemakaian);
+                    // Mengisi field-field yang sudah ada
+                    document.getElementById('edit_nama').value = aplikasi.nama;
+                    document.getElementById('edit_opd').value = aplikasi.opd;
+                    document.getElementById('edit_uraian').value = aplikasi.uraian;
+                    document.getElementById('edit_tahun_pembuatan').value = aplikasi.tahun_pembuatan;
+                    document.getElementById('edit_jenis').value = aplikasi.jenis;
+                    document.getElementById('edit_basis_aplikasi').value = aplikasi.basis_aplikasi;
+                    document.getElementById('edit_bahasa_framework').value = aplikasi.bahasa_framework;
+                    document.getElementById('edit_database').value = aplikasi.database;
+                    document.getElementById('edit_pengembang').value = aplikasi.pengembang;
+                    document.getElementById('edit_lokasi_server').value = aplikasi.lokasi_server;
+                    document.getElementById('edit_status_pemakaian').value = aplikasi.status_pemakaian;
 
+                    // Mengisi nilai atribut tambahan
+                    if (aplikasi.atribut_tambahans) {
+                        aplikasi.atribut_tambahans.forEach(atribut => {
+                            const inputElement = document.getElementById(`edit_atribut_${atribut.id_atribut}`);
+                            if (inputElement) {
+                                if (inputElement.tagName.toLowerCase() === 'textarea') {
+                                    inputElement.value = atribut.pivot.nilai_atribut || '';
+                                } else {
+                                    inputElement.value = atribut.pivot.nilai_atribut || '';
+                                }
+                            }
+                        });
+                    }
+
+                    // Set action URL untuk form
+                    document.getElementById('editForm').action = `/aplikasi/${id}`;
+                    
                     // Tampilkan modal
-                    $('#editModal').modal('show');
-                } else {
-                    toastr.error('Gagal memuat data aplikasi');
+                    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+                    editModal.show();
                 }
-            },
-            error: function(xhr) {
-                console.error('Ajax error:', xhr);
-                toastr.error('Terjadi kesalahan saat memuat data');
-            }
-        });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Gagal memuat data aplikasi');
+            });
     }
 
     // Form submit handler untuk edit
@@ -581,10 +626,14 @@
         const form = $(this);
         const url = form.attr('action');
         
+        // Tambahkan method _method untuk Laravel
+        const formData = new FormData(this);
+        formData.append('_method', 'PUT');
+        
         $.ajax({
             url: url,
-            method: 'POST',
-            data: new FormData(this),
+            method: 'POST',  // Tetap gunakan POST, method PUT ditangani oleh _method
+            data: formData,
             processData: false,
             contentType: false,
             headers: {
@@ -603,6 +652,7 @@
                 }
             },
             error: function(xhr) {
+                console.error('Ajax error:', xhr);  // Tambahkan log error
                 if (xhr.status === 422) {
                     // Validation errors
                     const errors = xhr.responseJSON.errors;
@@ -610,8 +660,7 @@
                         toastr.error(errors[key][0]);
                     });
                 } else {
-                    console.error('Ajax error:', xhr);
-                    toastr.error('Terjadi kesalahan saat memperbarui data');
+                    toastr.error('Terjadi kesalahan saat memperbarui data: ' + xhr.responseText);
                 }
             }
         });

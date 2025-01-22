@@ -26,10 +26,14 @@ class Aplikasi extends Model
         'status_pemakaian'
     ];
 
+    /**
+     * Relasi dengan atribut tambahan
+     */
     public function atributTambahans()
     {
         return $this->belongsToMany(AtributTambahan::class, 'aplikasi_atribut', 'id_aplikasi', 'id_atribut')
-                    ->withPivot('nilai_atribut');
+                    ->withPivot('nilai_atribut')
+                    ->withTimestamps();
     }
 
     // Method untuk mendapatkan nilai atribut

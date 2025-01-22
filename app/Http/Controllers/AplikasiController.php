@@ -158,7 +158,7 @@ class AplikasiController extends Controller
             
             $aplikasi = Aplikasi::findOrFail($id);
             
-            // Update aplikasi
+            // Update data aplikasi
             $aplikasi->update([
                 'nama' => $request->nama,
                 'opd' => $request->opd,
@@ -170,29 +170,27 @@ class AplikasiController extends Controller
                 'database' => $request->database,
                 'pengembang' => $request->pengembang,
                 'lokasi_server' => $request->lokasi_server,
-                'status_pemakaian' => $request->status_pemakaian,
+                'status_pemakaian' => $request->status_pemakaian
             ]);
 
-            // Update atribut tambahan jika ada
+            // Update atribut tambahan
             if ($request->has('atribut')) {
                 foreach ($request->atribut as $id_atribut => $nilai) {
-                    $aplikasi->atributTambahan()->updateOrCreate(
-                        ['id_atribut' => $id_atribut],
-                        ['nilai_atribut' => $nilai]
-                    );
+                    // Gunakan updateExistingPivot alih-alih updateOrCreate
+                    $aplikasi->atributTambahans()->updateExistingPivot($id_atribut, [
+                        'nilai_atribut' => $nilai
+                    ]);
                 }
             }
 
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Aplikasi berhasil diperbarui'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating aplikasi: ' . $e->getMessage());
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memperbarui aplikasi: ' . $e->getMessage()
@@ -211,7 +209,7 @@ class AplikasiController extends Controller
             $aplikasi = Aplikasi::findOrFail($id);
             
             // Hapus atribut tambahan terlebih dahulu
-            $aplikasi->atributTambahan()->detach();
+            $aplikasi->atributTambahans()->detach();
             
             // Hapus aplikasi
             $aplikasi->delete();
