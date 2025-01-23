@@ -511,6 +511,9 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     $("#appModal").modal("hide");
+                    // Simpan pesan ke sessionStorage untuk ditampilkan setelah refresh
+                    sessionStorage.setItem('flash_message', isEdit ? 'Data aplikasi berhasil diperbarui' : 'Data aplikasi berhasil ditambahkan');
+                    sessionStorage.setItem('flash_type', 'success');
                     window.location.reload();
                 } else {
                     toastr.error(response.message || "Terjadi kesalahan");
@@ -529,15 +532,9 @@ $(document).ready(function () {
                     });
                     toastr.error("Mohon periksa kembali input Anda");
                 } else {
-                    if (xhr.responseJSON && xhr.responseJSON.success) {
-                        $("#appModal").modal("hide");
-                        window.location.reload();
-                    } else {
-                        toastr.error(
-                            xhr.responseJSON?.message ||
-                                "Terjadi kesalahan saat menyimpan data"
-                        );
-                    }
+                    sessionStorage.setItem('flash_message', 'Terjadi kesalahan saat menyimpan data');
+                    sessionStorage.setItem('flash_type', 'error');
+                    window.location.reload();
                 }
                 submitBtn.prop("disabled", false);
             },
