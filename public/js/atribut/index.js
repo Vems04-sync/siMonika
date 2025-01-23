@@ -243,11 +243,6 @@ $(document).ready(function () {
                         });
                         errorMessage += "</ul>";
                         toastr.error(errorMessage, "Validasi Gagal");
-                    } else {
-                        toastr.error(
-                            "Terjadi kesalahan saat menyimpan data",
-                            "Error"
-                        );
                     }
                 },
             });
@@ -503,12 +498,12 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     $("#editAtributModal").modal("hide");
-                    toastr.success("Nilai atribut berhasil diperbarui");
-                    setTimeout(() => window.location.reload(), 1000);
+                    // Simpan pesan ke localStorage
+                    localStorage.setItem("flash_message", "Nilai atribut berhasil diperbarui");
+                    // Refresh halaman
+                    window.location.reload();
                 } else {
-                    toastr.error(
-                        response.message || "Gagal memperbarui nilai atribut"
-                    );
+                    toastr.error(response.message || "Gagal memperbarui nilai atribut");
                 }
             },
             error: function (xhr) {

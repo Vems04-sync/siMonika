@@ -511,10 +511,6 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     $("#appModal").modal("hide");
-                    // Simpan pesan ke sessionStorage untuk ditampilkan setelah refresh
-                    sessionStorage.setItem('flash_message', isEdit ? "Aplikasi berhasil diperbarui" : "Aplikasi berhasil ditambahkan");
-                    sessionStorage.setItem('flash_type', 'success');
-                    // Redirect atau refresh halaman
                     window.location.reload();
                 } else {
                     toastr.error(response.message || "Terjadi kesalahan");
@@ -535,10 +531,6 @@ $(document).ready(function () {
                 } else {
                     if (xhr.responseJSON && xhr.responseJSON.success) {
                         $("#appModal").modal("hide");
-                        // Simpan pesan ke sessionStorage untuk ditampilkan setelah refresh
-                        sessionStorage.setItem('flash_message', isEdit ? "Aplikasi berhasil diperbarui" : "Aplikasi berhasil ditambahkan");
-                        sessionStorage.setItem('flash_type', 'success');
-                        // Redirect atau refresh halaman
                         window.location.reload();
                     } else {
                         toastr.error(

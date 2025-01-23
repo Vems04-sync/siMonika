@@ -128,17 +128,19 @@
                     data-bahasa="{{ $aplikasi->bahasa_framework }}" data-database="{{ $aplikasi->database }}"
                     data-pengembang="{{ $aplikasi->pengembang }}" data-lokasi="{{ $aplikasi->lokasi_server }}">
                     <div class="card h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="app-icon me-3">
-                                        <i class="bi bi-window"></i>
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="app-icon me-3">
+                                            <i class="bi bi-app text-primary"></i>
+                                        </div>
+                                        <h5 class="card-title mb-0">{{ $aplikasi->nama }}</h5>
                                     </div>
-                                    <h5 class="card-title mb-0">{{ $aplikasi->nama }}</h5>
-                                </div>
-                                <div
-                                    class="status-badge {{ $aplikasi->status_pemakaian == 'Aktif' ? 'bg-success' : 'bg-danger' }} text-white">
-                                    {{ $aplikasi->status_pemakaian }}
+                                    <div
+                                        class="status-badge {{ $aplikasi->status_pemakaian == 'Aktif' ? 'bg-success' : 'bg-danger' }} text-white">
+                                        {{ $aplikasi->status_pemakaian }}
+                                    </div>
                                 </div>
                             </div>
 
@@ -162,12 +164,16 @@
 
                             <p class="card-text text-muted">{{ Str::limit($aplikasi->uraian, 100) }}</p>
 
-                            <div class="d-flex justify-content-between mt-3">
-                                <button class="btn btn-info btn-sm" onclick="showDetail('{{ $aplikasi->id_aplikasi }}')">
-                                    <i class="bi bi-eye">Detail</i>
+                            <!-- Spacer untuk mendorong tombol ke bawah -->
+                            <div class="flex-grow-1"></div>
+
+                            <!-- Button group di bagian bawah -->
+                            <div class="d-flex justify-content-between mt-auto pt-3 border-top">
+                                <button class="btn btn-primary btn-sm" onclick="showDetail('{{ $aplikasi->id_aplikasi }}')">
+                                    <i class="bi bi-eye"></i> Detail
                                 </button>
                                 <div>
-                                    <a href="javascript:void(0)" class="btn btn-warning btn-sm"
+                                    <a href="javascript:void(0)" class="btn btn-secondary btn-sm"
                                         onclick="editApp('{{ $aplikasi->id_aplikasi }}')">
                                         <i class="bi bi-pencil"></i> Edit
                                     </a>
@@ -576,10 +582,6 @@
                         toastr.error(response.message || 'Gagal memuat detail aplikasi');
                     }
                 },
-                error: function (xhr, status, error) {
-                    console.error('Ajax error:', { xhr, status, error }); // Debug log
-                    toastr.error('Terjadi kesalahan saat memuat data');
-                }
             });
         }
 
@@ -673,20 +675,6 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                success: function(response) {
-                    if (response.success) {
-                        $('#editModal').modal('hide');
-                        toastr.success(response.message);
-                        // Reload halaman untuk memperbarui data
-                        window.location.reload();
-                    } else {
-                        toastr.error(response.message);
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Update error:', xhr.responseText);
-                    toastr.error('Gagal memperbarui data: ' + (xhr.responseJSON?.message || 'Unknown error'));
-                }
             });
         });
 
