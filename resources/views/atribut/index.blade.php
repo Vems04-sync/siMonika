@@ -99,7 +99,7 @@
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $atribut->nama_atribut }}</td>
                             <td>
-                                <button class="btn btn-info btn-sm" data-bs-toggle="modal"
+                                <button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
                                     data-bs-target="#detailAtributModal"
                                     onclick="loadAtributDetail('{{ $atribut->id_atribut }}')">
                                     <i class="bi bi-info-circle"></i> Detail
@@ -152,7 +152,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-info"
+                                        <button class="btn btn-sm btn-secondary"
                                             onclick="showAppDetail({{ $aplikasi->id_aplikasi }})">
                                             <i class="bi bi-info-circle"></i> Detail
                                         </button>
