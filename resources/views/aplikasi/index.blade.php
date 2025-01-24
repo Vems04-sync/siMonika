@@ -260,7 +260,6 @@
                     </table>
                 </div>
             </div>
-            <!-- Pagination akan ditambahkan di sini oleh JavaScript -->
         </div>
 
         @include('aplikasi/create')

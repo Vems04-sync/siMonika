@@ -226,23 +226,35 @@ $(document).ready(function () {
                 method: "POST",
                 data: form.serialize(),
                 success: function (response) {
-                    localStorage.setItem(
-                        "flash_message",
-                        isEdit
-                            ? "Data atribut berhasil diperbarui!"
-                            : "Data atribut berhasil ditambahkan!"
-                    );
-                    window.location.reload();
+                    if (response.success) {
+                        localStorage.setItem(
+                            "flash_message",
+                            isEdit
+                                ? "Data atribut berhasil diperbarui!"
+                                : "Data atribut berhasil ditambahkan!"
+                        );
+                        window.location.reload();
+                    } else {
+                        // Tampilkan pesan error dari response
+                        toastr.error(response.message || "Terjadi kesalahan");
+                    }
                 },
                 error: function (xhr) {
                     if (xhr.status === 422) {
                         const errors = xhr.responseJSON.errors;
-                        let errorMessage = '<ul class="m-0">';
-                        Object.values(errors).forEach((error) => {
-                            errorMessage += `<li>${error[0]}</li>`;
-                        });
-                        errorMessage += "</ul>";
-                        toastr.error(errorMessage, "Validasi Gagal");
+                        // Tampilkan pesan error validasi
+                        if (errors.nama_atribut && errors.nama_atribut.includes('already exists')) {
+                            toastr.error("Nama atribut sudah ada, silakan gunakan nama lain", "Validasi Gagal");
+                        } else {
+                            let errorMessage = '<ul class="m-0">';
+                            Object.values(errors).forEach((error) => {
+                                errorMessage += `<li>${error[0]}</li>`;
+                            });
+                            errorMessage += "</ul>";
+                            toastr.error(errorMessage, "Validasi Gagal");
+                        }
+                    } else {
+                        toastr.error("Terjadi kesalahan pada server", "Error");
                     }
                 },
             });
