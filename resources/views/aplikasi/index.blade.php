@@ -240,11 +240,11 @@
                                     <td>{{ $aplikasi->lokasi_server }}</td>
                                     <td class="text-center pe-4">
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-info btn-sm"
+                                            <button class="btn btn-primary btn-sm"
                                                 onclick="showDetail({{ $aplikasi->id_aplikasi }})">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-warning btn-sm"
+                                            <button class="btn btn-secondary btn-sm"
                                                 onclick="editApp('{{ $aplikasi->id_aplikasi }}')">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
