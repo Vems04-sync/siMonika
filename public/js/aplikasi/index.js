@@ -5,21 +5,38 @@ const toggleViewBtn = document.getElementById("toggleView");
 const appGrid = document.getElementById("appGrid");
 const appTable = document.getElementById("appTable");
 
-toggleViewBtn.addEventListener("click", function () {
-    isCardView = !isCardView;
+// Tambahkan variabel global untuk menyimpan kata kunci pencarian
+let currentSearchTerm = '';
 
-    if (isCardView) {
-        appGrid.style.display = "flex";
-        appTable.style.display = "none";
-        toggleViewBtn.innerHTML =
-            '<i class="bi bi-grid"></i><span class="ms-2">Ubah Tampilan</span>';
+// Tambahkan variabel global untuk menyimpan state filter
+let currentFilters = {
+    status: '',
+    jenis: '',
+    basis: '',
+    bahasa: '',
+    database: '',
+    pengembang: '',
+    lokasi: '',
+    searchTerm: ''
+};
+
+toggleViewBtn.addEventListener("click", function () {
+    if (document.getElementById('cardView').style.display !== 'none') {
+        // Switch to table view
+        document.getElementById('cardView').style.display = 'none';
+        document.getElementById('tableView').style.display = 'block';
+        toggleViewBtn.innerHTML = '<i class="bi bi-grid"></i><span class="ms-2">Tampilan Card</span>';
+        
+        // Terapkan filter yang ada ke tampilan tabel
+        applyFilters('table');
     } else {
-        appGrid.style.display = "none";
-        appTable.style.display = "block";
-        toggleViewBtn.innerHTML =
-            '<i class="bi bi-card-list"></i><span class="ms-2">Ubah Tampilan</span>';
-        currentPage = 1; // Reset ke halaman pertama
-        showTablePage(); // Ini akan memanggil setupPagination()
+        // Switch to card view
+        document.getElementById('cardView').style.display = 'flex';
+        document.getElementById('tableView').style.display = 'none';
+        toggleViewBtn.innerHTML = '<i class="bi bi-table"></i><span class="ms-2">Tampilan Tabel</span>';
+        
+        // Terapkan filter yang ada ke tampilan card
+        applyFilters('card');
     }
 });
 
@@ -868,4 +885,177 @@ $(document).ready(function() {
         sessionStorage.removeItem('flash_message');
         sessionStorage.removeItem('flash_type');
     }
+});
+
+// Fungsi untuk filter tampilan card
+function filterCardView(searchTerm) {
+    const cards = document.querySelectorAll('.app-card');
+    cards.forEach(card => {
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const opd = card.querySelector('.app-info').textContent.toLowerCase();
+        const shouldShow = !searchTerm || 
+                          title.includes(searchTerm.toLowerCase()) || 
+                          opd.includes(searchTerm.toLowerCase());
+        card.closest('.col-md-6').style.display = shouldShow ? '' : 'none';
+    });
+}
+
+// Fungsi untuk filter tampilan tabel
+function filterTableView(searchTerm) {
+    const rows = document.querySelectorAll('#tableView tbody tr');
+    rows.forEach(row => {
+        const title = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const opd = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        const shouldShow = !searchTerm || 
+                          title.includes(searchTerm.toLowerCase()) || 
+                          opd.includes(searchTerm.toLowerCase());
+        row.style.display = shouldShow ? '' : 'none';
+    });
+}
+
+// Update event listener untuk search input
+document.getElementById('searchApp').addEventListener('input', function(e) {
+    const searchTerm = e.target.value;
+    currentSearchTerm = searchTerm; // Simpan kata kunci pencarian
+
+    // Cek tampilan mana yang aktif
+    const cardView = document.getElementById('cardView');
+    if (cardView.style.display !== 'none') {
+        filterCardView(searchTerm);
+    } else {
+        filterTableView(searchTerm);
+    }
+});
+
+// Tambahkan event listener untuk form search (mencegah refresh saat enter)
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const searchTerm = document.getElementById('searchApp').value;
+    currentSearchTerm = searchTerm;
+    
+    // Cek tampilan mana yang aktif
+    const cardView = document.getElementById('cardView');
+    if (cardView.style.display !== 'none') {
+        filterCardView(searchTerm);
+    } else {
+        filterTableView(searchTerm);
+    }
+});
+
+// Fungsi untuk menerapkan semua filter
+function applyFilters(viewType) {
+    const items = viewType === 'card' ? 
+        document.querySelectorAll('.app-card') : 
+        document.querySelectorAll('#tableView tbody tr');
+
+    items.forEach(item => {
+        let shouldShow = true;
+
+        // Filter berdasarkan status
+        if (currentFilters.status) {
+            const status = viewType === 'card' ? 
+                item.dataset.status :
+                (item.querySelector('.badge').textContent.trim().toLowerCase() === 'aktif' ? 'active' : 'unused');
+            if (status !== currentFilters.status) shouldShow = false;
+        }
+
+        // Filter berdasarkan jenis
+        if (currentFilters.jenis && shouldShow) {
+            const jenis = viewType === 'card' ? 
+                item.dataset.jenis :
+                item.querySelector('td:nth-child(6)').textContent.trim();
+            if (jenis.toLowerCase() !== currentFilters.jenis.toLowerCase()) shouldShow = false;
+        }
+
+        // Filter berdasarkan basis aplikasi
+        if (currentFilters.basis && shouldShow) {
+            const basis = viewType === 'card' ? 
+                item.dataset.basis :
+                item.querySelector('td:nth-child(7)').textContent.trim();
+            if (!basis.toLowerCase().includes(currentFilters.basis.toLowerCase())) shouldShow = false;
+        }
+
+        // Filter berdasarkan bahasa/framework
+        if (currentFilters.bahasa && shouldShow) {
+            const bahasa = viewType === 'card' ? 
+                item.dataset.bahasa :
+                item.querySelector('td:nth-child(8)').textContent.trim();
+            if (bahasa.toLowerCase() !== currentFilters.bahasa.toLowerCase()) shouldShow = false;
+        }
+
+        // Filter berdasarkan database
+        if (currentFilters.database && shouldShow) {
+            const database = viewType === 'card' ? 
+                item.dataset.database :
+                item.querySelector('td:nth-child(9)').textContent.trim();
+            if (database.toLowerCase() !== currentFilters.database.toLowerCase()) shouldShow = false;
+        }
+
+        // Filter berdasarkan pengembang
+        if (currentFilters.pengembang && shouldShow) {
+            const pengembang = viewType === 'card' ? 
+                item.dataset.pengembang :
+                item.querySelector('td:nth-child(10)').textContent.trim();
+            if (pengembang.toLowerCase() !== currentFilters.pengembang.toLowerCase()) shouldShow = false;
+        }
+
+        // Filter berdasarkan lokasi server
+        if (currentFilters.lokasi && shouldShow) {
+            const lokasi = viewType === 'card' ? 
+                item.dataset.lokasi :
+                item.querySelector('td:nth-child(11)').textContent.trim();
+            if (lokasi.toLowerCase() !== currentFilters.lokasi.toLowerCase()) shouldShow = false;
+        }
+
+        // Filter berdasarkan pencarian
+        if (currentFilters.searchTerm && shouldShow) {
+            const title = viewType === 'card' ? 
+                item.querySelector('.card-title').textContent.toLowerCase() :
+                item.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const opd = viewType === 'card' ? 
+                item.querySelector('.app-info').textContent.toLowerCase() :
+                item.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            
+            if (!title.includes(currentFilters.searchTerm.toLowerCase()) && 
+                !opd.includes(currentFilters.searchTerm.toLowerCase())) {
+                shouldShow = false;
+            }
+        }
+
+        // Tampilkan atau sembunyikan item
+        if (viewType === 'card') {
+            item.closest('.col-md-6').style.display = shouldShow ? '' : 'none';
+        } else {
+            item.style.display = shouldShow ? '' : 'none';
+        }
+    });
+}
+
+// Event listeners untuk filter
+const filters = [
+    { id: 'statusFilter', key: 'status' },
+    { id: 'jenisFilter', key: 'jenis' },
+    { id: 'basisFilter', key: 'basis' },
+    { id: 'bahasaFilter', key: 'bahasa' },
+    { id: 'databaseFilter', key: 'database' },
+    { id: 'pengembangFilter', key: 'pengembang' },
+    { id: 'lokasiFilter', key: 'lokasi' }
+];
+
+filters.forEach(filter => {
+    document.getElementById(filter.id).addEventListener('change', function() {
+        currentFilters[filter.key] = this.value;
+        applyFilters(document.getElementById('cardView').style.display !== 'none' ? 'card' : 'table');
+    });
+});
+
+// Update event listener untuk search
+document.getElementById('searchApp').addEventListener('input', function(e) {
+    currentFilters.searchTerm = e.target.value;
+    applyFilters(document.getElementById('cardView').style.display !== 'none' ? 'card' : 'table');
+});
+
+// Prevent form submission
+document.querySelector('form')?.addEventListener('submit', function(e) {
+    e.preventDefault();
 });
