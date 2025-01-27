@@ -120,8 +120,18 @@
                                             @break
                                         @case('text')
                                             <textarea class="form-control" 
+                                                      id="atribut_{{ $atribut->id_atribut }}"
+                                                      name="atribut[{{ $atribut->id_atribut }}]"></textarea>
+                                            @break
+                                        @case('enum')
+                                            <select class="form-select" 
                                                     id="atribut_{{ $atribut->id_atribut }}"
-                                                    name="atribut[{{ $atribut->id_atribut }}]"></textarea>
+                                                    name="atribut[{{ $atribut->id_atribut }}]">
+                                                <option value="">Pilih Opsi</option>
+                                                @foreach($atribut->enumOptions as $option)
+                                                    <option value="{{ $option->option }}">{{ $option->option }}</option>
+                                                @endforeach
+                                            </select>
                                             @break
                                         @default
                                             <input type="text" 

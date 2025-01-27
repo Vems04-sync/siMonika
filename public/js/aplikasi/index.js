@@ -609,45 +609,37 @@ $(document).ready(function () {
 });
 
 // Update fungsi deleteApp
-function deleteApp(appId) {
+function deleteApp(id) {
     Swal.fire({
-        title: "Apakah Anda yakin?",
-        text: "Data aplikasi akan dihapus secara permanen!",
-        icon: "warning",
+        title: 'Apakah anda yakin?',
+        text: "Data aplikasi akan dihapus permanen!",
+        icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Ya, hapus!",
-        cancelButtonText: "Batal",
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            const loadingOverlay = $(
-                '<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">'
-            ).append(
-                '<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>'
-            );
-            $("body").append(loadingOverlay);
-
             $.ajax({
-                url: `/aplikasi/delete/${appId}`,
-                method: "DELETE",
+                url: `/aplikasi/${id}`, // Pastikan URL ini benar
+                method: 'DELETE',
                 headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function (response) {
-                    loadingOverlay.remove();
-                    // Simpan pesan ke sessionStorage
-                    sessionStorage.setItem('flash_message', 'Data aplikasi berhasil dihapus');
-                    sessionStorage.setItem('flash_type', 'success');
-                    window.location.reload();
+                    if (response.success) {
+                        Swal.fire('Terhapus!', 'Data aplikasi berhasil dihapus.', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        Swal.fire('Gagal!', response.message, 'error');
+                    }
                 },
-                error: function (xhr) {
-                    loadingOverlay.remove();
-                    // Simpan pesan error ke sessionStorage
-                    sessionStorage.setItem('flash_message', 'Gagal menghapus data aplikasi');
-                    sessionStorage.setItem('flash_type', 'error');
-                    window.location.reload();
-                },
+                error: function () {
+                    Swal.fire('Error!', 'Terjadi kesalahan saat menghapus data.', 'error');
+                }
             });
         }
     });
@@ -1059,3 +1051,59 @@ document.getElementById('searchApp').addEventListener('input', function(e) {
 document.querySelector('form')?.addEventListener('submit', function(e) {
     e.preventDefault();
 });
+
+function showDetail(id) {
+    $.ajax({
+        url: `/aplikasi/${id}/detail`,
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (response) {
+            if (response.success) {
+                const app = response.data;
+
+                // Populate modal fields
+                $('#detail-nama').text(app.nama || '-');
+                $('#detail-opd').text(app.opd || '-');
+                $('#detail-uraian').text(app.uraian || '-');
+                $('#detail-tahun').text(app.tahun_pembuatan || '-');
+                $('#detail-jenis').text(app.jenis || '-');
+                $('#detail-basis').text(app.basis_aplikasi || '-');
+                $('#detail-bahasa').text(app.bahasa_framework || '-');
+                $('#detail-database').text(app.database || '-');
+                $('#detail-pengembang').text(app.pengembang || '-');
+                $('#detail-server').text(app.lokasi_server || '-');
+
+                // Tambahkan kelas untuk styling status
+                const statusClass = app.status_pemakaian === 'Aktif' ? 'text-success' : 'text-danger';
+                $('#detail-status').html(`<span class="${statusClass}">${app.status_pemakaian || '-'}</span>`);
+
+                // Build atribut tambahan table
+                let atributHtml = '<table class="table table-borderless">';
+                if (app.atribut_tambahans && app.atribut_tambahans.length > 0) {
+                    app.atribut_tambahans.forEach(atribut => {
+                        const nilai = atribut.pivot?.nilai_atribut || '-';
+                        atributHtml += `
+                            <tr>
+                                <td width="40%">${atribut.nama_atribut}</td>
+                                <td>${nilai}</td>
+                            </tr>`;
+                    });
+                } else {
+                    atributHtml += '<tr><td colspan="2">Tidak ada atribut tambahan</td></tr>';
+                }
+                atributHtml += '</table>';
+                $('#atribut-tambahan-content').html(atributHtml);
+
+                // Tampilkan modal
+                $('#detailAplikasiModal').modal('show');
+            } else {
+                toastr.error(response.message || 'Gagal memuat detail aplikasi');
+            }
+        },
+        error: function () {
+            toastr.error('Terjadi kesalahan saat memuat detail aplikasi');
+        }
+    });
+}

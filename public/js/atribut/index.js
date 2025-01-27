@@ -291,10 +291,47 @@ $(document).ready(function () {
         theme: "bootstrap-5",
     });
 
-    // Handle submit form tambah atribut
+    // Show/hide enum options based on selected type
+    $('#tipeDataSelect').on('change', function() {
+        if ($(this).val() === 'enum') {
+            $('#enumOptionsContainer').show();
+        } else {
+            $('#enumOptionsContainer').hide();
+            $('#enumOptions').empty(); // Clear options if not enum
+        }
+    });
+
+    // Add new enum option input
+    $('#addEnumOption').on('click', function() {
+        $('#enumOptions').append(`
+            <div class="mb-2">
+                <input type="text" class="form-control" name="enum_options[]" placeholder="Masukkan opsi enum">
+                <button type="button" class="btn btn-danger removeEnumOption">Hapus</button>
+            </div>
+        `);
+    });
+
+    // Remove enum option input
+    $(document).on('click', '.removeEnumOption', function() {
+        $(this).parent().remove();
+    });
+
+    // Handle form submit for tambah atribut
     $("#tambahAtributForm").on("submit", function (e) {
         e.preventDefault();
         const formData = $(this).serialize();
+
+        // Include only filled enum options
+        const enumOptions = $('input[name="enum_options[]"]').map(function() {
+            return $(this).val();
+        }).get().filter(function(option) {
+            return option !== ""; // Filter out empty options
+        });
+
+        // Add enum options to form data if any
+        if (enumOptions.length > 0) {
+            formData += '&enum_options=' + JSON.stringify(enumOptions);
+        }
 
         $.ajax({
             url: "/atribut",
