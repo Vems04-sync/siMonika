@@ -194,19 +194,20 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Tipe Data</label>
-                                <select name="tipe_data" class="form-select" required>
+                                <select name="tipe_data" class="form-select" required id="tipeDataSelect">
                                     <option value="">Pilih Tipe Data</option>
                                     <option value="varchar">Text (VARCHAR)</option>
                                     <option value="number">Angka (NUMBER)</option>
                                     <option value="date">Tanggal (DATE)</option>
                                     <option value="text">Text Panjang (TEXT)</option>
+                                    <option value="enum">Enum (ENUM)</option>
                                 </select>
                             </div>
-                            {{-- <div class="mb-3">
-                                <label class="form-label">Nilai Default (Opsional)</label>
-                                <input type="text" name="nilai_default" class="form-control">
-                                <div class="form-text">Nilai awal yang akan diterapkan ke semua aplikasi</div>
-                            </div> --}}
+                            <div id="enumOptionsContainer" style="display: none;">
+                                <label class="form-label">Opsi Enum</label>
+                                <div id="enumOptions"></div>
+                                <button type="button" class="btn btn-secondary" id="addEnumOption">Tambah Opsi</button>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
