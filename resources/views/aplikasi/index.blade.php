@@ -466,6 +466,18 @@
                                                         id="edit_atribut_{{ $atribut->id_atribut }}"
                                                         name="atribut[{{ $atribut->id_atribut }}]"></textarea>
                                                 @break
+                                            @case('enum')
+                                                <select class="form-select" 
+                                                        id="edit_atribut_{{ $atribut->id_atribut }}"
+                                                        name="atribut[{{ $atribut->id_atribut }}]">
+                                                    <option value="">Pilih Opsi</option>
+                                                    @if($atribut->enum_options)
+                                                        @foreach($atribut->enum_options as $option)
+                                                            <option value="{{ $option }}">{{ $option }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                                @break
                                             @default
                                                 <input type="text" 
                                                     class="form-control" 
