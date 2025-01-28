@@ -404,80 +404,110 @@ function formatLabel(key) {
     return labels[key] || key;
 }
 
-// Fungsi untuk reset form
+// Fungsi untuk reset form tanpa menghapus atribut tambahan
+function resetFormExceptAttributes() {
+    // Reset hanya field-field utama
+    const mainFields = ['nama', 'opd', 'uraian', 'tahun_pembuatan', 'jenis', 
+                       'basis_aplikasi', 'bahasa_framework', 'database', 
+                       'pengembang', 'lokasi_server', 'status_pemakaian'];
+    
+    mainFields.forEach(field => {
+        $(`#${field}`).val('');
+    });
+
+    $('#appForm').attr('action', '/aplikasi');
+    $('input[name="_method"]').val('POST');
+    $('#modalTitle').text('Tambah Aplikasi Baru');
+}
+
+// Fungsi untuk reset form lengkap (termasuk atribut tambahan)
 function resetForm() {
-    const form = $("#appForm");
-    form[0].reset();
-    form.attr("action", "/aplikasi");
-
-    // Hapus input method jika ada
-    $("#_method").remove();
-
-    // Reset error alert jika ada
-    $("#errorAlert").addClass("d-none");
+    $('#appForm')[0].reset();
+    $('#appForm').attr('action', '/aplikasi');
+    $('input[name="_method"]').val('POST');
+    $('#modalTitle').text('Tambah Aplikasi Baru');
 }
 
-// Update fungsi addApp
+// Fungsi untuk menambah aplikasi baru
 function addApp() {
-    resetForm(); // Reset form terlebih dahulu
-    $("#modalTitle").text("Tambah Aplikasi");
-    $("#appForm").attr("action", "/aplikasi");
-    $("#appModal").modal("show");
+    resetForm(); // Reset lengkap untuk form tambah baru
+    $('#appModal').modal('show');
 }
 
-// Fungsi untuk edit aplikasi
-function editApp(nama) {
-    // Reset form dan hapus error messages
-    resetForm();
-
-    // Tampilkan loading
-    const loadingOverlay = $(
-        '<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">'
-    ).append(
-        '<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>'
-    );
-    $("body").append(loadingOverlay);
-
-    // Ambil data aplikasi
+// Tambahkan fungsi untuk load data atribut
+function loadAtributValues(id) {
     $.ajax({
-        url: `/aplikasi/${nama}/edit`,
-        method: "GET",
-        success: function (response) {
-            loadingOverlay.remove();
-
-            // Isi form dengan data yang ada
-            $("#nama").val(response.nama);
-            $("#opd").val(response.opd);
-            $("#uraian").val(response.uraian);
-            $("#tahun_pembuatan").val(response.tahun_pembuatan);
-            $("#jenis").val(response.jenis);
-            $("#basis_aplikasi").val(response.basis_aplikasi);
-            $("#bahasa_framework").val(response.bahasa_framework);
-            $("#database").val(response.database);
-            $("#pengembang").val(response.pengembang);
-            $("#lokasi_server").val(response.lokasi_server);
-            $("#status_pemakaian").val(response.status_pemakaian);
-
-            // Set form untuk update
-            $("#modalTitle").text("Edit Aplikasi");
-            $("#appForm").attr("action", `/aplikasi/${nama}`);
-
-            // Hapus method field lama jika ada
-            $("#appForm").find('input[name="_method"]').remove();
-            // Tambahkan method PUT
-            $("#appForm").append(
-                '<input type="hidden" name="_method" value="PUT">'
-            );
-
-            // Tampilkan modal
-            $("#appModal").modal("show");
+        url: `/aplikasi/${id}/atribut`,
+        method: 'GET',
+        success: function(response) {
+            if (response.atribut_tambahans) {
+                response.atribut_tambahans.forEach(atribut => {
+                    const nilai = atribut.pivot ? atribut.pivot.nilai_atribut : '';
+                    const inputId = `edit_atribut_${atribut.id_atribut}`;
+                    const input = $(`#${inputId}`);
+                    
+                    if (input.length) {
+                        if (input.is('select')) {
+                            input.val(nilai).trigger('change');
+                        } else if (input.is('textarea')) {
+                            input.val(nilai);
+                        } else {
+                            input.val(nilai);
+                        }
+                    }
+                });
+            }
         },
-        error: function (xhr) {
-            loadingOverlay.remove();
-            toastr.error(
-                xhr.responseJSON?.message || "Gagal memuat data aplikasi"
-            );
+        error: function(xhr) {
+            console.error('Error loading atribut values:', xhr.responseText);
+            toastr.error('Gagal memuat nilai atribut');
+        }
+    });
+}
+
+// Update fungsi editApp
+function editApp(id) {
+    $.ajax({
+        url: `/aplikasi/${id}/edit`,
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const app = response.aplikasi;
+                
+                // Set form action dengan benar
+                $('#editForm').attr('action', `/aplikasi/${id}`);
+                
+                // Isi form fields
+                $('#edit_nama').val(app.nama);
+                $('#edit_opd').val(app.opd);
+                $('#edit_uraian').val(app.uraian);
+                $('#edit_tahun_pembuatan').val(app.tahun_pembuatan);
+                $('#edit_jenis').val(app.jenis);
+                $('#edit_basis_aplikasi').val(app.basis_aplikasi);
+                $('#edit_bahasa_framework').val(app.bahasa_framework);
+                $('#edit_database').val(app.database);
+                $('#edit_pengembang').val(app.pengembang);
+                $('#edit_lokasi_server').val(app.lokasi_server);
+                $('#edit_status_pemakaian').val(app.status_pemakaian);
+                
+                // Isi atribut tambahan
+                if (app.atribut_tambahans) {
+                    app.atribut_tambahans.forEach(atribut => {
+                        const nilai = atribut.pivot ? atribut.pivot.nilai_atribut : '';
+                        $(`#edit_atribut_${atribut.id_atribut}`).val(nilai);
+                    });
+                }
+                
+                // Tampilkan modal
+                $('#editModal').modal('show');
+            } else {
+                toastr.error(response.message || 'Gagal memuat data aplikasi');
+            }
         },
+        error: function(xhr) {
+            console.error('Error:', xhr.responseText); // Untuk debugging
+            toastr.error('Gagal memuat data aplikasi');
+        }
     });
 }
 
@@ -833,32 +863,61 @@ $(document).ready(function () {
 // Form submit handler untuk edit
 $('#editForm').on('submit', function(e) {
     e.preventDefault();
-    const form = $(this);
-    const url = form.attr('action');
     
+    const form = $(this);
+    const formData = new FormData(this);
+    formData.append('_method', 'PUT'); // Tambahkan method PUT secara eksplisit
+    
+    // Tampilkan loading
+    const loadingOverlay = $('<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">')
+        .append('<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>');
+    $('body').append(loadingOverlay);
+
     $.ajax({
-        url: url,
-        method: 'POST',
-        data: new FormData(this),
+        url: form.attr('action'),
+        method: 'POST', // Tetap gunakan POST karena FormData
+        data: formData,
         processData: false,
         contentType: false,
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
+            loadingOverlay.remove();
+            
             if (response.success) {
                 $('#editModal').modal('hide');
-                // Simpan pesan ke sessionStorage untuk ditampilkan setelah refresh
-                sessionStorage.setItem('flash_message', 'Data aplikasi berhasil diperbarui');
-                sessionStorage.setItem('flash_type', 'success');
-                window.location.reload();
+                toastr.success('Data aplikasi berhasil diperbarui');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                toastr.error(response.message || 'Gagal memperbarui data aplikasi');
             }
         },
         error: function(xhr) {
-            // Simpan pesan error ke sessionStorage
-            sessionStorage.setItem('flash_message', 'Gagal memperbarui data aplikasi');
-            sessionStorage.setItem('flash_type', 'error');
-            window.location.reload();
+            loadingOverlay.remove();
+            console.error('Error response:', xhr.responseText); // Untuk debugging
+            
+            if (xhr.status === 422) {
+                // Validation errors
+                const errors = xhr.responseJSON.errors;
+                let errorMessage = '<ul>';
+                Object.keys(errors).forEach(key => {
+                    errorMessage += `<li>${errors[key][0]}</li>`;
+                });
+                errorMessage += '</ul>';
+                
+                toastr.error(errorMessage, 'Validation Error', {
+                    closeButton: true,
+                    timeOut: 0,
+                    extendedTimeOut: 0,
+                    progressBar: false,
+                    enableHtml: true
+                });
+            } else {
+                toastr.error(xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data');
+            }
         }
     });
 });
