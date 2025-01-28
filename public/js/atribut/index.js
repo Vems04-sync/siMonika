@@ -85,7 +85,7 @@ window.editAppAtribut = function (id) {
         url: `/aplikasi/${id}/atribut`,
         method: "GET",
         headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
         },
         success: function (response) {
             if (!response.success) {
@@ -93,12 +93,12 @@ window.editAppAtribut = function (id) {
                 return;
             }
 
-            let html = '';
+            let html = "";
             const atributs = response.atribut_tambahans || [];
 
-            atributs.forEach(atribut => {
-                const nilai = atribut.pivot ? atribut.pivot.nilai_atribut : '';
-                
+            atributs.forEach((atribut) => {
+                const nilai = atribut.pivot ? atribut.pivot.nilai_atribut : "";
+
                 html += `
                 <div class="mb-3">
                     <label class="form-label">
@@ -106,37 +106,42 @@ window.editAppAtribut = function (id) {
                         <small class="text-muted">(${atribut.tipe_data})</small>
                     </label>`;
 
-                switch(atribut.tipe_data) {
-                    case 'date':
+                switch (atribut.tipe_data) {
+                    case "date":
                         html += `
                             <input type="date" 
                                    class="form-control" 
                                    name="atribut[${atribut.id_atribut}]" 
-                                   value="${nilai || ''}">`;
+                                   value="${nilai || ""}">`;
                         break;
-                    case 'number':
+                    case "number":
                         html += `
                             <input type="number" 
                                    class="form-control" 
                                    name="atribut[${atribut.id_atribut}]" 
-                                   value="${nilai || ''}">`;
+                                   value="${nilai || ""}">`;
                         break;
-                    case 'text':
+                    case "text":
                         html += `
                             <textarea class="form-control" 
-                                      name="atribut[${atribut.id_atribut}]">${nilai || ''}</textarea>`;
+                                      name="atribut[${atribut.id_atribut}]">${
+                            nilai || ""
+                        }</textarea>`;
                         break;
-                    case 'enum':
+                    case "enum":
                         html += `<select class="form-select" name="atribut[${atribut.id_atribut}]">
                                     <option value="">Pilih Opsi</option>`;
                         if (atribut.enum_options) {
-                            const options = typeof atribut.enum_options === 'string' ? 
-                                JSON.parse(atribut.enum_options) : 
-                                atribut.enum_options;
-                            
-                            options.forEach(option => {
+                            const options =
+                                typeof atribut.enum_options === "string"
+                                    ? JSON.parse(atribut.enum_options)
+                                    : atribut.enum_options;
+
+                            options.forEach((option) => {
                                 html += `
-                                    <option value="${option}" ${nilai === option ? 'selected' : ''}>
+                                    <option value="${option}" ${
+                                    nilai === option ? "selected" : ""
+                                }>
                                         ${option}
                                     </option>`;
                             });
@@ -148,19 +153,19 @@ window.editAppAtribut = function (id) {
                             <input type="text" 
                                    class="form-control" 
                                    name="atribut[${atribut.id_atribut}]" 
-                                   value="${nilai || ''}">`;
+                                   value="${nilai || ""}">`;
                 }
                 html += `</div>`;
             });
 
-            $('#editAtributForm').data('app-id', id);
-            $('#atributFields').html(html);
-            $('#editAtributModal').modal('show');
+            $("#editAtributForm").data("app-id", id);
+            $("#atributFields").html(html);
+            $("#editAtributModal").modal("show");
         },
-        error: function(xhr) {
-            console.error('Error response:', xhr.responseText);
-            toastr.error('Terjadi kesalahan saat memuat data');
-        }
+        error: function (xhr) {
+            console.error("Error response:", xhr.responseText);
+            toastr.error("Terjadi kesalahan saat memuat data");
+        },
     });
 };
 
@@ -283,8 +288,14 @@ $(document).ready(function () {
                     if (xhr.status === 422) {
                         const errors = xhr.responseJSON.errors;
                         // Tampilkan pesan error validasi
-                        if (errors.nama_atribut && errors.nama_atribut.includes('already exists')) {
-                            toastr.error("Nama atribut sudah ada, silakan gunakan nama lain", "Validasi Gagal");
+                        if (
+                            errors.nama_atribut &&
+                            errors.nama_atribut.includes("already exists")
+                        ) {
+                            toastr.error(
+                                "Nama atribut sudah ada, silakan gunakan nama lain",
+                                "Validasi Gagal"
+                            );
                         } else {
                             let errorMessage = '<ul class="m-0">';
                             Object.values(errors).forEach((error) => {
@@ -332,18 +343,18 @@ $(document).ready(function () {
     });
 
     // Show/hide enum options based on selected type
-    $('#tipeDataSelect').on('change', function() {
-        if ($(this).val() === 'enum') {
-            $('#enumOptionsContainer').show();
+    $("#tipeDataSelect").on("change", function () {
+        if ($(this).val() === "enum") {
+            $("#enumOptionsContainer").show();
         } else {
-            $('#enumOptionsContainer').hide();
-            $('#enumOptions').empty(); // Clear options if not enum
+            $("#enumOptionsContainer").hide();
+            $("#enumOptions").empty(); // Clear options if not enum
         }
     });
 
     // Add new enum option input
-    $('#addEnumOption').on('click', function() {
-        $('#enumOptions').append(`
+    $("#addEnumOption").on("click", function () {
+        $("#enumOptions").append(`
             <div class="mb-2">
                 <input type="text" class="form-control" name="enum_options[]" placeholder="Masukkan opsi enum">
                 <button type="button" class="btn btn-danger removeEnumOption">Hapus</button>
@@ -352,7 +363,7 @@ $(document).ready(function () {
     });
 
     // Remove enum option input
-    $(document).on('click', '.removeEnumOption', function() {
+    $(document).on("click", ".removeEnumOption", function () {
         $(this).parent().remove();
     });
 
@@ -360,50 +371,42 @@ $(document).ready(function () {
     $("#formTambahAtribut").on("submit", function (e) {
         e.preventDefault();
         const formData = new FormData(this);
-        
+
         // Jika tipe data adalah enum, tambahkan opsi enum ke formData
-        if ($('#tipeDataSelect').val() === 'enum') {
+        if ($("#tipeDataSelect").val() === "enum") {
             const enumOptions = [];
-            $('input[name="enum_options[]"]').each(function() {
-                if ($(this).val().trim() !== '') {
+            $('input[name="enum_options[]"]').each(function () {
+                if ($(this).val().trim() !== "") {
                     enumOptions.push($(this).val().trim());
                 }
             });
-            formData.set('enum_options', JSON.stringify(enumOptions));
+            formData.set("enum_options", JSON.stringify(enumOptions));
         }
 
         $.ajax({
-            url: $(this).attr('action'),
+            url: $(this).attr("action"),
             method: "POST",
             data: formData,
             processData: false,
             contentType: false,
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
             success: function (response) {
                 if (response.success) {
                     $("#tambahAtributModal").modal("hide");
-                    toastr.success(response.message || "Atribut berhasil ditambahkan");
+                    toastr.success(
+                        response.message || "Atribut berhasil ditambahkan"
+                    );
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);
                 } else {
-                    toastr.error(response.message || "Gagal menambahkan atribut");
+                    toastr.error(
+                        response.message || "Gagal menambahkan atribut"
+                    );
                 }
             },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-                    let errorMessage = '';
-                    for (let field in errors) {
-                        errorMessage += `${errors[field].join('\n')}\n`;
-                    }
-                    toastr.error(errorMessage || "Validasi gagal");
-                } else {
-                    toastr.error("Terjadi kesalahan saat menambahkan atribut");
-                }
-            }
         });
     });
 
@@ -568,33 +571,40 @@ $(document).ready(function () {
     });
 
     // Handle form submission untuk edit atribut
-    $(document).ready(function() {
-        $('#editAtributForm').on('submit', function(e) {
+    $(document).ready(function () {
+        $("#editAtributForm").on("submit", function (e) {
             e.preventDefault();
             const form = $(this);
-            const id = form.data('app-id');
-            
+            const id = form.data("app-id");
+
             $.ajax({
                 url: `/aplikasi/${id}/atribut`,
-                method: 'POST',
+                method: "POST",
                 data: form.serialize(),
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
+                        "content"
+                    ),
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
-                        $('#editAtributModal').modal('hide');
-                        toastr.success('Atribut berhasil diperbarui');
+                        $("#editAtributModal").modal("hide");
+                        toastr.success("Atribut berhasil diperbarui");
                         setTimeout(() => window.location.reload(), 1000);
                     } else {
-                        toastr.error(response.message || 'Gagal memperbarui atribut');
+                        toastr.error(
+                            response.message || "Gagal memperbarui atribut"
+                        );
                     }
                 },
-                error: function(xhr) {
-                    console.error('Error response:', xhr.responseText);
+                error: function (xhr) {
+                    console.error("Error response:", xhr.responseText);
                     const response = xhr.responseJSON;
-                    toastr.error(response?.message || 'Terjadi kesalahan saat memperbarui data');
-                }
+                    toastr.error(
+                        response?.message ||
+                            "Terjadi kesalahan saat memperbarui data"
+                    );
+                },
             });
         });
     });

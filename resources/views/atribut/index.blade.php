@@ -156,10 +156,10 @@
                                             onclick="showAppDetail({{ $aplikasi->id_aplikasi }})">
                                             <i class="bi bi-info-circle"></i> Detail
                                         </button>
-                                        <button class="btn btn-sm btn-warning"
+                                        {{-- <button class="btn btn-sm btn-warning"
                                             onclick="editAppAtribut({{ $aplikasi->id_aplikasi }})">
                                             <i class="bi bi-pencil"></i> Edit Atribut
-                                        </button>
+                                        </button> --}}
                                     </td>
                                 </tr>
                             @empty
@@ -236,7 +236,8 @@
                                 <!-- Content will be loaded dynamically -->
                             </div>
                             <div class="text-end mt-3">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Batal</button>
                                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                             </div>
                         </form>
@@ -466,37 +467,40 @@
                 },
                 success: function(response) {
                     $('#editAtributForm').data('app-id', id);
-                    
+
                     let html = `<h6 class="mb-3">Edit Atribut</h6>`;
-                    
+
                     if (response.atribut_tambahans && response.atribut_tambahans.length > 0) {
                         response.atribut_tambahans.forEach(atribut => {
                             const nilai = atribut.pivot ? atribut.pivot.nilai_atribut : '';
-                            
+
                             html += `
                             <div class="mb-3">
                                 <label class="form-label">
                                     ${atribut.nama_atribut}
                                     <small class="text-muted">(${atribut.tipe_data.charAt(0).toUpperCase() + atribut.tipe_data.slice(1)})</small>
                                 </label>`;
-                            
-                            switch(atribut.tipe_data) {
+
+                            switch (atribut.tipe_data) {
                                 case 'date':
-                                    html += `<input type="date" class="form-control" name="atribut[${atribut.id_atribut}]" value="${nilai || ''}">`;
+                                    html +=
+                                        `<input type="date" class="form-control" name="atribut[${atribut.id_atribut}]" value="${nilai || ''}">`;
                                     break;
                                 case 'number':
-                                    html += `<input type="number" class="form-control" name="atribut[${atribut.id_atribut}]" value="${nilai || ''}">`;
+                                    html +=
+                                        `<input type="number" class="form-control" name="atribut[${atribut.id_atribut}]" value="${nilai || ''}">`;
                                     break;
                                 case 'text':
-                                    html += `<textarea class="form-control" name="atribut[${atribut.id_atribut}]">${nilai || ''}</textarea>`;
+                                    html +=
+                                        `<textarea class="form-control" name="atribut[${atribut.id_atribut}]">${nilai || ''}</textarea>`;
                                     break;
                                 case 'enum':
                                     html += `
                                     <select class="form-select" name="atribut[${atribut.id_atribut}]">
                                         <option value="">Pilih Opsi</option>`;
                                     if (atribut.enum_options) {
-                                        const options = Array.isArray(atribut.enum_options) ? 
-                                            atribut.enum_options : 
+                                        const options = Array.isArray(atribut.enum_options) ?
+                                            atribut.enum_options :
                                             JSON.parse(atribut.enum_options);
                                         options.forEach(option => {
                                             html += `
@@ -508,7 +512,8 @@
                                     html += `</select>`;
                                     break;
                                 default:
-                                    html += `<input type="text" class="form-control" name="atribut[${atribut.id_atribut}]" value="${nilai || ''}">`;
+                                    html +=
+                                        `<input type="text" class="form-control" name="atribut[${atribut.id_atribut}]" value="${nilai || ''}">`;
                             }
                             html += `</div>`;
                         });
@@ -531,7 +536,7 @@
                 e.preventDefault();
                 const form = $(this);
                 const id = form.data('app-id');
-                
+
                 // Kumpulkan data form
                 const formData = {};
                 form.serializeArray().forEach(item => {
@@ -565,7 +570,8 @@
                         }
                     },
                     error: function(xhr) {
-                        console.error('Error response:', xhr.responseText); // Tambahkan log error
+                        console.error('Error response:', xhr
+                            .responseText); // Tambahkan log error
                         toastr.error('Terjadi kesalahan saat memperbarui data');
                     }
                 });
