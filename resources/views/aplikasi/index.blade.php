@@ -349,7 +349,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editForm" method="POST">
+                    <form id="editForm" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="row g-3">
@@ -670,22 +670,72 @@
             });
         }
 
-        // Tambahkan event handler untuk form submit
+        // Perbaiki event handler untuk form submit
         $('#editForm').on('submit', function(e) {
             e.preventDefault();
             
             const id = $(this).attr('action').split('/').pop();
             const formData = new FormData(this);
+            
+            // Tampilkan loading indicator
+            const loadingOverlay = $('<div class="position-fixed w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: 9999;">')
+                .append('<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>');
+            $('body').append(loadingOverlay);
 
             $.ajax({
                 url: $(this).attr('action'),
-                method: 'POST', // Gunakan POST karena form tidak bisa langsung PUT
+                method: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
+                success: function(response) {
+                    loadingOverlay.remove();
+                    
+                    if (response.success) {
+                        // Tutup modal
+                        $('#editModal').modal('hide');
+                        
+                        // Tampilkan pesan sukses
+                        toastr.success('Data aplikasi berhasil diperbarui');
+                        
+                        // Reload halaman setelah sukses
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        toastr.error(response.message || 'Gagal memperbarui data aplikasi');
+                    }
+                },
+                error: function(xhr) {
+                    loadingOverlay.remove();
+                    
+                    // Log error untuk debugging
+                    console.error('Error response:', xhr.responseText);
+                    
+                    // Tampilkan pesan error
+                    if (xhr.status === 422) {
+                        // Validation errors
+                        const errors = xhr.responseJSON.errors;
+                        let errorMessage = '<ul>';
+                        Object.keys(errors).forEach(key => {
+                            errorMessage += `<li>${errors[key][0]}</li>`;
+                        });
+                        errorMessage += '</ul>';
+                        
+                        toastr.error(errorMessage, 'Validation Error', {
+                            closeButton: true,
+                            timeOut: 0,
+                            extendedTimeOut: 0,
+                            progressBar: false,
+                            enableHtml: true
+                        });
+                    } else {
+                        toastr.error(xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data');
+                    }
+                }
             });
         });
 
