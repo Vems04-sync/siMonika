@@ -128,9 +128,11 @@
                                                     id="atribut_{{ $atribut->id_atribut }}"
                                                     name="atribut[{{ $atribut->id_atribut }}]">
                                                 <option value="">Pilih Opsi</option>
-                                                @foreach($atribut->enumOptions as $option)
-                                                    <option value="{{ $option->option }}">{{ $option->option }}</option>
-                                                @endforeach
+                                                @if($atribut->enum_options)
+                                                    @foreach($atribut->enum_options as $option)
+                                                        <option value="{{ $option }}">{{ $option }}</option>
+                                                    @endforeach
+                                                @endif
                                             </select>
                                             @break
                                         @default

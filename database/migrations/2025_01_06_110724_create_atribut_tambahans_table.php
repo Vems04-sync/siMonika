@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('id_atribut');
             $table->string('nama_atribut', 100)->unique();
             $table->string('tipe_data');
+            $table->text('enum_options')->nullable(); // Tambahkan kolom ini
             $table->timestamps();
         });
 

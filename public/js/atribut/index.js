@@ -84,43 +84,83 @@ window.editAppAtribut = function (id) {
     $.ajax({
         url: `/aplikasi/${id}/atribut`,
         method: "GET",
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
         success: function (response) {
-            const atributs = response.atribut_tambahans;
-            let html = "";
-
-            if (atributs && atributs.length > 0) {
-                atributs.forEach((atribut) => {
-                    // Tambahkan atribut type sesuai tipe data
-                    const inputType = getInputType(atribut.tipe_data);
-                    html += `
-                        <div class="mb-3">
-                            <label class="form-label">${
-                                atribut.nama_atribut
-                            }</label>
-                            <input type="${inputType}"
-                                   class="form-control"
-                                   name="nilai_atribut[${atribut.id_atribut}]"
-                                   value="${atribut.pivot?.nilai_atribut || ""}"
-                                   ${getInputAttributes(atribut.tipe_data)}
-                                   placeholder="Masukkan nilai untuk ${
-                                       atribut.nama_atribut
-                                   }">
-                            <div class="invalid-feedback"></div>
-                        </div>
-                    `;
-                });
-            } else {
-                html =
-                    '<div class="alert alert-info">Belum ada atribut yang ditambahkan</div>';
+            if (!response.success) {
+                toastr.error(response.message || "Gagal memuat data atribut");
+                return;
             }
 
-            $("#atributFields").html(html);
-            $("#editAtributForm").data("app-id", id);
-            $("#editAtributModal").modal("show");
+            let html = '';
+            const atributs = response.atribut_tambahans || [];
+
+            atributs.forEach(atribut => {
+                const nilai = atribut.pivot ? atribut.pivot.nilai_atribut : '';
+                
+                html += `
+                <div class="mb-3">
+                    <label class="form-label">
+                        ${atribut.nama_atribut}
+                        <small class="text-muted">(${atribut.tipe_data})</small>
+                    </label>`;
+
+                switch(atribut.tipe_data) {
+                    case 'date':
+                        html += `
+                            <input type="date" 
+                                   class="form-control" 
+                                   name="atribut[${atribut.id_atribut}]" 
+                                   value="${nilai || ''}">`;
+                        break;
+                    case 'number':
+                        html += `
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="atribut[${atribut.id_atribut}]" 
+                                   value="${nilai || ''}">`;
+                        break;
+                    case 'text':
+                        html += `
+                            <textarea class="form-control" 
+                                      name="atribut[${atribut.id_atribut}]">${nilai || ''}</textarea>`;
+                        break;
+                    case 'enum':
+                        html += `<select class="form-select" name="atribut[${atribut.id_atribut}]">
+                                    <option value="">Pilih Opsi</option>`;
+                        if (atribut.enum_options) {
+                            const options = typeof atribut.enum_options === 'string' ? 
+                                JSON.parse(atribut.enum_options) : 
+                                atribut.enum_options;
+                            
+                            options.forEach(option => {
+                                html += `
+                                    <option value="${option}" ${nilai === option ? 'selected' : ''}>
+                                        ${option}
+                                    </option>`;
+                            });
+                        }
+                        html += `</select>`;
+                        break;
+                    default:
+                        html += `
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="atribut[${atribut.id_atribut}]" 
+                                   value="${nilai || ''}">`;
+                }
+                html += `</div>`;
+            });
+
+            $('#editAtributForm').data('app-id', id);
+            $('#atributFields').html(html);
+            $('#editAtributModal').modal('show');
         },
-        error: function () {
-            toastr.error("Gagal memuat data atribut");
-        },
+        error: function(xhr) {
+            console.error('Error response:', xhr.responseText);
+            toastr.error('Terjadi kesalahan saat memuat data');
+        }
     });
 };
 
@@ -316,55 +356,54 @@ $(document).ready(function () {
         $(this).parent().remove();
     });
 
-    // Handle form submit for tambah atribut
-    $("#tambahAtributForm").on("submit", function (e) {
+    // Handle form submit untuk tambah atribut
+    $("#formTambahAtribut").on("submit", function (e) {
         e.preventDefault();
-        const formData = $(this).serialize();
-
-        // Include only filled enum options
-        const enumOptions = $('input[name="enum_options[]"]').map(function() {
-            return $(this).val();
-        }).get().filter(function(option) {
-            return option !== ""; // Filter out empty options
-        });
-
-        // Add enum options to form data if any
-        if (enumOptions.length > 0) {
-            formData += '&enum_options=' + JSON.stringify(enumOptions);
+        const formData = new FormData(this);
+        
+        // Jika tipe data adalah enum, tambahkan opsi enum ke formData
+        if ($('#tipeDataSelect').val() === 'enum') {
+            const enumOptions = [];
+            $('input[name="enum_options[]"]').each(function() {
+                if ($(this).val().trim() !== '') {
+                    enumOptions.push($(this).val().trim());
+                }
+            });
+            formData.set('enum_options', JSON.stringify(enumOptions));
         }
 
         $.ajax({
-            url: "/atribut",
+            url: $(this).attr('action'),
             method: "POST",
             data: formData,
+            processData: false,
+            contentType: false,
             headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function (response) {
                 if (response.success) {
                     $("#tambahAtributModal").modal("hide");
-                    toastr.success(response.message);
-                    // Reset form
-                    $("#tambahAtributForm")[0].reset();
-                    // Refresh halaman setelah delay
+                    toastr.success(response.message || "Atribut berhasil ditambahkan");
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);
+                } else {
+                    toastr.error(response.message || "Gagal menambahkan atribut");
                 }
             },
             error: function (xhr) {
                 if (xhr.status === 422) {
-                    // Validation errors
                     const errors = xhr.responseJSON.errors;
-                    let errorMessage = "";
+                    let errorMessage = '';
                     for (let field in errors) {
-                        errorMessage += `${errors[field]}\n`;
+                        errorMessage += `${errors[field].join('\n')}\n`;
                     }
-                    toastr.error(errorMessage);
+                    toastr.error(errorMessage || "Validasi gagal");
                 } else {
-                    toastr.error("Gagal menambahkan atribut");
+                    toastr.error("Terjadi kesalahan saat menambahkan atribut");
                 }
-            },
+            }
         });
     });
 
@@ -528,46 +567,35 @@ $(document).ready(function () {
         filterAtributTable();
     });
 
-    // Handle submit form edit atribut
-    $("#editAtributForm").on("submit", function (e) {
-        e.preventDefault();
-        const form = $(this);
-        const formData = new FormData(this);
-        const appId = $(this).data("app-id");
-
-        // Tambahkan CSRF token
-        formData.append("_token", $('meta[name="csrf-token"]').attr("content"));
-
-        $.ajax({
-            url: `/aplikasi/${appId}/update-atribut`,
-            method: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                if (response.success) {
-                    $("#editAtributModal").modal("hide");
-                    // Simpan pesan ke localStorage
-                    localStorage.setItem("flash_message", "Nilai atribut berhasil diperbarui");
-                    // Refresh halaman
-                    window.location.reload();
-                } else {
-                    toastr.error(response.message || "Gagal memperbarui nilai atribut");
-                }
-            },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    const error = xhr.responseJSON;
-                    toastr.error(error.message);
-                    if (error.field) {
-                        const input = form.find(`input[name="${error.field}"]`);
-                        input.addClass("is-invalid");
-                        input.siblings(".invalid-feedback").text(error.message);
+    // Handle form submission untuk edit atribut
+    $(document).ready(function() {
+        $('#editAtributForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const id = form.data('app-id');
+            
+            $.ajax({
+                url: `/aplikasi/${id}/atribut`,
+                method: 'POST',
+                data: form.serialize(),
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#editAtributModal').modal('hide');
+                        toastr.success('Atribut berhasil diperbarui');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        toastr.error(response.message || 'Gagal memperbarui atribut');
                     }
-                } else {
-                    toastr.error("Terjadi kesalahan saat menyimpan data");
+                },
+                error: function(xhr) {
+                    console.error('Error response:', xhr.responseText);
+                    const response = xhr.responseJSON;
+                    toastr.error(response?.message || 'Terjadi kesalahan saat memperbarui data');
                 }
-            },
+            });
         });
     });
 });

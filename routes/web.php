@@ -48,6 +48,10 @@ Route::middleware(['auth'])->group(function () {
         // Route untuk atribut
         Route::get('/{id}/atribut', [AplikasiController::class, 'getAtribut']);
         Route::put('/{id}/atribut', [AplikasiController::class, 'updateAtribut'])->name('aplikasi.updateAtribut');
+
+        // Perbaikan route untuk update atribut
+        Route::post('/{id}/atribut', [AtributTambahanController::class, 'updateAtributValues'])
+            ->name('aplikasi.atribut.update');
     });
 
     Route::get('/chart-data', [AplikasiController::class, 'getChartData']);
@@ -123,9 +127,6 @@ Route::get('/aplikasi/{id}/detail', [AplikasiController::class, 'detail'])->name
 Route::get('/aplikasi/{id}/atribut', [AplikasiController::class, 'getAtribut']);
 // Route::put('/aplikasi/{id}/atribut', [AplikasiController::class, 'updateAtribut']);
 
-// Route untuk update atribut aplikasi
-Route::post('/aplikasi/{id}/update-atribut', [AtributTambahanController::class, 'update'])->name('aplikasi.update-atribut');
-
 // Routes untuk aplikasi
 Route::get('/aplikasi/{id}', [AplikasiController::class, 'show'])->name('aplikasi.show');
 Route::get('/aplikasi/{id}/atribut', [AplikasiController::class, 'getAtribut']);
@@ -153,4 +154,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{id}/atribut', [AplikasiController::class, 'updateAtribut'])->name('aplikasi.updateAtribut');
     });
 });
+
+// Pastikan route untuk update atribut sudah terdaftar
+Route::post('/aplikasi/{id}/atribut', [AtributTambahanController::class, 'update'])
+    ->name('aplikasi.atribut.update');
 
