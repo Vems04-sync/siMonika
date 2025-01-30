@@ -156,6 +156,7 @@
                                     @elseif ($aplikasi->basis_aplikasi === 'Website')
                                         <i class="bi bi-browser-chrome me-1"></i>
                                     @endif
+                                    Basis Aplikasi:
                                     {{ $aplikasi->basis_aplikasi }}
                                 </p>
                                 <p class="mb-2"><i class="bi bi-code-slash me-2"></i>Bahasa Framework:
